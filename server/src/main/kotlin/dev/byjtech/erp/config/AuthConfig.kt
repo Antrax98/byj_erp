@@ -23,6 +23,8 @@ val dotenv = dotenv {
     ignoreIfMissing = false
 }
 
+//TODO: esto se ve bien, no se si hay que mejorarlo todavia
+
 fun Application.configureOAuth(httpClient: HttpClient, stateCache: Cache<String, String>) {
 
     install(Authentication) {

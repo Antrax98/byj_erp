@@ -19,7 +19,6 @@ import dev.byjtech.erp.session.initAndroidSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import java.util.Base64
-import android.content.Context
 
 class MainActivity : ComponentActivity() { //se cambia ComponentActivity por AppCompatActivity
     private lateinit var apiClient: ApiClient
@@ -39,8 +38,6 @@ class MainActivity : ComponentActivity() { //se cambia ComponentActivity por App
             dispatcher = Dispatchers.IO,
             onNavigationRequired = {}
         )
-
-
 
         val loginHandler = AndroidGoogleLoginHandler(this, settings)
         sessionManager = SessionManager(apiClient, settings,loginHandler) {}

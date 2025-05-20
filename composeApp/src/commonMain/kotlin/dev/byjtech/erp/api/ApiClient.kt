@@ -13,8 +13,8 @@ import dev.byjtech.erp.api.core.CoreApi
 import dev.byjtech.erp.api.core.CoreAuth
 import dev.byjtech.erp.api.core.users.UsersSuperAdminApi
 import dev.byjtech.erp.api.core.users.UsersTenantApi
-import dev.byjtech.erp.core.dto.module.ModuleDTO
-import dev.byjtech.erp.core.dto.permission.PermissionDTO
+import dev.byjtech.erp.core.dto.ModuleDTO
+import dev.byjtech.erp.core.dto.PermissionDTO
 import dev.byjtech.erp.core.session.AppSession
 import dev.byjtech.erp.session.SessionNavigationTarget
 import dev.byjtech.erp.session.SettingsCookieStorage

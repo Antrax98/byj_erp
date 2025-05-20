@@ -40,14 +40,7 @@ class RootComponentImpl(
         data object SuperHome : Config()
     }
 
-    private fun child(config: Config, componentContext: ComponentContext): RootComponent.Child =
-        when (config) {
-            is Config.Home -> RootComponent.Child.Home(homeComponent(componentContext))
-            is Config.Login -> RootComponent.Child.Login(loginComponent(componentContext))
-            is Config.Splash -> RootComponent.Child.Splash(splashComponent(componentContext))
-            is Config.SuperHome -> RootComponent.Child.SuperHome(superHomeComponent(componentContext))
-        }
-
+    //TODO, en vez de hacer estas funciones, se les puede entrega su contenido directamente al fun child
     private fun homeComponent(componentContext: ComponentContext): HomeComponent =
         HomeComponentImpl(componentContext, sessionManager, apiClient)
     private fun loginComponent(componentContext: ComponentContext): LoginComponent =
@@ -56,6 +49,16 @@ class RootComponentImpl(
         SplashComponentImpl(componentContext, sessionManager,)
     private fun superHomeComponent(componentContext: ComponentContext): SuperHomeComponent =
         SuperHomeComponentImpl(componentContext, sessionManager, apiClient)
+
+    private fun child(config: Config, componentContext: ComponentContext): RootComponent.Child =
+        when (config) {
+            is Config.Home -> RootComponent.Child.Home(homeComponent(componentContext))
+            is Config.Login -> RootComponent.Child.Login(loginComponent(componentContext))
+            is Config.Splash -> RootComponent.Child.Splash(splashComponent(componentContext))
+            is Config.SuperHome -> RootComponent.Child.SuperHome(superHomeComponent(componentContext))
+        }
+
+
 
     private fun navigateToLogin(navigation: StackNavigation<Config>) {
         println("current child stack: ${childStack.value}")
@@ -97,26 +100,25 @@ class RootComponentImpl(
         }
     }
 
-
-
-    init {
-        sessionManager.onNavigationRequired = { target ->
-            when(target){
-                SessionNavigationTarget.Login -> {navigateToLogin(navigation)}
-                SessionNavigationTarget.Home -> {navigateToHome(navigation)}
-                SessionNavigationTarget.SuperHome -> {navigateToSuperHome(navigation)}
-                SessionNavigationTarget.Splash -> {navigateToSplash(navigation)}
-            }
+    private fun navigateTo(target: SessionNavigationTarget) {
+        val config = when (target) {
+            SessionNavigationTarget.Login -> Config.Login
+            SessionNavigationTarget.Home -> Config.Home
+            SessionNavigationTarget.SuperHome -> Config.SuperHome
+            SessionNavigationTarget.Splash -> Config.Splash
         }
-        //apiClient no necesita todas las rutas, pero si la de login
-        apiClient.onNavigationRequired = { target ->
-            when(target){
-                SessionNavigationTarget.Login -> {navigateToLogin(navigation)}
-                SessionNavigationTarget.Home -> {navigateToHome(navigation)}
-                SessionNavigationTarget.SuperHome -> {navigateToSuperHome(navigation)}
-                SessionNavigationTarget.Splash -> {navigateToSplash(navigation)}
-            }
+
+        val current = childStack.value.active.configuration
+        if (current != config) {
+            navigation.replaceCurrent(config)
         }
     }
+
+    init {
+        sessionManager.onNavigationRequired = ::navigateTo
+        apiClient.onNavigationRequired = ::navigateTo
+    }
+
+
 }
 

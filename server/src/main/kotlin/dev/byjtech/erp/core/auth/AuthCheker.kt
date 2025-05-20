@@ -2,8 +2,8 @@ package dev.byjtech.erp.core.auth
 
 import dev.byjtech.erp.core.database.rolePermission.RolePermissionDataSource.Companion.userHasAnyPermission
 import dev.byjtech.erp.core.database.superAdmins.SuperAdminDataSource.Companion.isSuperAdmin
-import dev.byjtech.erp.core.database.userSessions.UserSessionEntity
-import dev.byjtech.erp.core.permissions.PermissionKey
+import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.core.infrastructure.exposed.entities.SessionEntity
 import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource as USDS
 import dev.byjtech.erp.core.session.AppSession
 import io.ktor.http.HttpStatusCode
@@ -13,7 +13,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respondText
 import io.ktor.http.ContentType
 
-//TODO: patron de como nombrar los permisos
+//patron de como nombrar los permisos
 // <module_name>:<module_version>:<category_name>:<permission_name>
 // ejemplo: hr:v2:resources:delete
 // tienen que ser minusculas y sin espacios y exactamente igual que en la base de datos
@@ -23,11 +23,14 @@ import io.ktor.http.ContentType
 // o se podria crear un modulo de mentiras solo para contenerlos
 
 
+//TODO: moverlo al AuthServiceContractImpl y usar services que a su vez usen repositories
+
+
 suspend fun authenticateAndAuthorize(
     call: ApplicationCall,
     requiredAnyPermissions: List<PermissionKey>? = null,
     requiredAdmin: Boolean = false
-): UserSessionEntity {
+): SessionEntity {
     // Validate configuration
     if (requiredAnyPermissions != null && requiredAdmin) {
         call.respondText(
@@ -60,7 +63,7 @@ suspend fun authenticateAndAuthorize(
         throw IllegalStateException("Unauthorized. Missing authorization.")
     }
 
-    val session = USDS.findSessionById(appSession.userSessionEntityId)
+    val session = USDS.findSessionById(appSession.sessionId)
     if (session == null) {
         call.respondText(
             text = "Unauthorized. Invalid Session.",

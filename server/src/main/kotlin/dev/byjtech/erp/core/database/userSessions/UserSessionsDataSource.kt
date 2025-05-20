@@ -1,7 +1,9 @@
 package dev.byjtech.erp.core.database.userSessions
 
 import dev.byjtech.erp.config.logger
-import dev.byjtech.erp.core.database.users.UserEntity
+import dev.byjtech.erp.core.infrastructure.exposed.entities.UserEntity
+import dev.byjtech.erp.core.infrastructure.exposed.entities.SessionEntity
+import dev.byjtech.erp.core.infrastructure.exposed.tables.SessionsTable
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
@@ -10,51 +12,11 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 import java.time.Instant
 
-
+//TODO: ELIMINAR y reemplazar con un service de sesion (o el mismo sessionRepositoryImpl serviria?)
 class UserSessionsDataSource {
-
-    // Crear o reemplazar una sesión de usuario
-
-
-//    fun findSessionByUserIdAndDeviceId(userId: Int, deviceId: String): UserSessionEntity? = transaction {
-//        UserSessionEntity.find {
-//            (UserSessions.userId eq userId) and
-//                    (UserSessions.deviceId eq deviceId) and
-//                    (UserSessions.isValid eq true)
-//        }.singleOrNull()
-//    }
-
-
-
-    //REEMPLPAZADA POR updateSession() y deleteSessionById()
-//    // Actualizar el accessToken y refreshToken de una sesión existente
-//    fun refreshSession(sessionId: UUID, newAccessToken: String, newRefreshToken: String) {
-//        transaction {
-//            val session = UserSessionEntity.find { UserSessions.sessionId eq sessionId }.firstOrNull()
-//            session?.let {
-//                it.accessToken = newAccessToken
-//                it.refreshToken = newRefreshToken
-//                it.updatedAt = LocalDateTime.now()  // Actualizamos la fecha de actualización
-//            }
-//        }
-//    }
-//
-//    // Marcar la sesión como no válida (para hacer logout)
-//    fun invalidateSession(sessionEntityId: Int) {
-//        transaction {
-//            val session = UserSessionEntity.find { UserSessions.sessionId eq sessionId }.firstOrNull()
-//            session?.let {
-//                it.isValid = false
-//            }
-//        }
-//    }
-
-    //modificar en donde se use para que sea un companion object, tambien las demas arriba
-
-
     companion object {
         fun findUserIdBySessionId(sessionId: Int): Int? = transaction {
-            val session = UserSessionEntity.findById(sessionId)
+            val session = SessionEntity.findById(sessionId)
             session?.user?.id?.value
         }
 
@@ -68,15 +30,15 @@ class UserSessionsDataSource {
             expiresAt: Instant
         ): Int {
             return transaction {
-                UserSessionEntity.find {
-                    (UserSessions.userId eq userId) and
-                            (UserSessions.deviceId eq deviceId) and
-                            (UserSessions.isValid eq true)
+                SessionEntity.find {
+                    (SessionsTable.userId eq userId) and
+                            (SessionsTable.deviceId eq deviceId) and
+                            (SessionsTable.isValid eq true)
                 }.forEach {
                     it.isValid = false
                 }
 
-                val newSession = UserSessionEntity.new {
+                val newSession = SessionEntity.new {
                     this.user = UserEntity[userId]
                     this.accessToken = accessToken
                     this.refreshToken = refreshToken
@@ -94,9 +56,9 @@ class UserSessionsDataSource {
         }
 
         // Crear una nueva sesión de usuario
-        fun createSession(userId: Int, accessToken: String, refreshToken: String, userAgent: String, deviceId: String, platform: String, expiresAt: Instant): UserSessionEntity { // Añadido
+        fun createSession(userId: Int, accessToken: String, refreshToken: String, userAgent: String, deviceId: String, platform: String, expiresAt: Instant): SessionEntity { // Añadido
             return transaction {
-                UserSessionEntity.new {
+                SessionEntity.new {
                     this.user = UserEntity[userId]
                     this.accessToken = accessToken
                     this.refreshToken = refreshToken
@@ -110,15 +72,15 @@ class UserSessionsDataSource {
                 }
             }
         }
-        fun findSessionByUserIdAndDeviceId(userId: Int, deviceId: String): UserSessionEntity? = transaction {
+        fun findSessionByUserIdAndDeviceId(userId: Int, deviceId: String): SessionEntity? = transaction {
             addLogger(StdOutSqlLogger) // Enable SQL logging for this transaction
             logger.debug("Finding session for userId: $userId, deviceId: $deviceId")
-            val query = UserSessionEntity.find {
-                (UserSessions.userId eq userId) and
-                        (UserSessions.deviceId eq deviceId) and
-                        (UserSessions.isValid eq true)
+            val query = SessionEntity.find {
+                (SessionsTable.userId eq userId) and
+                        (SessionsTable.deviceId eq deviceId) and
+                        (SessionsTable.isValid eq true)
             }
-                .orderBy(UserSessions.updatedAt to SortOrder.DESC)
+                .orderBy(SessionsTable.updatedAt to SortOrder.DESC)
                 .limit(1)
             val session = query.firstOrNull()
             logger.debug("Found session: $session")
@@ -126,7 +88,7 @@ class UserSessionsDataSource {
         }
 
         fun updateSession(sessionId: Int, accessToken: String, refreshToken: String, userAgent: String, platform: String, expiresAt: Instant) = transaction { // Añadido
-            val session = UserSessionEntity.findById(sessionId)
+            val session = SessionEntity.findById(sessionId)
             session?.let {
                 it.accessToken = accessToken
                 it.refreshToken = refreshToken
@@ -136,14 +98,14 @@ class UserSessionsDataSource {
                 it.updatedAt = LocalDateTime.now()
             }
         }
-        fun findSessionById(userSessionEntityId: Int): UserSessionEntity? {
+        fun findSessionById(userSessionEntityId: Int): SessionEntity? {
             return transaction {
-                UserSessionEntity.findById(userSessionEntityId)
+                SessionEntity.findById(userSessionEntityId)
             }
         }
         fun deleteSessionById(sessionId: Int) {
             return transaction {
-                UserSessionEntity.findById(sessionId)?.delete()
+                SessionEntity.findById(sessionId)?.delete()
             }
         }
     }

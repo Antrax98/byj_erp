@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.logback)
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.status.pages)
     //descomentar si se necesitan los tests para el server
     //testImplementation(libs.ktor.server.tests)
     //testImplementation(libs.kotlin.test.junit)
@@ -30,6 +31,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.dotenv)
     implementation(libs.caffeine)
+
+    implementation(libs.koin.core)
+    implementation(libs.koin.ktor)
+    implementation(libs.koin.logger.slf4j)
 
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)

@@ -3,8 +3,8 @@ package dev.byjtech.erp.session
 import com.russhwolf.settings.Settings
 import dev.byjtech.erp.api.ApiClient
 import dev.byjtech.erp.api.InvalidSessionException
-import dev.byjtech.erp.core.dto.module.ModuleDTO
-import dev.byjtech.erp.core.dto.permission.PermissionDTO
+import dev.byjtech.erp.core.dto.ModuleDTO
+import dev.byjtech.erp.core.dto.PermissionDTO
 import dev.byjtech.erp.core.session.AppSession
 import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.Dispatchers

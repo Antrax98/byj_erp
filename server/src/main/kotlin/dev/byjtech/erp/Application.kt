@@ -1,31 +1,27 @@
 package dev.byjtech.erp
 
 import dev.byjtech.erp.config.configureOAuth
-import dev.byjtech.erp.config.database.DatabaseFactory
-import dev.byjtech.erp.config.database.DatabaseInitializer
-import dev.byjtech.erp.core.routes.googleAuthRoutes
 import io.ktor.client.HttpClient
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.client.engine.cio.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.*
-import io.ktor.http.HttpStatusCode
-import dev.byjtech.erp.core.routes.logger
-import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.Cache
-import dev.byjtech.erp.core.Core
-import dev.byjtech.erp.core.auth.authenticateAndAuthorize
-import dev.byjtech.erp.core.database.CoreTables
-import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource
-import dev.byjtech.erp.core.routes.CoreRoutes
-import java.util.concurrent.TimeUnit
-import dev.byjtech.erp.modules.announcements.v1.AnnouncementsV1
+import dev.byjtech.erp.config.ModuleInitializer
+import dev.byjtech.erp.shared.contracts.core.auth.AuthenticationException
+import dev.byjtech.erp.shared.contracts.core.auth.AuthorizationException
+import dev.byjtech.erp.core.CoreInitializer
+import dev.byjtech.erp.shared.infrastructure.database.DatabaseInitializer
 import io.github.cdimascio.dotenv.dotenv
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.routing.get
+import org.koin.ktor.ext.getKoin
+import org.koin.ktor.plugin.Koin
+import org.koin.logger.slf4jLogger
 
 val dotenv = dotenv{
     ignoreIfMissing = false
@@ -38,29 +34,35 @@ fun main() {
 
 fun Application.module() {
 
-    //inicializar base de datos
-    val databaseFactory = DatabaseFactory()
-    val database = databaseFactory.database
 
-    //inicializar las tablas (por si es que no existen)
-    val databaseInitializer = DatabaseInitializer(database)
-//databaseInitializer.nuke() //borra las tablas
-    try {
-        databaseInitializer.initialize(
-            *Core.tables.toTypedArray()+
-            AnnouncementsV1.tables.toTypedArray()
+
+    //intalacion de Koin y sus modulos en set
+    install(Koin){
+        slf4jLogger()
+        modules(
+            serverModule
         )
-    } catch (e: Exception) {
-        println("Las tablas ya existen o hubo un problema: ${e.message}")
+    }
+
+    //val koin = GlobalContext.get()
+    val koin = this.getKoin()
+    val moduleInitializers: List<ModuleInitializer> = koin.getAll()
+    val allModules = moduleInitializers.filterNot { it is CoreInitializer } //sin el core, de ser necesario
+    val coreInitializer = moduleInitializers.find { it is CoreInitializer } as CoreInitializer
+
+    moduleInitializers.forEach {
+        println("Module ${it.definition.name} detected")
     }
 
 
-    //TODO() mandarlo a su propia funcion para que no moleste con los imports
-    val httpClient = HttpClient(CIO) {
-        install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
-        }
-    }
+    val databaseInitializer: DatabaseInitializer = koin.get()
+
+    println("Initializing database...")
+    databaseInitializer.multiCreate(moduleInitializers)
+    databaseInitializer.registerModuleDefinitions(moduleInitializers)
+    println("Database initialized")
+
+    //databaseInitializer.nuke() //borra las tablas.. no sirbe para nada, hacerlo manualmente mejor por ahora
 
     install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) {
         json(Json {
@@ -70,14 +72,13 @@ fun Application.module() {
         })
     }
 
-    val stateCache: Cache<String, String> = Caffeine.newBuilder()
-        .expireAfterWrite(20, TimeUnit.MINUTES) // Tiempo de vida del state
-        .maximumSize(10_000)                   // Tamaño máximo del cache
-        .build()
-
+    val httpClient: HttpClient = koin.get<HttpClient>()
+    val stateCache: Cache<String, String> = koin.get<Cache<String, String>>()
 
     configureOAuth(httpClient, stateCache)
 
+
+    configureStatusPages()
 
 
 
@@ -87,30 +88,36 @@ fun Application.module() {
             get {
                 call.respondText { "Ktor: ${Greeting().greet()}" }
             }
-        }
 
-        route("/auth"){
-            googleAuthRoutes(httpClient, stateCache)
-        }
-
-
-
-        route("/api"){
-            //aqui agregar las rutas autenticadas para los modulos
-            Core.installRoutes(this)
-            AnnouncementsV1.installRoutes(this)
-
-        }
-
-        route("/testAdmin"){
-            get {
-                //logger.debug("SESSION of SuperAdmin : {}", call.attributes[sessionKey])
-                val session =authenticateAndAuthorize(call, requiredAdmin = true)
-                logger.debug("SESSION of SuperAdmin : {}", session)
-                logger.debug("si esto se imprime y no se tiene superAdmin, significa que hay que hacer cambios en la verificacion de permisos")
-                call.respondText("Hello Admin")
+            //las instalara en /auth, son solo las de autenticacion
+            with(coreInitializer){
+                this@route.installAuthRoutes()
             }
         }
 
+        route("/api") {
+            moduleInitializers.forEach { initializer ->
+                with(initializer) {
+                    this@route.installRoutes()
+                }
+            }
+        }
+
+    }
+}
+
+
+fun Application.configureStatusPages() {
+    install(StatusPages) {
+        exception<AuthenticationException> { call, cause ->
+            call.respond(HttpStatusCode.Unauthorized, mapOf("error" to cause.message))
+        }
+        exception<AuthorizationException> { call, cause ->
+            call.respond(HttpStatusCode.Forbidden, mapOf("error" to cause.message))
+        }
+        exception<Throwable> { call, cause ->
+            call.application.environment.log.error("Unhandled exception", cause)
+            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Internal server error"))
+        }
     }
 }
