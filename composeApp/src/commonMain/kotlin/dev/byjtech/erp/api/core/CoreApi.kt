@@ -5,7 +5,7 @@ import de.jensklingenberg.ktorfit.http.*
 interface CoreApi {
 
     //opciones "superadmin" o "tenant"
-    @GET("api/core/core/me/type")
+    @GET("api/core/users/me/type")
     suspend fun getMyType(): String
 
 }

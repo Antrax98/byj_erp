@@ -22,6 +22,7 @@ import io.ktor.server.routing.get
 import org.koin.ktor.ext.getKoin
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
+import org.slf4j.LoggerFactory
 
 val dotenv = dotenv{
     ignoreIfMissing = false
@@ -31,6 +32,8 @@ fun main() {
     embeddedServer(Netty, port = dotenv["SERVER_PORT"].toInt(), host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
+
+private val logger = LoggerFactory.getLogger("Server Main")
 
 fun Application.module() {
 
@@ -103,6 +106,9 @@ fun Application.module() {
             }
         }
 
+    }.run {
+        val allMyBase = getAllRoutes()
+        logger.debug("--- All Routes:\n${allMyBase.joinToString("\n")}")
     }
 }
 

@@ -22,7 +22,6 @@ data class AppSession(val sessionId: Int, val expiresAt: Long = 0) {
                 // Convertimos el JSON de nuevo a un objeto AppSession
                 return Json.decodeFromString(decodedJson)
             } catch (e: Exception) {
-                // Manejar el error en caso de que la decodificación falle
                 throw IllegalArgumentException("Error al decodificar la AppSession: ${e.message}", e)
             }
         }

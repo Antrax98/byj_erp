@@ -94,7 +94,12 @@ class SessionManager(
         val encodedSession = settings.getString(apiClient.sessionKey, "")
         println("encodedSession: $encodedSession")
         return if (encodedSession.isNotEmpty()) {
-            AppSession.fromEncoded(encodedSession)
+            try {
+                AppSession.fromEncoded(encodedSession)
+            } catch (e: IllegalArgumentException) {
+                println("Error al decodificar la sesión: ${e.message}")
+                null
+            }
         } else {
             null
         }

@@ -64,7 +64,7 @@ fun Route.googleAuthRoutes(
     route("/logout"){
         get {
             val session = authenticateAndAuthorize(call)
-            println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
             //UserSessionsDataSource.deleteSessionById(session.id.value)
             sessionRepo.delete(session.id.value)///esto despues se saca porque no se usa autenticateandautorize sino que se usara el authservice nuevo
             call.respondText("Logout", status = HttpStatusCode.OK)
