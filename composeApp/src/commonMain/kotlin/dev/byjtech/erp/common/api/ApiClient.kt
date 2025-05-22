@@ -1,4 +1,4 @@
-package dev.byjtech.erp.api
+package dev.byjtech.erp.common.api
 
 import io.ktor.client.*
 import io.ktor.client.engine.*
@@ -9,15 +9,15 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import com.russhwolf.settings.*
 import de.jensklingenberg.ktorfit.Ktorfit
-import dev.byjtech.erp.api.core.CoreApi
-import dev.byjtech.erp.api.core.CoreAuth
-import dev.byjtech.erp.api.core.users.UsersSuperAdminApi
-import dev.byjtech.erp.api.core.users.UsersTenantApi
+import dev.byjtech.erp.core.api.CoreApi
+import dev.byjtech.erp.core.api.CoreAuth
+import dev.byjtech.erp.core.api.users.UsersSuperAdminApi
+import dev.byjtech.erp.core.api.users.UsersTenantApi
 import dev.byjtech.erp.core.dto.ModuleDTO
 import dev.byjtech.erp.core.dto.PermissionDTO
 import dev.byjtech.erp.core.session.AppSession
-import dev.byjtech.erp.session.SessionNavigationTarget
-import dev.byjtech.erp.session.SettingsCookieStorage
+import dev.byjtech.erp.common.session.SessionNavigationTarget
+import dev.byjtech.erp.common.session.SettingsCookieStorage
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.json
@@ -94,11 +94,17 @@ class ApiClient(
         .httpClient(clientKtor)
         .build()
 
-    //core
-    val coreAuth = ktorfit.create<CoreAuth>()
-    val coreApi = ktorfit.create<CoreApi>()
-    val tenantCoreApi = ktorfit.create<CoreApi>()
+    /*
+    se usa ktorfit.create aunque este deprecado por que la version recomendada tiene problemas con KMP
+    cuando esos problemas se arreglen, se cambiara de:
+    ktorfit.create<CoreAuth>() -> ktorfit.createCoreAuth()
+     */
 
+    //core
+    val coreAuth = ktorfit.create<CoreAuth>() //importante no moverlo
+    val coreApi = ktorfit.create<CoreApi>() //importante no moverlo
+
+    //TODO() anidarlos de mejor forma, como : apiClient.roles.permission.getPermissions()
     //core-users
     val usersSuperAdminApi = ktorfit.create<UsersSuperAdminApi>()
     val usersTenantApi = ktorfit.create<UsersTenantApi>()

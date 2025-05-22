@@ -1,11 +1,11 @@
-package dev.byjtech.erp.api.core.users
+package dev.byjtech.erp.core.api.users
 
 import de.jensklingenberg.ktorfit.http.*
 import dev.byjtech.erp.core.dto.UserDTO
 
 interface UsersSuperAdminApi {
 
-    @GET("api/core/core/users/superadmin/{id}")
+    @GET("api/core/users/superadmin/{id}")
     suspend fun getUserById(@Path("id") id: Int): UserDTO
 
 }

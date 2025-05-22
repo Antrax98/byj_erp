@@ -1,4 +1,4 @@
-package dev.byjtech.erp.api.core
+package dev.byjtech.erp.core.api
 
 import de.jensklingenberg.ktorfit.http.*
 

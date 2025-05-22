@@ -1,23 +1,7 @@
 package dev.byjtech.erp
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 //import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
-import byj_erp.composeapp.generated.resources.Res
-import byj_erp.composeapp.generated.resources.compose_multiplatform
-import dev.byjtech.erp.session.SessionManager
 
 //@Composable
 //@Preview
@@ -44,14 +28,14 @@ import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import dev.byjtech.erp.navigation.RootComponent
-import dev.byjtech.erp.ui.HomeScreen
+import dev.byjtech.erp.core.home.HomeScreen
 import dev.byjtech.erp.ui.LoginScreen
 import dev.byjtech.erp.ui.SplashScreen
 import dev.byjtech.erp.ui.SuperHomeScreen
 
 
 @Composable
-fun App(root: RootComponent) { //se cambia el nombre a App y se le pasa como parametro RootComponent
+fun App(root: RootComponent) {
     MaterialTheme {
         Children(
             stack = root.childStack,

@@ -4,12 +4,12 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.arkivanov.decompose.DefaultComponentContext
 import dev.byjtech.erp.navigation.RootComponentImpl
-import dev.byjtech.erp.api.ApiClient
-import dev.byjtech.erp.session.SessionManager
-import dev.byjtech.erp.session.provideSettings
+import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.common.session.SessionManager
+import dev.byjtech.erp.common.session.provideSettings
 import io.ktor.client.engine.cio.CIO
 import com.arkivanov.essenty.lifecycle.*
-import dev.byjtech.erp.session.DesktopGoogleLoginHandler
+import dev.byjtech.erp.common.session.DesktopGoogleLoginHandler
 import io.github.cdimascio.dotenv.dotenv
 import kotlinx.coroutines.Dispatchers
 

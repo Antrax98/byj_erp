@@ -5,12 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import com.russhwolf.settings.Settings
 import dev.byjtech.erp.AndroidEnv
+import dev.byjtech.erp.common.session.GoogleLoginHandler
 import dev.byjtech.erp.getOrCreateDeviceId
 import kotlinx.serialization.json.Json
 import java.util.Base64
 
 
-class AndroidGoogleLoginHandler(private val activity: ComponentActivity, private val settings: Settings) : GoogleLoginHandler {
+class AndroidGoogleLoginHandler(private val activity: ComponentActivity, private val settings: Settings) :
+    GoogleLoginHandler {
     override fun initiateGoogleLogin() {
         AndroidEnv.init(activity)
         val baseUrl = AndroidEnv.get("BASE_URL")

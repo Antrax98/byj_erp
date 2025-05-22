@@ -1,8 +1,8 @@
-package dev.byjtech.erp.session
+package dev.byjtech.erp.common.session
 
 import com.russhwolf.settings.Settings
-import dev.byjtech.erp.api.ApiClient
-import dev.byjtech.erp.api.InvalidSessionException
+import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.common.api.InvalidSessionException
 import dev.byjtech.erp.core.dto.ModuleDTO
 import dev.byjtech.erp.core.dto.PermissionDTO
 import dev.byjtech.erp.core.session.AppSession

@@ -3,9 +3,11 @@ package dev.byjtech.erp.navigation
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.Value
-import dev.byjtech.erp.api.ApiClient
-import dev.byjtech.erp.session.SessionManager
-import dev.byjtech.erp.session.SessionNavigationTarget
+import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.common.session.SessionManager
+import dev.byjtech.erp.common.session.SessionNavigationTarget
+import dev.byjtech.erp.core.home.HomeComponent
+import dev.byjtech.erp.core.home.HomeComponentImpl
 import kotlinx.serialization.Serializable
 
 class RootComponentImpl(

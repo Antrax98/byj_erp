@@ -8,11 +8,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.arkivanov.decompose.defaultComponentContext
 import dev.byjtech.erp.navigation.RootComponentImpl
-import dev.byjtech.erp.api.ApiClient
-import dev.byjtech.erp.session.SessionManager
+import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.common.session.SessionManager
 import io.ktor.client.engine.android.Android
 import com.russhwolf.settings.Settings
-import dev.byjtech.erp.session.provideSettings
+import dev.byjtech.erp.common.session.provideSettings
 import dev.byjtech.erp.core.session.AppSession
 import dev.byjtech.erp.session.AndroidGoogleLoginHandler
 import dev.byjtech.erp.session.initAndroidSettings

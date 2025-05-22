@@ -1,4 +1,4 @@
-package dev.byjtech.erp.session
+package dev.byjtech.erp.common.session
 
 import io.ktor.client.plugins.cookies.*
 import io.ktor.http.*

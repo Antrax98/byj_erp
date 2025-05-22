@@ -1,8 +1,8 @@
 package dev.byjtech.erp.navigation
 
 import com.arkivanov.decompose.ComponentContext
-import dev.byjtech.erp.api.ApiClient
-import dev.byjtech.erp.session.SessionManager
+import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.common.session.SessionManager
 
 class SuperHomeComponentImpl (
     componentContext: ComponentContext,
