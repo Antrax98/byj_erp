@@ -1,4 +1,4 @@
-package dev.byjtech.erp.core.home
+package dev.byjtech.erp.core.moduleRoot.nav.home
 
 import com.arkivanov.decompose.ComponentContext
 import dev.byjtech.erp.common.api.ApiClient
@@ -10,6 +10,8 @@ class HomeComponentImpl(
     private val sessionManager: SessionManager,
     private val api: ApiClient
 ): HomeComponent, ComponentContext by componentContext {
+
+    override val moduleName = "core"
 
     private val _state = MutableStateFlow(HomeState())
     override val state: StateFlow<HomeState> = _state.asStateFlow()

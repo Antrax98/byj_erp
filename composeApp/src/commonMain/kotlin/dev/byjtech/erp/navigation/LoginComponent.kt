@@ -1,8 +1,0 @@
-package dev.byjtech.erp.navigation
-
-import com.arkivanov.decompose.ComponentContext
-import dev.byjtech.erp.common.session.SessionManager
-
-interface LoginComponent{
-    suspend fun onLoginClicked()
-}

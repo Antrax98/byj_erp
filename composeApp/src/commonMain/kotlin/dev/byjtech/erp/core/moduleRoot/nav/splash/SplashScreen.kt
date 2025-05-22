@@ -1,4 +1,4 @@
-package dev.byjtech.erp.ui
+package dev.byjtech.erp.core.moduleRoot.nav.splash
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

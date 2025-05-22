@@ -1,4 +1,4 @@
-package dev.byjtech.erp.navigation
+package dev.byjtech.erp.core.moduleRoot.nav.superHome
 
 interface SuperHomeComponent {
     suspend fun onLogout()

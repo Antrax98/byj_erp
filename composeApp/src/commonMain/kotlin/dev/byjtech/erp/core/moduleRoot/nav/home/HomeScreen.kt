@@ -1,4 +1,4 @@
-package dev.byjtech.erp.core.home
+package dev.byjtech.erp.core.moduleRoot.nav.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

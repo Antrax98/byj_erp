@@ -27,6 +27,8 @@ import io.ktor.client.plugins.api.createClientPlugin
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -39,6 +41,14 @@ class ApiClient(
     private val dispatcher: CoroutineDispatcher,
     var onNavigationRequired: (SessionNavigationTarget) -> Unit
 ) {
+
+    private val _events = MutableSharedFlow<ApiEvent>()
+    val events: SharedFlow<ApiEvent> = _events
+
+    suspend fun emitEvent(event: ApiEvent){
+        _events.emit(event)
+    }
+
     //esta aqui para agilisar el manejo de sesiones
     val sessionKey = "session_active"
     private var authHeaderProvider: (() -> String?)? = null
@@ -71,13 +81,27 @@ class ApiClient(
         HttpResponseValidator {
             validateResponse { response ->
                 if (response.status == HttpStatusCode.Unauthorized) {
+                    //NO ENVIO TOKEN o FUE INVALIDADA LA SESSION EN EL SERVER
+                    //emitEvent(ApiEvent.Unauthorized)
+
                     // Lanzar una excepción específica para sesión inválida
                     // AQUI PEDIRLE AL SESSION MANAGER QUE INVALIDE LA SESSION ACTUAL Y REDIRECCIONE AL LOGIN O SPLASH
                     //throw InvalidSessionException("Session is invalid or expired")
+
                     withContext(Dispatchers.Main){
                         //usa la clase del sessionmanager para manejar la navegacino en este caso
                         onNavigationRequired(SessionNavigationTarget.Splash)
                     }
+                }
+                else if(response.status == HttpStatusCode.Forbidden){
+                    //SIN ACCESO AL MODULO O PERMISOS INSUFICIENTES
+                    //emitEvent(ApiEvent.Forbidden)
+
+                    withContext(Dispatchers.Main){
+                        //usa la clase del sessionmanager para manejar la navegacino en este caso
+                        onNavigationRequired(SessionNavigationTarget.Splash)
+                    }
+
                 }
                 // Para otros errores, usar el comportamiento por defecto
                 else if (response.status.value >= 300) {
@@ -121,15 +145,6 @@ class ApiClient(
     }
 
 
-    //mover estas dos funciones a CoreApi
-//    suspend fun test(): HttpResponse {
-//        return clientKtor.get("/test")
-//    }
-//    suspend fun logout(): HttpResponse {
-//        return clientKtor.get("/logout")
-//    }
-
-
     suspend fun clearCookies() {
         cookiesStorage.clearAll()
     }
@@ -166,6 +181,11 @@ class ApiClient(
         return clientKtor.get("/modules/contracted").body()
     }
 
+}
+
+sealed class ApiEvent {
+    data object Unauthorized : ApiEvent()
+    data object Forbidden : ApiEvent()
 }
 
 class InvalidSessionException(message: String) : Exception(message)

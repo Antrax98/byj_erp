@@ -1,4 +1,4 @@
-package dev.byjtech.erp.navigation
+package dev.byjtech.erp.core.moduleRoot.nav.splash
 
 import com.arkivanov.decompose.ComponentContext
 import dev.byjtech.erp.common.session.SessionManager
@@ -20,6 +20,7 @@ class SplashComponentImpl(
             sessionJob.await()
         }
 
+        ////PARECE QUE ESTO NICIQUIERA ERA NECESARIO, todo: porbar eliminandolo
         // Cancela el scope cuando el componente se destruye
         lifecycle.doOnDestroy {
             scope.cancel() // Cancela las corutinas cuando el componente es destruido

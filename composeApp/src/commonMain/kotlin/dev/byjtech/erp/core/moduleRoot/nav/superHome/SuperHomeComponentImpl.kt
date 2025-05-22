@@ -1,4 +1,4 @@
-package dev.byjtech.erp.navigation
+package dev.byjtech.erp.core.moduleRoot.nav.superHome
 
 import com.arkivanov.decompose.ComponentContext
 import dev.byjtech.erp.common.api.ApiClient

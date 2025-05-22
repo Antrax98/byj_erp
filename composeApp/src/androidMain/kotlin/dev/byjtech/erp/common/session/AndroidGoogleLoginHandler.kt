@@ -1,4 +1,4 @@
-package dev.byjtech.erp.session
+package dev.byjtech.erp.common.session
 
 import android.content.Intent
 import androidx.activity.ComponentActivity

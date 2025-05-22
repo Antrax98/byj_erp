@@ -1,4 +1,4 @@
-package dev.byjtech.erp.core.home
+package dev.byjtech.erp.core.moduleRoot.nav.home
 
 data class HomeState(
     val isLoading: Boolean = false,

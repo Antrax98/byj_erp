@@ -2,15 +2,18 @@ package dev.byjtech.erp.common.session
 
 import com.russhwolf.settings.Settings
 import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.common.api.ApiEvent
 import dev.byjtech.erp.common.api.InvalidSessionException
 import dev.byjtech.erp.core.dto.ModuleDTO
 import dev.byjtech.erp.core.dto.PermissionDTO
 import dev.byjtech.erp.core.session.AppSession
 import io.ktor.client.plugins.ClientRequestException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 // USARLO EN LA APP
@@ -41,9 +44,11 @@ class SessionManager(
     private val _userPermissions = MutableStateFlow<List<PermissionDTO>>(emptyList())
     val userPermissions: StateFlow<List<PermissionDTO>> = _userPermissions.asStateFlow()
 
-    //este es util solo si el usuario es un admin de la empresa, podria eliminarse
+    //este es util solo si el usuario es un SuperAdmin, podria eliminarse
     private val _contractedModules = MutableStateFlow<List<ModuleDTO>>(emptyList())
     val contractedModules: StateFlow<List<ModuleDTO>> = _contractedModules.asStateFlow()
+
+
 
     suspend fun loadSession() {
         val sessionActive = isSessionActive()
@@ -203,6 +208,22 @@ class SessionManager(
         //onNavigationRequired(SessionNavigationTarget.Login)
     }
 
+    init {
+        CoroutineScope(Dispatchers.Default).launch {
+            apiClient.events.collect { event ->
+                when (event) {
+                    ApiEvent.Forbidden -> {
+                        //TODO() : Refrescar los
+                        onNavigationRequired(SessionNavigationTarget.Splash)
+                    }
+                    ApiEvent.Unauthorized -> {
+                        //CUANDO no hay token o el token es invalido
+                        onNavigationRequired(SessionNavigationTarget.Splash)
+                    }
+                }
 
+            }
+        }
+    }
 
 }

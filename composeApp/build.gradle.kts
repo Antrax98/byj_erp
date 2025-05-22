@@ -30,8 +30,9 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.android)
             implementation(libs.dotenv)
-            implementation(libs.decompose.core)
-            implementation(libs.decompose.compose)
+            implementation(libs.decompose.core)//?
+            implementation(libs.decompose.compose)//?
+            implementation(libs.koin.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -53,7 +54,7 @@ kotlin {
             implementation(libs.decompose.compose)
             implementation(libs.essenty)
             implementation(libs.ktorfit.lib)
-
+            api(libs.koin.core)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

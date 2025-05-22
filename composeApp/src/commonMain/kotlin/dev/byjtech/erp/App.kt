@@ -27,11 +27,11 @@ import androidx.compose.runtime.Composable
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
-import dev.byjtech.erp.navigation.RootComponent
-import dev.byjtech.erp.core.home.HomeScreen
-import dev.byjtech.erp.ui.LoginScreen
-import dev.byjtech.erp.ui.SplashScreen
-import dev.byjtech.erp.ui.SuperHomeScreen
+import dev.byjtech.erp.core.moduleRoot.RootComponent
+import dev.byjtech.erp.core.moduleRoot.nav.home.HomeScreen
+import dev.byjtech.erp.core.moduleRoot.nav.auth.LoginScreen
+import dev.byjtech.erp.core.moduleRoot.nav.splash.SplashScreen
+import dev.byjtech.erp.core.moduleRoot.nav.superHome.SuperHomeScreen
 
 
 @Composable

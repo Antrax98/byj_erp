@@ -1,4 +1,4 @@
-package dev.byjtech.erp.navigation
+package dev.byjtech.erp.core.moduleRoot
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.*
@@ -6,8 +6,14 @@ import com.arkivanov.decompose.value.Value
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.common.session.SessionManager
 import dev.byjtech.erp.common.session.SessionNavigationTarget
-import dev.byjtech.erp.core.home.HomeComponent
-import dev.byjtech.erp.core.home.HomeComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.auth.LoginComponent
+import dev.byjtech.erp.core.moduleRoot.nav.auth.LoginComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.HomeComponent
+import dev.byjtech.erp.core.moduleRoot.nav.home.HomeComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.splash.SplashComponent
+import dev.byjtech.erp.core.moduleRoot.nav.splash.SplashComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.superHome.SuperHomeComponent
+import dev.byjtech.erp.core.moduleRoot.nav.superHome.SuperHomeComponentImpl
 import kotlinx.serialization.Serializable
 
 class RootComponentImpl(
