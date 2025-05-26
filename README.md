@@ -45,11 +45,13 @@ Android Studio no permite iniciar mas de una aplicacion a la vez, por lo que ser
 
 ### 💻 Iniciar app de escritorio (desktop)
 
+Desde Android Studio o con:
+
 ```bash
-./gradlew :composeApp:run
+./gradlew :composeApp:run -Dorg.gradle.java.home=/lib/jvm/java-21-openjdk/
 ```
 
-> debes tener instalado *java 24*
+> *-Dorg.gradle.java.home* debe apuntar a tu instancia de *java 21*
 
 ---
 
@@ -58,9 +60,10 @@ Android Studio no permite iniciar mas de una aplicacion a la vez, por lo que ser
 Desde Android Studio o con:
 
 ```bash
-./gradlew :composeApp:androidApp:installDebug
-./gradlew :composeApp:androidApp:run
+./gradlew :composeApp:installDebug
 ```
+
+iniciar manualmente
 
 > debes tener un emulador iniciado (Android Studio) o dispositivo conectado (con depuracion USB).
 

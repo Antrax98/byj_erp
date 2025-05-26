@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList.tools.ModuleGrid
 
 @Composable
 fun ModuleListScreen(component: ModuleListComponent) {
