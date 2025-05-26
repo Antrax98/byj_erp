@@ -1,8 +1,10 @@
 package dev.byjtech.erp.core.moduleRoot
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.childContext
 import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.Value
+import dev.byjtech.erp.common.ModuleManager
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.common.session.SessionManager
 import dev.byjtech.erp.common.session.SessionNavigationTarget
@@ -15,6 +17,7 @@ import dev.byjtech.erp.core.moduleRoot.nav.splash.SplashComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.SuperHomeComponent
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.SuperHomeComponentImpl
 import kotlinx.serialization.Serializable
+import org.koin.mp.KoinPlatform.getKoin
 
 class RootComponentImpl(
     componentContext: ComponentContext,
@@ -48,9 +51,12 @@ class RootComponentImpl(
         data object SuperHome : Config()
     }
 
+    private val koin = getKoin()
+    private val moduleManager = koin.get<ModuleManager>()
+
     //TODO, en vez de hacer estas funciones, se les puede entrega su contenido directamente al fun child
     private fun homeComponent(componentContext: ComponentContext): HomeComponent =
-        HomeComponentImpl(componentContext, sessionManager, apiClient)
+        HomeComponentImpl(componentContext, sessionManager, apiClient, moduleManager = moduleManager)
     private fun loginComponent(componentContext: ComponentContext): LoginComponent =
         LoginComponentImpl(componentContext, sessionManager)
     private fun splashComponent(componentContext: ComponentContext): SplashComponent =
@@ -60,10 +66,10 @@ class RootComponentImpl(
 
     private fun child(config: Config, componentContext: ComponentContext): RootComponent.Child =
         when (config) {
-            is Config.Home -> RootComponent.Child.Home(homeComponent(componentContext))
-            is Config.Login -> RootComponent.Child.Login(loginComponent(componentContext))
-            is Config.Splash -> RootComponent.Child.Splash(splashComponent(componentContext))
-            is Config.SuperHome -> RootComponent.Child.SuperHome(superHomeComponent(componentContext))
+            is Config.Home -> RootComponent.Child.Home(homeComponent(componentContext.childContext("home")))
+            is Config.Login -> RootComponent.Child.Login(loginComponent(componentContext.childContext("login")))
+            is Config.Splash -> RootComponent.Child.Splash(splashComponent(componentContext.childContext("splash")))
+            is Config.SuperHome -> RootComponent.Child.SuperHome(superHomeComponent(componentContext.childContext("superHome")))
         }
 
 
@@ -124,7 +130,6 @@ class RootComponentImpl(
 
     init {
         sessionManager.onNavigationRequired = ::navigateTo
-        apiClient.onNavigationRequired = ::navigateTo
     }
 
 

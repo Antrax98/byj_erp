@@ -10,7 +10,6 @@ import dev.byjtech.erp.core.moduleRoot.nav.superHome.SuperHomeComponent
 interface RootComponent {
     val childStack: Value<ChildStack<*, Child>>
 
-
     sealed class Child {
         class Home(val component: HomeComponent): Child()
         class Login(val component: LoginComponent): Child()

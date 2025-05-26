@@ -26,11 +26,9 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.api.createClientPlugin
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class ApiClient(
@@ -39,7 +37,7 @@ class ApiClient(
     val basePort: Int,
     settings: Settings,
     private val dispatcher: CoroutineDispatcher,
-    var onNavigationRequired: (SessionNavigationTarget) -> Unit
+    //var onNavigationRequired: (SessionNavigationTarget) -> Unit
 ) {
 
     private val _events = MutableSharedFlow<ApiEvent>()
@@ -82,25 +80,25 @@ class ApiClient(
             validateResponse { response ->
                 if (response.status == HttpStatusCode.Unauthorized) {
                     //NO ENVIO TOKEN o FUE INVALIDADA LA SESSION EN EL SERVER
-                    //emitEvent(ApiEvent.Unauthorized)
+                    emitEvent(ApiEvent.Unauthorized)
 
                     // Lanzar una excepción específica para sesión inválida
                     // AQUI PEDIRLE AL SESSION MANAGER QUE INVALIDE LA SESSION ACTUAL Y REDIRECCIONE AL LOGIN O SPLASH
                     //throw InvalidSessionException("Session is invalid or expired")
 
-                    withContext(Dispatchers.Main){
-                        //usa la clase del sessionmanager para manejar la navegacino en este caso
-                        onNavigationRequired(SessionNavigationTarget.Splash)
-                    }
+//                    withContext(Dispatchers.Main){
+//                        //usa la clase del sessionmanager para manejar la navegacino en este caso
+//                        onNavigationRequired(SessionNavigationTarget.Splash)
+//                    }
                 }
                 else if(response.status == HttpStatusCode.Forbidden){
                     //SIN ACCESO AL MODULO O PERMISOS INSUFICIENTES
-                    //emitEvent(ApiEvent.Forbidden)
+                    emitEvent(ApiEvent.Forbidden)
 
-                    withContext(Dispatchers.Main){
-                        //usa la clase del sessionmanager para manejar la navegacino en este caso
-                        onNavigationRequired(SessionNavigationTarget.Splash)
-                    }
+//                    withContext(Dispatchers.Main){
+//                        //usa la clase del sessionmanager para manejar la navegacino en este caso
+//                        onNavigationRequired(SessionNavigationTarget.Splash)
+//                    }
 
                 }
                 // Para otros errores, usar el comportamiento por defecto
@@ -108,7 +106,7 @@ class ApiClient(
                     val clientException = ClientRequestException(response, response.bodyAsText())
                     throw clientException
                 }
-                //TODO???: agregar uno para Forbidden (no tiene los permisos necesarios)
+
             }
         }
     }
@@ -181,8 +179,18 @@ class ApiClient(
         return clientKtor.get("/modules/contracted").body()
     }
 
+    private fun AuthorizationPlugin(tokenProvider: () -> String?) = createClientPlugin("AuthorizationPlugin") {
+        onRequest { request, _ ->
+            tokenProvider()?.let { token ->
+                request.headers.append("Authentication", "Bearer $token")
+            }
+        }
+    }
+
 }
 
+
+//TODO: mover estos a sus propios archivos o algo
 sealed class ApiEvent {
     data object Unauthorized : ApiEvent()
     data object Forbidden : ApiEvent()
@@ -190,10 +198,3 @@ sealed class ApiEvent {
 
 class InvalidSessionException(message: String) : Exception(message)
 
-fun AuthorizationPlugin(tokenProvider: () -> String?) = createClientPlugin("AuthorizationPlugin") {
-    onRequest { request, _ ->
-        tokenProvider()?.let { token ->
-            request.headers.append("Authentication", "Bearer $token")
-        }
-    }
-}

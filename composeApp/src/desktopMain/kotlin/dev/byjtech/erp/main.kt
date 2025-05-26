@@ -28,7 +28,7 @@ fun main() {
             basePort = dotenv["BASE_PORT"].toInt(),
             settings = settings,
             dispatcher = Dispatchers.IO,
-            onNavigationRequired = {}
+            //onNavigationRequired = {}
         )
 
         val lifecycle = LifecycleRegistry()

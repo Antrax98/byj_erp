@@ -213,7 +213,7 @@ class SessionManager(
             apiClient.events.collect { event ->
                 when (event) {
                     ApiEvent.Forbidden -> {
-                        //TODO() : Refrescar los
+                        //TODO() : manejarlo de una forma mas elegante, pero esto funciona por ahora
                         onNavigationRequired(SessionNavigationTarget.Splash)
                     }
                     ApiEvent.Unauthorized -> {
