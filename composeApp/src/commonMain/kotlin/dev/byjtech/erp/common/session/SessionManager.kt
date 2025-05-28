@@ -11,6 +11,7 @@ import dev.byjtech.erp.core.session.AppSession
 import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -212,19 +213,12 @@ class SessionManager(
     }
 
     init {
-        CoroutineScope(Dispatchers.Default).launch {
+        MainScope().launch {
             apiClient.events.collect { event ->
                 when (event) {
-                    ApiEvent.Forbidden -> {
-                        //TODO() : manejarlo de una forma mas elegante, pero esto funciona por ahora
-                        onNavigationRequired(SessionNavigationTarget.Splash)
-                    }
-                    ApiEvent.Unauthorized -> {
-                        //CUANDO no hay token o el token es invalido
-                        onNavigationRequired(SessionNavigationTarget.Splash)
-                    }
+                    ApiEvent.Forbidden -> onNavigationRequired(SessionNavigationTarget.Splash)
+                    ApiEvent.Unauthorized -> onNavigationRequired(SessionNavigationTarget.Login)
                 }
-
             }
         }
     }

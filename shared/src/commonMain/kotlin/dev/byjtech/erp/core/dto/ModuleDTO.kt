@@ -10,7 +10,5 @@ data class ModuleDTO(
     val name: String,
     val displayName: String,
     val description: String,
-    val createdAt: LocalDateTime?,
-    val updatedAt: LocalDateTime?,
     val developerOnly: Boolean
 )

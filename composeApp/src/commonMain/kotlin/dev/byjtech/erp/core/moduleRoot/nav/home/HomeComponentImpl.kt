@@ -65,7 +65,7 @@ class HomeComponentImpl(
         return when (config) {
             "home" -> ModuleListComponentImpl(
                 componentContext.childContext("home_moduleList"),
-                sessionManager,
+                sessionManager.userPermissions,
                 api,
                 toHome = ::toHome,
                 navTo = ::navigateTo,
@@ -75,7 +75,7 @@ class HomeComponentImpl(
                 val factory = entriesByName[config]?.factory
                     ?: throw IllegalArgumentException("Invalid config: $config")
 
-                factory.create(componentContext.childContext(config), sessionManager, api, ::toHome)
+                factory.create(componentContext.childContext(config), sessionManager.userPermissions, api, ::toHome)
             }
         }
     }

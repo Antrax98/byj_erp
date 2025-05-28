@@ -11,7 +11,5 @@ class ModuleEntity(id: EntityID<Int>) : IntEntity(id) {
     var name by ModulesTable.name
     var displayName by ModulesTable.displayName
     var description by ModulesTable.description
-    var createdAt by ModulesTable.createdAt
-    var updatedAt by ModulesTable.updatedAt
     var developerOnly by ModulesTable.developerOnly
 }

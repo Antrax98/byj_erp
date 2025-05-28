@@ -71,10 +71,11 @@ val infrastructureModule = module {
             stateCache = get(),
             userRepo = get(),
             userServ = get(),
+            subscriptionRepo = get(),
             sessionRepo = get(),
             superAdminRepo = get(),
             moduleRepo = get(),
-            auth = get()
+            auth = get(),
         )
     }
 

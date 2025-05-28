@@ -8,7 +8,5 @@ object ModulesTable : IntIdTable("modules") {
     val name = text("name")
     val displayName = text("display_name")
     val description = text("description")
-    val createdAt = datetime("created_at").nullable()
-    val updatedAt = datetime("updated_at").nullable()
     val developerOnly = bool("developer_only").default(false)
 }

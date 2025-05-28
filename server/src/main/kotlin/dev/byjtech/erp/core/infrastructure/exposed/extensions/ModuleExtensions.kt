@@ -12,8 +12,6 @@ fun ModuleEntity.toDTO(): ModuleDTO {
         name = this.name,
         displayName = this.displayName,
         description = this.description,
-        createdAt = this.createdAt?.toKotlinx(),
-        updatedAt = this.updatedAt?.toKotlinx(),
         developerOnly = this.developerOnly,
     )
 }
@@ -25,8 +23,6 @@ fun ModuleEntity.toModel(categoriesSet: Set<CategoryEntity>? = null): Module {
         name = this.name,
         displayName = this.displayName,
         description = this.description,
-        createdAt = this.createdAt?.toKotlinx(),
-        updatedAt = this.updatedAt?.toKotlinx(),
         developerOnly = this.developerOnly,
         categories = categories
     )
@@ -38,8 +34,6 @@ fun Module.toDTO(): ModuleDTO {
         name = this.name,
         displayName = this.displayName,
         description = this.description,
-        createdAt = this.createdAt,
-        updatedAt = this.updatedAt,
         developerOnly = this.developerOnly,
     )
 }

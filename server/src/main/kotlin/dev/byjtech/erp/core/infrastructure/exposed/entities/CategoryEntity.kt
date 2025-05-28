@@ -10,7 +10,5 @@ class CategoryEntity(id: EntityID<Int>) : IntEntity(id) {
 
     var name by CategoriesTable.name
     var description by CategoriesTable.description
-    var createdAt by CategoriesTable.createdAt
-    var updatedAt by CategoriesTable.updatedAt
     var module by ModuleEntity.referencedOn(CategoriesTable.moduleId)
 }

@@ -111,7 +111,7 @@ class ApiClient(
         }
     }
 
-    private val ktorfit = Ktorfit.Builder()
+    val ktorfit = Ktorfit.Builder()
         //.baseUrl("http://$baseUrl:$basePort")
         .httpClient(clientKtor)
         .build()
@@ -125,6 +125,10 @@ class ApiClient(
     //core
     val coreAuth = ktorfit.create<CoreAuth>() //importante no moverlo
     val coreApi = ktorfit.create<CoreApi>() //importante no moverlo
+
+    fun creatorFactory(creat: creatorInter) {
+
+    }
 
     //TODO() anidarlos de mejor forma, como : apiClient.roles.permission.getPermissions()
     //core-users
@@ -198,3 +202,4 @@ sealed class ApiEvent {
 
 class InvalidSessionException(message: String) : Exception(message)
 
+interface creatorInter

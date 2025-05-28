@@ -4,6 +4,8 @@ import com.github.benmanes.caffeine.cache.Cache
 import dev.byjtech.erp.config.fetchGoogleUserInfo
 import dev.byjtech.erp.core.application.service.UserService
 import dev.byjtech.erp.core.auth.authenticateAndAuthorize
+import dev.byjtech.erp.core.database.superAdmins.SuperAdminDataSource.Companion.isSuperAdmin
+import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource.Companion.findUserIdBySessionId
 import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource as USDS
 import dev.byjtech.erp.core.database.users.findUserByEmail
 import dev.byjtech.erp.core.database.users.updateUserFromGoogleInfo
@@ -122,6 +124,23 @@ fun Route.googleAuthRoutes(
             call.respond(HttpStatusCode.NotFound, "User not found")
         } else {
 
+        }
+    }
+
+    get("/me/type") {
+        val session = authenticateAndAuthorize(call)
+        val userId = findUserIdBySessionId(session.id.value)
+
+        if (userId == null) {
+            //nunca deveria pasar
+            call.respond(HttpStatusCode.Unauthorized, "Unauthorized")
+        }else{
+            val userType = if (isSuperAdmin(userId)) {
+                "superadmin"
+            } else {
+                "tenant"
+            }
+            call.respond(userType)
         }
     }
 

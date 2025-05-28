@@ -15,6 +15,9 @@ interface CoreAuth {
     @GET("/auth/login")
     suspend fun login(): String
 
+    @GET("/auth/me/type")
+    suspend fun getMyType(): String
+
 
     //podria cambiar estas funciones a que fueran rutas de Subscriptions o Modules??
     @GET("/auth/permitted-modules")
