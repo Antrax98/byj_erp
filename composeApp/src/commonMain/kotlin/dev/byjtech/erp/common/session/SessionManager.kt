@@ -1,6 +1,7 @@
 package dev.byjtech.erp.common.session
 
 import com.russhwolf.settings.Settings
+import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.common.api.ApiEvent
 import dev.byjtech.erp.common.api.InvalidSessionException
@@ -38,11 +39,13 @@ class SessionManager(
     var onNavigationRequired: (SessionNavigationTarget) -> Unit,
 ) {
 
+
+    //TODO: cambiar esto state para que sean los modulos que el usuario tiene subscfritos, accesibles y no se que mas
     private val _allowedModules = MutableStateFlow<List<ModuleDTO>>(emptyList())
     val allowedModules: StateFlow<List<ModuleDTO>> = _allowedModules.asStateFlow()
 
-    private val _userPermissions = MutableStateFlow<List<PermissionDTO>>(emptyList())
-    val userPermissions: StateFlow<List<PermissionDTO>> = _userPermissions.asStateFlow()
+    private val _userPermissions = MutableStateFlow<List<PermissionKey>>(emptyList())
+    val userPermissions: StateFlow<List<PermissionKey>> = _userPermissions.asStateFlow()
 
     //este es util solo si el usuario es un SuperAdmin, podria eliminarse
     private val _contractedModules = MutableStateFlow<List<ModuleDTO>>(emptyList())
@@ -127,7 +130,7 @@ class SessionManager(
     suspend fun updatePermissions() {
         try {
             val permissions = apiClient.fetchUserPermissions()
-            _userPermissions.value = permissions
+            //_userPermissions.value = permissions
         } catch (e: InvalidSessionException) {
             // Si la sesión es inválida
             handleInvalidSession()

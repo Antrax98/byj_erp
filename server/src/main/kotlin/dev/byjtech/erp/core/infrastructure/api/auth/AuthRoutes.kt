@@ -9,9 +9,14 @@ import dev.byjtech.erp.core.database.users.findUserByEmail
 import dev.byjtech.erp.core.database.users.updateUserFromGoogleInfo
 import dev.byjtech.erp.core.domain.repository.ModuleRepository
 import dev.byjtech.erp.core.domain.repository.SessionRepository
+import dev.byjtech.erp.core.domain.repository.SubscriptionRepository
 import dev.byjtech.erp.core.domain.repository.SuperAdminRepository
 import dev.byjtech.erp.core.domain.repository.UserRepository
 import dev.byjtech.erp.core.infrastructure.auth.CoreAuthWrapper
+import dev.byjtech.erp.core.infrastructure.exposed.extensions.toDTO
+import dev.byjtech.erp.core.response.AccessibleModulesResponse
+import dev.byjtech.erp.core.response.PermittedModulesResponse
+import dev.byjtech.erp.core.response.SubscribedModulesResponse
 import dev.byjtech.erp.core.session.AppSession
 import java.time.LocalDateTime
 import io.ktor.client.HttpClient
@@ -46,6 +51,7 @@ fun Route.googleAuthRoutes(
     stateCache: Cache<String, String>,
     userRepo: UserRepository,
     userServ: UserService,
+    subscriptionRepo: SubscriptionRepository,
     sessionRepo: SessionRepository,
     superAdminRepo: SuperAdminRepository, //los que no use se borran despues
     moduleRepo: ModuleRepository,
@@ -61,8 +67,67 @@ fun Route.googleAuthRoutes(
         call.respondText("Debugging complete.")
     }
 
+    //los activos (Active) por el admin y el Superadmin (Accessible) al mismo timepo
+    // No developerOnly
+    get("/permitted-modules") {
+        val session = auth.authorizeOrThrow(call.request.headers["Authorization"])
+        val user = userRepo.find(session.userId)
+        if (user?.companyId == null) {
+            call.respond(HttpStatusCode.NotFound, "User and/or Company not found")
+        } else {
+            val companySubscriptions = subscriptionRepo.findByCompanyId(user.companyId).filter { it.isActive && it.isAccessible }
+            //aqui las subscripciones tienen tanto la compañia como los modulos (sin categorias y permisos)
+            val companyModules = companySubscriptions.map { it.module.toDTO() }.filter { !it.developerOnly }.toSet()
+            call.respond(PermittedModulesResponse(companyModules))
+        }
+
+    }
+
+    //los subscriptos por el tenant(compañia), tanto los activos como los inactivos, como los que el Superadmin haya dejado inaccesibles
+    //cosa de saber todos los modulos subscritos, que no sean developer only
+    // No DeveloperOnly
+    get("/subscribed-modules") {
+        val session = auth.authorizeOrThrow(call.request.headers["Authorization"])
+        val user = userRepo.find(session.userId)
+        if (user?.companyId == null) {
+            call.respond(HttpStatusCode.NotFound, "User and/or Company not found")
+        } else {
+            val companySubscriptions = subscriptionRepo.findByCompanyId(user.companyId)
+            //aqui las subscripciones tienen tanto la compañia como los modulos (sin categorias y permisos)
+            val companyModules = companySubscriptions.map { it.module.toDTO() }.filter { !it.developerOnly }.toSet()
+            call.respond(SubscribedModulesResponse(companyModules))
+        }
+
+    }
+
+    //los marcados accessible por el SuperAdmin, incluyendo los desativados por el admin(tenant)
+    //no DeveloperOnly
+    get("/accessible-modules") {
+        val session = auth.authorizeOrThrow(call.request.headers["Authorization"])
+        val user = userRepo.find(session.userId)
+        if (user?.companyId == null) {
+            call.respond(HttpStatusCode.NotFound, "User and/or Company not found")
+        } else {
+            val companySubscriptions = subscriptionRepo.findByCompanyId(user.companyId).filter { it.isAccessible }
+            //aqui las subscripciones tienen tanto la compañia como los modulos (sin categorias y permisos)
+            val companyModules = companySubscriptions.map { it.module.toDTO() }.filter { !it.developerOnly }.toSet()
+            call.respond(AccessibleModulesResponse(companyModules))
+        }
+    }
+
+    get("/user-permissions") {
+        val session = auth.authorizeOrThrow(call.request.headers["Authorization"])
+        val user = userRepo.find(session.userId)
+        if (user == null) {
+            call.respond(HttpStatusCode.NotFound, "User not found")
+        } else {
+
+        }
+    }
+
     route("/logout"){
         get {
+            //TODO: reemplazar por auth
             val session = authenticateAndAuthorize(call)
 
             //UserSessionsDataSource.deleteSessionById(session.id.value)

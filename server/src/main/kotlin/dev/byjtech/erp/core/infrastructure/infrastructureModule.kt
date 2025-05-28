@@ -55,7 +55,7 @@ val infrastructureModule = module {
     //single<CoreTables> { CoreTables } //no supe como hacerlo funcionar, lo dare directametne en el initializer por ahora
 
     //contracts
-    single<AuthServiceContract> { AuthServiceContractImpl(get(), get(), get(), get(), get()) }
+    single<AuthServiceContract> { AuthServiceContractImpl(get(), get(), get(), get(), get(), get()) }
 
     //authWraper
     single<CoreAuthWrapper> { CoreAuthWrapper(get()) }
@@ -78,18 +78,19 @@ val infrastructureModule = module {
         )
     }
 
-    single<UserRoutesInstaller> {
-        UserRoutesInstaller(
-            userServ = get()
-        )
-    }
+//    single<UserRoutesInstaller> {
+//        UserRoutesInstaller(
+//            userServ = get(),
+//            authServ = get()
+//        )
+//    }
 
     //routing
     single<CoreRoutesInstaller> {
         CoreRoutesInstaller(
             setOf(
                 //AuthRoutesInstaller(), //TODO: justamente separar esta de las demas rutas, los otros si van aqui
-                UserRoutesInstaller(get())
+                UserRoutesInstaller(get(), get())
             )
         )
     }

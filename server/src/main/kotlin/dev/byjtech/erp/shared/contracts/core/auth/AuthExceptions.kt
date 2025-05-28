@@ -15,6 +15,10 @@ open class AuthorizationException(message: String = "Authorization failed") : Ru
 // Excepción si el usuario no tiene los permisos necesarios
 class MissingPermissionsException(val missingPermissions: List<String>) : AuthorizationException("User is missing required permissions: ${missingPermissions.joinToString()}")
 
+class MissingRoleException(): AuthorizationException("User has no role")
+
+class MissingSuperAdminException(): AuthorizationException("User is not a super admin")
+
 // Excepción si el usuario no tiene acceso al módulo solicitado
 class ModuleAccessException(val module: String) : AuthorizationException("User does not have access to module: $module")
 

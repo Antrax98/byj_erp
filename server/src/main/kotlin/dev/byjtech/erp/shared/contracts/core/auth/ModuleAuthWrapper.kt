@@ -11,9 +11,9 @@ abstract class ModuleAuthWrapper(
     abstract val moduleName: String
 
     //dejar de usar suspend y dispatcher si hace problemas despues
-    suspend fun authorizeOrThrow(token: String, requiredSuperAdmin: Boolean = false, requiredAnyPermissions: Set<PermissionKey>? = null) {
-        val result = withContext(Dispatchers.IO) {
-            authService.validateSessionAndAuthorize(token, moduleName, requiredAnyPermissions, requiredSuperAdmin)
+    suspend fun authorizeOrThrow(authHeader: String?, requiredSuperAdmin: Boolean = false, requiredAnyPermissions: Set<PermissionKey>? = null) : ValidatedSessionInfo {
+        return withContext(Dispatchers.IO) {
+            authService.validateSessionAndAuthorize(authHeader, moduleName, requiredAnyPermissions, requiredSuperAdmin)
         }
     }
 }

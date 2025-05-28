@@ -11,6 +11,8 @@ interface SubscriptionRepository {
     fun createBilling(billing: Billing): Billing
     fun find(id: Int): Subscription?
     fun findByCompanyId(companyId: Int): Set<Subscription>
+    fun findByCompanyIdAndModule(companyId: Int, module: String): Subscription?
     fun findByModuleId(moduleId: Int): Set<Subscription>
     fun delete(id: Int)
+    fun deleteBilling(id: Int)
 }

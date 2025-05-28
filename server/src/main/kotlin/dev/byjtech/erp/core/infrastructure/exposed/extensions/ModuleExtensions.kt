@@ -2,6 +2,8 @@ package dev.byjtech.erp.core.infrastructure.exposed.extensions
 
 import dev.byjtech.erp.core.dto.ModuleDTO
 import dev.byjtech.erp.core.infrastructure.exposed.entities.ModuleEntity
+import dev.byjtech.erp.core.domain.model.Module
+import dev.byjtech.erp.core.infrastructure.exposed.entities.CategoryEntity
 import dev.byjtech.erp.utils.datetime.toKotlinx
 
 fun ModuleEntity.toDTO(): ModuleDTO {
@@ -12,6 +14,32 @@ fun ModuleEntity.toDTO(): ModuleDTO {
         description = this.description,
         createdAt = this.createdAt?.toKotlinx(),
         updatedAt = this.updatedAt?.toKotlinx(),
+        developerOnly = this.developerOnly,
+    )
+}
+
+fun ModuleEntity.toModel(categoriesSet: Set<CategoryEntity>? = null): Module {
+    val categories = categoriesSet?.map { it.toModel() }?.toSet()
+    return Module(
+        id = this.id.value,
+        name = this.name,
+        displayName = this.displayName,
+        description = this.description,
+        createdAt = this.createdAt?.toKotlinx(),
+        updatedAt = this.updatedAt?.toKotlinx(),
+        developerOnly = this.developerOnly,
+        categories = categories
+    )
+}
+
+fun Module.toDTO(): ModuleDTO {
+    return ModuleDTO(
+        id = this.id,
+        name = this.name,
+        displayName = this.displayName,
+        description = this.description,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
         developerOnly = this.developerOnly,
     )
 }

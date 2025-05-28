@@ -7,7 +7,5 @@ import org.jetbrains.exposed.sql.javatime.datetime
 object CategoriesTable : IntIdTable("categories") {
     val name = text("name")
     val description = text("description")
-    val createdAt = datetime("created_at").nullable()
-    val updatedAt = datetime("updated_at").nullable()
     val moduleId = reference("module_id", ModulesTable)
 }

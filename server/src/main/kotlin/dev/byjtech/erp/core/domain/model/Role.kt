@@ -6,7 +6,7 @@ data class Role(
     val id: Int,
     val name: String,
     val description: String,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime,
-    private val permissions: MutableSet<Permission>
+    val createdAt: LocalDateTime?,
+    val updatedAt: LocalDateTime?,
+    val permissions: Set<Permission>? = setOf()
 )
