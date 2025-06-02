@@ -9,7 +9,9 @@ import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource.Compani
 import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource as USDS
 import dev.byjtech.erp.core.database.users.findUserByEmail
 import dev.byjtech.erp.core.database.users.updateUserFromGoogleInfo
+import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.domain.repository.ModuleRepository
+import dev.byjtech.erp.core.domain.repository.RoleRepository
 import dev.byjtech.erp.core.domain.repository.SessionRepository
 import dev.byjtech.erp.core.domain.repository.SubscriptionRepository
 import dev.byjtech.erp.core.domain.repository.SuperAdminRepository
@@ -19,6 +21,7 @@ import dev.byjtech.erp.core.infrastructure.exposed.extensions.toDTO
 import dev.byjtech.erp.core.response.AccessibleModulesResponse
 import dev.byjtech.erp.core.response.PermittedModulesResponse
 import dev.byjtech.erp.core.response.SubscribedModulesResponse
+import dev.byjtech.erp.core.response.UserPermissionsResponse
 import dev.byjtech.erp.core.session.AppSession
 import java.time.LocalDateTime
 import io.ktor.client.HttpClient
@@ -53,6 +56,7 @@ fun Route.googleAuthRoutes(
     stateCache: Cache<String, String>,
     userRepo: UserRepository,
     userServ: UserService,
+    roleRepo: RoleRepository,
     subscriptionRepo: SubscriptionRepository,
     sessionRepo: SessionRepository,
     superAdminRepo: SuperAdminRepository, //los que no use se borran despues
@@ -60,7 +64,7 @@ fun Route.googleAuthRoutes(
     auth: CoreAuthWrapper
 ) {
     get("/test") {
-        val session = authenticateAndAuthorize(call)
+        val session = auth.authorizeOrThrow(call)
         println("Request Info:")
         println("Method: ${call.request.httpMethod}")
         println("URL: ${call.request.uri}")
@@ -72,7 +76,7 @@ fun Route.googleAuthRoutes(
     //los activos (Active) por el admin y el Superadmin (Accessible) al mismo timepo
     // No developerOnly
     get("/permitted-modules") {
-        val session = auth.authorizeOrThrow(call.request.headers["Authorization"])
+        val session = auth.authorizeOrThrow(call)
         val user = userRepo.find(session.userId)
         if (user?.companyId == null) {
             call.respond(HttpStatusCode.NotFound, "User and/or Company not found")
@@ -80,6 +84,7 @@ fun Route.googleAuthRoutes(
             val companySubscriptions = subscriptionRepo.findByCompanyId(user.companyId).filter { it.isActive && it.isAccessible }
             //aqui las subscripciones tienen tanto la compañia como los modulos (sin categorias y permisos)
             val companyModules = companySubscriptions.map { it.module.toDTO() }.filter { !it.developerOnly }.toSet()
+            logger.debug("User {} permitted modules: {}", user.name, companyModules)
             call.respond(PermittedModulesResponse(companyModules))
         }
 
@@ -89,14 +94,15 @@ fun Route.googleAuthRoutes(
     //cosa de saber todos los modulos subscritos, que no sean developer only
     // No DeveloperOnly
     get("/subscribed-modules") {
-        val session = auth.authorizeOrThrow(call.request.headers["Authorization"])
+        val session = auth.authorizeOrThrow(call)
         val user = userRepo.find(session.userId)
         if (user?.companyId == null) {
             call.respond(HttpStatusCode.NotFound, "User and/or Company not found")
         } else {
             val companySubscriptions = subscriptionRepo.findByCompanyId(user.companyId)
-            //aqui las subscripciones tienen tanto la compañia como los modulos (sin categorias y permisos)
+            //aqui las subscripciones tienen tanto la compañia como los modulos (sin categorias y permisos) // todo: agregar billings?
             val companyModules = companySubscriptions.map { it.module.toDTO() }.filter { !it.developerOnly }.toSet()
+            logger.debug("User {} subscribed modules: {}", user.name, companyModules)
             call.respond(SubscribedModulesResponse(companyModules))
         }
 
@@ -105,7 +111,7 @@ fun Route.googleAuthRoutes(
     //los marcados accessible por el SuperAdmin, incluyendo los desativados por el admin(tenant)
     //no DeveloperOnly
     get("/accessible-modules") {
-        val session = auth.authorizeOrThrow(call.request.headers["Authorization"])
+        val session = auth.authorizeOrThrow(call)
         val user = userRepo.find(session.userId)
         if (user?.companyId == null) {
             call.respond(HttpStatusCode.NotFound, "User and/or Company not found")
@@ -113,50 +119,51 @@ fun Route.googleAuthRoutes(
             val companySubscriptions = subscriptionRepo.findByCompanyId(user.companyId).filter { it.isAccessible }
             //aqui las subscripciones tienen tanto la compañia como los modulos (sin categorias y permisos)
             val companyModules = companySubscriptions.map { it.module.toDTO() }.filter { !it.developerOnly }.toSet()
+            logger.debug("User {} accessible modules: {}", user.name, companyModules)
             call.respond(AccessibleModulesResponse(companyModules))
         }
     }
 
     get("/user-permissions") {
-        val session = auth.authorizeOrThrow(call.request.headers["Authorization"])
+        val session = auth.authorizeOrThrow(call)
         val user = userRepo.find(session.userId)
         if (user == null) {
-            call.respond(HttpStatusCode.NotFound, "User not found")
+            call.respond(HttpStatusCode.NotFound, "User not found") // no deveria de pasar
         } else {
-
+            val userRoles = roleRepo.findByUserId(user.id)
+            var userPermissions: Set<Permission> = userRoles
+                .flatMap { role -> roleRepo.getPermissionsByRoleId(role.id) }
+                .toSet()
+            val userSpecialPermissions = userRepo.getSpecialPermissionsByUserId(user.id)?: emptySet()
+            userPermissions = userPermissions + userSpecialPermissions
+            val userPermissionKeys = moduleRepo.getPermissionKeysByPermissionIdSet(userPermissions.map { it.id }.toSet())
+            logger.debug("User {} permissions: {}",user.name, userPermissionKeys)
+            call.respond(UserPermissionsResponse(userPermissionKeys))
         }
     }
 
     get("/me/type") {
-        val session = authenticateAndAuthorize(call)
-        val userId = findUserIdBySessionId(session.id.value)
+        val session = auth.authorizeOrThrow(call)
 
-        if (userId == null) {
-            //nunca deveria pasar
-            call.respond(HttpStatusCode.Unauthorized, "Unauthorized")
-        }else{
-            val userType = if (isSuperAdmin(userId)) {
-                "superadmin"
-            } else {
-                "tenant"
-            }
-            call.respond(userType)
+        val userType = if (isSuperAdmin(session.userId)) {
+            "superadmin"
+        } else {
+            "tenant"
         }
+        call.respond(userType)//TODO: enviar respuesta como un DTO???
     }
 
     route("/logout"){
         get {
-            //TODO: reemplazar por auth
-            val session = authenticateAndAuthorize(call)
-
-            //UserSessionsDataSource.deleteSessionById(session.id.value)
-            sessionRepo.delete(session.id.value)///esto despues se saca porque no se usa autenticateandautorize sino que se usara el authservice nuevo
+            val session = auth.authorizeOrThrow(call)
+            sessionRepo.delete(session.sessionId)
+            logger.debug("User {} logged out session id: {}", userRepo.find(session.userId)?.name, session.sessionId)
             call.respondText("Logout", status = HttpStatusCode.OK)
         }
 
     }
 
-
+    //TODO: quitar todos los logger.debug()
     authenticate("google-oauth") {
         get("/login") {
             val stateEncoded = call.request.queryParameters["state"]

@@ -8,6 +8,6 @@ data class CompanyDTO(
     val id: Int,
     val name: String,
     val contactEmail: String,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime,
+    val createdAt: LocalDateTime?,
+    val updatedAt: LocalDateTime?,
 )

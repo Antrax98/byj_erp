@@ -12,8 +12,8 @@ fun CompanyEntity.toDTO(): CompanyDTO {
         id = this.id.value,
         name = this.name,
         contactEmail = this.contactEmail,
-        createdAt = this.createdAt.toKotlinx(),
-        updatedAt = this.updatedAt.toKotlinx()
+        createdAt = this.createdAt?.toKotlinx(),
+        updatedAt = this.updatedAt?.toKotlinx()
     )
 }
 
@@ -22,8 +22,8 @@ fun CompanyEntity.toModel(): Company {
         id = this.id.value,
         name = this.name,
         contactEmail = this.contactEmail,
-        createdAt = this.createdAt.toKotlinx(),
-        updatedAt = this.updatedAt.toKotlinx()
+        createdAt = this.createdAt?.toKotlinx(),
+        updatedAt = this.updatedAt?.toKotlinx()
     )
 }
 
@@ -42,14 +42,14 @@ fun Company.toEntity(existingEntity: CompanyEntity? = null): CompanyEntity {
         CompanyEntity.new(null) {
             name = this@toEntity.name
             contactEmail = this@toEntity.contactEmail
-            createdAt = this@toEntity.createdAt.toJavaLocalDateTime()
-            updatedAt = this@toEntity.updatedAt.toJavaLocalDateTime()
+            createdAt = this@toEntity.createdAt?.toJavaLocalDateTime()
+            updatedAt = this@toEntity.updatedAt?.toJavaLocalDateTime()
         }
     } else {
         existingEntity.name = this.name
         existingEntity.contactEmail = this.contactEmail
-        existingEntity.createdAt = this.createdAt.toJavaLocalDateTime()
-        existingEntity.updatedAt = this.updatedAt.toJavaLocalDateTime()
+        existingEntity.createdAt = this.createdAt?.toJavaLocalDateTime()
+        existingEntity.updatedAt = this.updatedAt?.toJavaLocalDateTime()
         existingEntity
     }
 }

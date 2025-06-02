@@ -4,6 +4,7 @@ import de.jensklingenberg.ktorfit.http.*
 import dev.byjtech.erp.core.response.AccessibleModulesResponse
 import dev.byjtech.erp.core.response.PermittedModulesResponse
 import dev.byjtech.erp.core.response.SubscribedModulesResponse
+import dev.byjtech.erp.core.response.UserPermissionsResponse
 
 interface CoreAuth {
     @GET("/auth/test")
@@ -28,5 +29,9 @@ interface CoreAuth {
 
     @GET("/auth/accessible-modules")
     suspend fun accessibleModules(): AccessibleModulesResponse
+
+    @GET("/auth/user-permissions")
+    suspend fun userPermissions(): UserPermissionsResponse
+
 
 }

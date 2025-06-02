@@ -1,6 +1,7 @@
 package dev.byjtech.erp.shared.contracts.core.auth
 
 import dev.byjtech.erp.common.PermissionKey
+import io.ktor.server.application.ApplicationCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -11,9 +12,9 @@ abstract class ModuleAuthWrapper(
     abstract val moduleName: String
 
     //dejar de usar suspend y dispatcher si hace problemas despues
-    suspend fun authorizeOrThrow(authHeader: String?, requiredSuperAdmin: Boolean = false, requiredAnyPermissions: Set<PermissionKey>? = null) : ValidatedSessionInfo {
+    suspend fun authorizeOrThrow(call: ApplicationCall, requiredSuperAdmin: Boolean = false, requiredAnyPermissions: Set<PermissionKey>? = null) : ValidatedSessionInfo {
         return withContext(Dispatchers.IO) {
-            authService.validateSessionAndAuthorize(authHeader, moduleName, requiredAnyPermissions, requiredSuperAdmin)
+            authService.validateSessionAndAuthorize(call, moduleName, requiredAnyPermissions, requiredSuperAdmin)
         }
     }
 }

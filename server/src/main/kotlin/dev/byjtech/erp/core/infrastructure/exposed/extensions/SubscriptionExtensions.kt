@@ -24,8 +24,8 @@ fun SubscriptionEntity.toModel(): Subscription {
         module = this.module.toModel(),
         isActive = this.isActive,
         isAccessible = this.isAccessible,
-        createdAt = this.createdAt.toKotlinx(),
-        updatedAt = this.updatedAt.toKotlinx(),
+        createdAt = this.createdAt?.toKotlinx(),
+        updatedAt = this.updatedAt?.toKotlinx(),
         billing = billing
     )
 }

@@ -76,6 +76,7 @@ val infrastructureModule = module {
             superAdminRepo = get(),
             moduleRepo = get(),
             auth = get(),
+            roleRepo = get()
         )
     }
 

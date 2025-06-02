@@ -125,9 +125,11 @@ class HomeComponentImpl(
     private val backCallback = BackCallback(
         onBack = {
             if (childStack.value.active.configuration != "home") {
+                println("Back button pressed")
                 navigation.replaceCurrent("home")
                 //se consumio el evento???
             } else {
+                println("flujo normal???")
                // no consumió, sigue el flujo normal??????
             }
         }

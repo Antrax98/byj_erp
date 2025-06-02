@@ -3,6 +3,7 @@ package dev.byjtech.erp.core.infrastructure.api.auth
 import com.github.benmanes.caffeine.cache.Cache
 import dev.byjtech.erp.core.application.service.UserService
 import dev.byjtech.erp.core.domain.repository.ModuleRepository
+import dev.byjtech.erp.core.domain.repository.RoleRepository
 import dev.byjtech.erp.core.domain.repository.SessionRepository
 import dev.byjtech.erp.core.domain.repository.SubscriptionRepository
 import dev.byjtech.erp.core.domain.repository.SuperAdminRepository
@@ -21,6 +22,7 @@ class AuthRoutesInstaller(
     private val stateCache: Cache<String, String>,
     private val userRepo: UserRepository,
     private val userServ: UserService,
+    private val roleRepo: RoleRepository,
     private val subscriptionRepo: SubscriptionRepository,
     private val sessionRepo: SessionRepository,
     private val superAdminRepo: SuperAdminRepository,//????????? mejor hacer un service con enfoque de los permisos y ahorrarme todos los imports aqui
@@ -29,7 +31,7 @@ class AuthRoutesInstaller(
 ): RoutesInstaller {
     override fun Route.installRoutes() {
         route("/auth"){
-            googleAuthRoutes(httpClient, stateCache, userRepo, userServ, subscriptionRepo, sessionRepo, superAdminRepo, moduleRepo, auth)
+            googleAuthRoutes(httpClient, stateCache, userRepo, userServ, roleRepo, subscriptionRepo, sessionRepo, superAdminRepo, moduleRepo, auth)
         }
         //aui se devia dividir entre instalar rutas para el tenant o el SuperAdmin, o ambos
         //pero este installer es especial y no debe ser copiado

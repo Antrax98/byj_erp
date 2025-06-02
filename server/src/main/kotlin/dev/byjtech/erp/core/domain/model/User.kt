@@ -12,7 +12,8 @@ data class User (
     var createdAt: LocalDateTime?,
     var updatedAt: LocalDateTime?,
     val companyId: Int?,
-    val roles: Set<Role>?
+    val roles: Set<Role>?,
+    val specialPermissions: Set<Permission>?
 ) {
     fun rename(newName: String) = copy(name = newName)
     fun changeEmail(newEmail: String) = copy(email = newEmail)

@@ -14,22 +14,10 @@ class CoreInitializer(
     moduleRoutesInstaller: ModuleRoutesInstaller,
     private val authRoutesInstaller: RoutesInstaller,
 ): ModuleInitializer(definition,tables,moduleRoutesInstaller) {
-    //este se ejecuta dentro de la ruta .../api para que quede ordenado
-//    override fun installRoutes(baseRoute: Route) {
-//        moduleRoutesInstaller.installRoutes(baseRoute)
-//    }
-
-    //este caso especial se ejecuta dentro de la ruta Raiz pero se podria hacer /auth o algo asi
+    //este caso es especial, no referenciar esta funcion
     fun Route.installAuthRoutes() {
         with(authRoutesInstaller) {
             this@installAuthRoutes.installRoutes()
         }
     }
-
-//    override fun Route.install(){
-//        route("/${definition.name}"){
-//            moduleRoutesInstaller.installRoutes(this)
-//        }
-//    }
-
 }

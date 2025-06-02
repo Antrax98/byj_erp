@@ -1,12 +1,16 @@
 package dev.byjtech.erp.core.infrastructure.exposed.repository
 
+import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.domain.model.User
 import dev.byjtech.erp.core.domain.repository.UserRepository
+import dev.byjtech.erp.core.infrastructure.exposed.entities.PermissionEntity
 import dev.byjtech.erp.core.infrastructure.exposed.entities.RoleEntity
 import dev.byjtech.erp.core.infrastructure.exposed.entities.UserEntity
+import dev.byjtech.erp.core.infrastructure.exposed.entities.UserPermissionEntity
 import dev.byjtech.erp.core.infrastructure.exposed.entities.UserRoleEntity
 import dev.byjtech.erp.core.infrastructure.exposed.extensions.fromModel
 import dev.byjtech.erp.core.infrastructure.exposed.extensions.toModel
+import dev.byjtech.erp.core.infrastructure.exposed.tables.UserPermissionTable
 import dev.byjtech.erp.core.infrastructure.exposed.tables.UserRoleTable
 import dev.byjtech.erp.core.infrastructure.exposed.tables.UsersTable
 import org.jetbrains.exposed.sql.and
@@ -82,6 +86,56 @@ class UserRepositoryImpl: UserRepository {
     override fun findByCompanyId(companyId: Int): Set<User> {
         return transaction {
             UserEntity.find { UsersTable.companyId eq companyId }.map { it.toModel() }.toSet()
+        }
+    }
+
+    //funciones dedicadas a permisos especiales
+
+    override fun addSpecialPermission(userId: Int, permissionId: Int): Boolean {
+        return transaction {
+            //chekear si existe el usuario y el permiso, por ahora solo retornan false de no existir
+            val user = UserEntity.findById(userId)
+            val permission = PermissionEntity.findById(permissionId)
+            if (user == null || permission == null) {
+                return@transaction false
+            }
+
+            val exist = UserPermissionEntity.find { (UserPermissionTable.userId eq userId) and (UserPermissionTable.permissionId eq permissionId) }.firstOrNull()
+            if (exist != null) {
+                return@transaction false
+            } else {
+                UserPermissionEntity.new {
+                    this.user = UserEntity[userId]
+                    this.permission = PermissionEntity[permissionId]
+                }
+            }
+            return@transaction true
+        }
+    }
+    override fun removeSpecialPermission(userId: Int, permissionId: Int): Boolean {
+        return transaction {
+            //chekear si existe el usuario y el permiso, por ahora solo retornan false de no existir
+            val user = UserEntity.findById(userId)
+            val permission = PermissionEntity.findById(permissionId)
+            if (user == null || permission == null) {
+                return@transaction false
+            }
+
+            val exist = UserPermissionEntity.find { (UserPermissionTable.userId eq userId) and (UserPermissionTable.permissionId eq permissionId) }.firstOrNull()
+            if (exist == null) {
+                return@transaction false
+            } else {
+                exist.delete()
+                return@transaction true
+            }
+
+        }
+    }
+    override fun getSpecialPermissionsByUserId(userId: Int): Set<Permission>? {
+        return transaction {
+            UserEntity.findById(userId) ?: return@transaction null
+            val permissions = UserPermissionEntity.find { UserPermissionTable.userId eq userId }.map { it.permission }
+            return@transaction permissions.map { it.toModel() }.toSet()
         }
     }
 }

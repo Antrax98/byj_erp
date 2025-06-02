@@ -42,15 +42,15 @@ class SessionManager(
 
 
     //TODO: cambiar esto state para que sean los modulos que el usuario tiene subscfritos, accesibles y no se que mas
-    private val _allowedModules = MutableStateFlow<List<ModuleDTO>>(emptyList())
-    val allowedModules: StateFlow<List<ModuleDTO>> = _allowedModules.asStateFlow()
+    private val _allowedModules = MutableStateFlow<Set<ModuleDTO>>(emptySet())
+    val allowedModules: StateFlow<Set<ModuleDTO>> = _allowedModules.asStateFlow()
 
-    private val _userPermissions = MutableStateFlow<List<PermissionKey>>(emptyList())
-    val userPermissions: StateFlow<List<PermissionKey>> = _userPermissions.asStateFlow()
+    private val _userPermissions = MutableStateFlow<Set<PermissionKey>>(emptySet())
+    val userPermissions: StateFlow<Set<PermissionKey>> = _userPermissions.asStateFlow()
 
-    //este es util solo si el usuario es un SuperAdmin, podria eliminarse
-    private val _contractedModules = MutableStateFlow<List<ModuleDTO>>(emptyList())
-    val contractedModules: StateFlow<List<ModuleDTO>> = _contractedModules.asStateFlow()
+//    //este es util solo si el usuario es un SuperAdmin, podria eliminarse
+//    private val _contractedModules = MutableStateFlow<Set<ModuleDTO>>(emptySet())
+//    val contractedModules: StateFlow<Set<ModuleDTO>> = _contractedModules.asStateFlow()
 
 
 
@@ -63,8 +63,8 @@ class SessionManager(
                 if (myType == "superadmin") {
                     onNavigationRequired(SessionNavigationTarget.SuperHome)
                 } else if (myType == "tenant") {
-                    //updateAllowedModules()
-                    //updatePermissions()
+                    updateAllowedModules()
+                    updatePermissions()
                     //updateContractedModules()
                     onNavigationRequired(SessionNavigationTarget.Home)
                 }
@@ -117,8 +117,8 @@ class SessionManager(
 
     suspend fun updateAllowedModules() {
         try {
-            val modules = apiClient.fetchAllowedModules()
-            _allowedModules.value = modules
+            val modules = apiClient.coreAuth.permittedModules()
+            _allowedModules.value = modules.modules
         } catch (e: InvalidSessionException) {
             // Si la sesión es inválida
             handleInvalidSession()
@@ -130,8 +130,8 @@ class SessionManager(
 
     suspend fun updatePermissions() {
         try {
-            val permissions = apiClient.fetchUserPermissions()
-            //_userPermissions.value = permissions
+            val permissions = apiClient.coreAuth.userPermissions()
+            _userPermissions.value = permissions.permissions
         } catch (e: InvalidSessionException) {
             // Si la sesión es inválida
             handleInvalidSession()
@@ -141,18 +141,18 @@ class SessionManager(
         }
     }
 
-    suspend fun updateContractedModules() {
-        try {
-            val contractedModules = apiClient.fetchContractedModules()
-            _contractedModules.value = contractedModules
-        } catch (e: InvalidSessionException) {
-            // Si la sesión es inválida
-            handleInvalidSession()
-        } catch (e: Exception) {
-            // Otros errores
-            println("Error al obtener módulos contratados: ${e.message}")
-        }
-    }
+//    suspend fun updateContractedModules() {
+//        try {
+//            val contractedModules = apiClient.coreAuth.subscribedModules()
+//            _contractedModules.value = contractedModules.modules
+//        } catch (e: InvalidSessionException) {
+//            // Si la sesión es inválida
+//            handleInvalidSession()
+//        } catch (e: Exception) {
+//            // Otros errores
+//            println("Error al obtener módulos contratados: ${e.message}")
+//        }
+//    }
 
     // Verifica si la sesión está activa
     //se podria modificar para que se lo pregunte a el servidor directamente...

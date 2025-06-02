@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 //hacer que este componente no herede de ModuleRootCOmponent de ser necesario
 class ModuleListComponentImpl(
     componentContext: ComponentContext,
-    override val userPermissions: StateFlow<List<PermissionKey>>,
+    override val userPermissions: StateFlow<Set<PermissionKey>>,
     override val apiClient: ApiClient,
     override val toHome: () -> Unit,
     override val navTo: (String) -> Unit,

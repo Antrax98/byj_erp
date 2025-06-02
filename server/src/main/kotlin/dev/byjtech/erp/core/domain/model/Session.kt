@@ -4,7 +4,7 @@ import kotlinx.datetime.LocalDateTime
 
 data class Session(
     val id: Int,
-    val user: User,
+    val userId: Int,
     val deviceId: String,
     val accessTokens: String,
     val refreshToken: String,

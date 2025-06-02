@@ -1,4 +1,4 @@
-package dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList
+package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.nav.featureList
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ModuleListScreen(component: ModuleListComponent) {
+fun FeatureListScreen(component: FeatureListComponent){
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -25,32 +25,10 @@ fun ModuleListScreen(component: ModuleListComponent) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        Text("Lista Modulos ERP")
-//        Button(onClick = { component.navTo("core")}){
-//            Text("to Core")
-//        }
-
-        //ModuleGrid(modules = component.modulesMetadata, onClick = {component.navTo})
-
-        val modulePairList = component.modulesMetadata.toList()
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 120.dp), // Se adapta a la pantalla
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            //modifier = Modifier.fillMaxSize()
-        ) {
-            items(modulePairList) { (name, metadata) ->
-                Button(onClick = { component.navTo(name) }){
-                    Text(name)
-
-                }
-            }
-
-        }
+        Text("Lista de Features")
 
         val dummyNames = listOf(
-            "Core", "Boletas", "HR",
+            "Botón 1", "Botón 2", "Botón 3",
             "Botón 4", "Botón 5", "Botón 6"
         )
 
@@ -59,11 +37,11 @@ fun ModuleListScreen(component: ModuleListComponent) {
             contentPadding = PaddingValues(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            //modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             items(dummyNames) { name ->
                 Button(
-                    onClick = { /*NADA*/ },
+                    onClick = { /* No hace nada */ },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(name)

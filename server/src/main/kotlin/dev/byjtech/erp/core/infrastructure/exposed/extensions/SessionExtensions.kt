@@ -1,5 +1,6 @@
 package dev.byjtech.erp.core.infrastructure.exposed.extensions
 
+import dev.byjtech.erp.core.domain.model.Session
 import dev.byjtech.erp.core.dto.SessionDTO
 import dev.byjtech.erp.core.infrastructure.exposed.entities.SessionEntity
 import dev.byjtech.erp.utils.datetime.toKotlinx
@@ -19,5 +20,21 @@ fun SessionEntity.toDTO(): SessionDTO {
         userAgent = this.userAgent,
         isValid = this.isValid,
         isActive = this.isValid && this.expiresAt.toKotlinLocalDateTime() > now
+    )
+}
+
+fun SessionEntity.toModel(): Session {
+    return Session(
+        id = this.id.value,
+        userId = this.user.id.value,
+        deviceId = this.deviceId,
+        platform = this.platform,
+        createdAt = this.createdAt.toKotlinLocalDateTime(),
+        updatedAt = this.updatedAt.toKotlinLocalDateTime(),
+        expiresAt = this.expiresAt.toKotlinLocalDateTime(),
+        userAgent = this.userAgent,
+        isValid = this.isValid,
+        accessTokens = this.accessToken,
+        refreshToken = this.refreshToken
     )
 }

@@ -29,7 +29,7 @@ class SubscriptionRepositoryImpl: SubscriptionRepository {
             val subscriptionEntity = SubscriptionEntity[subscription.id]
             subscriptionEntity.isActive = subscription.isActive
             subscriptionEntity.isAccessible = subscription.isAccessible
-            subscriptionEntity.updatedAt = subscription.updatedAt.toJava()
+            subscriptionEntity.updatedAt = subscription.updatedAt?.toJava()
             subscriptionEntity.billing = subscription.billing?.let { billing ->
                 val billingAux = BillingEntity[billing.id]
                 billingAux.lastPaymentDate = billing.lastPaymentDate?.toJava()

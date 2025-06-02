@@ -21,5 +21,6 @@ interface ModuleRepository {
     fun addPermissionToCategory(categoryId: Int, newPermission: PermissionDTO): Permission
     fun findPermissionByPermissionKey(permissionKey: PermissionKey): Permission?
     fun findPermissionsByPermissionKeySet(permissionKeySet: Set<PermissionKey>): Set<Permission>
+    fun getPermissionKeysByPermissionIdSet(permissionIdSet: Set<Int>): Set<PermissionKey>
     //TODo() si faltan mas se agregan nomas
 }

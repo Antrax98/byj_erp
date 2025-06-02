@@ -8,6 +8,7 @@ import dev.byjtech.erp.core.domain.repository.SubscriptionRepository
 import dev.byjtech.erp.core.domain.repository.SuperAdminRepository
 import dev.byjtech.erp.core.domain.repository.UserRepository
 import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.config.logger
 import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.domain.repository.ModuleRepository
 import dev.byjtech.erp.core.domain.repository.RoleRepository
@@ -15,6 +16,7 @@ import dev.byjtech.erp.core.session.AppSession
 import dev.byjtech.erp.shared.contracts.core.auth.MissingPermissionsException
 import dev.byjtech.erp.shared.contracts.core.auth.MissingSuperAdminException
 import dev.byjtech.erp.shared.contracts.core.auth.ModuleAccessException
+import io.ktor.server.application.ApplicationCall
 
 //este se podria crear como un wrapper de la clase AuthService, destiando a solo servir el service interno a los demas
 
@@ -29,7 +31,7 @@ class AuthServiceContractImpl(
     private val subscriptionRepo: SubscriptionRepository
 ): AuthServiceContract {
     override fun validateSessionAndAuthorize(
-        authHeader: String?,
+        call: ApplicationCall,
         module: String,
         requiredAnyPermissions: Set<PermissionKey>?,
         requiredSuperAdmin: Boolean
@@ -43,8 +45,9 @@ class AuthServiceContractImpl(
 //            //POR AHORA LO DEJA PASAR
 //            //esto aria qeu no necesite permisos, cosa de solo recuperar la session
 //        }
-
+        val authHeader = call.request.headers["Authentication"]
         val token = authHeader?.removePrefix("Bearer ")?.trim()
+        logger.debug("Token: {}", token)
         val appSession = token?.let { AppSession.fromEncoded(it) }
         if(appSession == null){
             throw IllegalStateException("AppSession is null")
@@ -55,7 +58,7 @@ class AuthServiceContractImpl(
             throw SessionNotFoundException(appSession.sessionId.toString())
         }
 
-        val user = userRepo.find(session.user.id)
+        val user = userRepo.find(session.userId)
         if(user == null){
             throw IllegalStateException("User is null")
         }
@@ -82,9 +85,11 @@ class AuthServiceContractImpl(
 
             //2. chequear si el usuario tiene los permisos requeridos
             val userRoles = roleRepo.findByUserId(user.id)
-            val userPermissions: Set<Permission> = userRoles
+            var userPermissions: Set<Permission> = userRoles
                 .flatMap { role -> roleRepo.getPermissionsByRoleId(role.id) }
                 .toSet()
+            val userSpecialPermissions = userRepo.getSpecialPermissionsByUserId(user.id)?: emptySet()
+            userPermissions = userPermissions + userSpecialPermissions
             val requiredPermissions: Set<Permission> = moduleRepo.findPermissionsByPermissionKeySet(requiredAnyPermissions)
             val pass: Boolean = userPermissions.any { it in requiredPermissions }
 

@@ -28,5 +28,6 @@ val CoreModule = module {
             )
         )
     }
+    //aqui poner todos los "feature" del core (users, role, company, etc...)
 
 }

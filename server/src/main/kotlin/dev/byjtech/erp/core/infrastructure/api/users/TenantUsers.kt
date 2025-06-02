@@ -13,7 +13,7 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository) {
     get("/me") {
 
         val session = authServ.authorizeOrThrow(
-            call.request.headers["Authorization"],
+            call,
             requiredAnyPermissions = setOf(
                 CoreDefinition.Users.View.key,
                 CoreDefinition.Users.Update.key,

@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 object UserRoleTable : IntIdTable("user_role") {
     val userId = reference("user_id", UsersTable)
     val roleId = reference("role_id", RolesTable)
-    val createdAt = datetime("created_at")
+    val createdAt = datetime("created_at").nullable()
 
     init {
         // no se repita la combinación de usuario y rol

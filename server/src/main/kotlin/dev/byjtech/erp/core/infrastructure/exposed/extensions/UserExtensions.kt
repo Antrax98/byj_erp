@@ -1,5 +1,6 @@
 package dev.byjtech.erp.core.infrastructure.exposed.extensions
 
+import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.domain.model.User
 import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.infrastructure.exposed.entities.CompanyEntity
@@ -22,7 +23,7 @@ fun UserEntity.toDTO(): UserDTO {
     )
 }
 
-fun UserEntity.toModel(rolesSet: Set<RoleEntity>? = null): User {
+fun UserEntity.toModel(rolesSet: Set<RoleEntity>? = null, specialSet: Set<Permission>? = null): User {
     val roles = rolesSet?.map { it.toModel() }?.toSet()
     return User(
         id = this.id.value,
@@ -34,7 +35,8 @@ fun UserEntity.toModel(rolesSet: Set<RoleEntity>? = null): User {
         createdAt = this.createdAt?.toKotlinx(),
         updatedAt = this.updatedAt?.toKotlinx(),
         companyId = this.company?.id?.value,
-        roles = roles?:emptySet()
+        roles = roles?:emptySet(),
+        specialPermissions = specialSet?:emptySet()
     )
 }
 

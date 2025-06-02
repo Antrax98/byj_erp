@@ -64,6 +64,9 @@ fun Application.module() {
     databaseInitializer.multiCreate(moduleInitializers)
     databaseInitializer.registerModuleDefinitions(moduleInitializers)
     println("Database initialized")
+    println("Initializing first data...")
+    databaseInitializer.firstDataInitialization()
+    println("First data initialized")
 
     //databaseInitializer.nuke() //borra las tablas.. no sirbe para nada, hacerlo manualmente mejor por ahora
 

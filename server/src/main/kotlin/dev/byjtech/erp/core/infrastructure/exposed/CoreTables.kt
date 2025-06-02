@@ -15,6 +15,7 @@ object CoreTables {
         RolePermissionTable,
         UserRoleTable,
         SessionsTable,
-        SuperAdminsTable
+        SuperAdminsTable,
+        UserPermissionTable
     )
 }

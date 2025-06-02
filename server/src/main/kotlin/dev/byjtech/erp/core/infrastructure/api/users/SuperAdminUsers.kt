@@ -14,7 +14,7 @@ fun Route.superAdminUsers(authServ: CoreAuthWrapper) {
     //route("/get")
     //NO COMENSAR UN GET CON / O SE ROMPE LA RUTA
     get ("{id}"){
-        val session = authServ.authorizeOrThrow(call.request.headers["Authorization"], requiredSuperAdmin = true)
+        val session = authServ.authorizeOrThrow(call, requiredSuperAdmin = true)
         val id = call.request.queryParameters["id"]
         //var user: UserEntity? = null
         if (id == null) {

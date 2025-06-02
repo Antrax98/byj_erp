@@ -2,6 +2,7 @@ package dev.byjtech.erp.shared.contracts.core.auth
 
 //este class esta en el shared del proyecto completo, no en la carpeta core real
 import dev.byjtech.erp.common.PermissionKey
+import io.ktor.server.application.ApplicationCall
 
 
 //enviarlo a otro archivo compartido de ser necesario? (para juntar todos los dto y clases compartidas)
@@ -19,7 +20,7 @@ data class ValidatedSessionInfo(
 interface AuthServiceContract {
 
     fun validateSessionAndAuthorize(
-        authHeader: String?, //se obtiene del call y esta funcion valida que el token siquiera exista
+        call: ApplicationCall, //se obtiene del call y esta funcion valida que el token siquiera exista
         module: String, // obtenerlo de su propio class de inicialisacion (en el shared)
         requiredAnyPermissions: Set<PermissionKey>? = null, //asegurarse de no usar permissions de otros modulos (a excepcion de los de core)
         requiredSuperAdmin: Boolean = false

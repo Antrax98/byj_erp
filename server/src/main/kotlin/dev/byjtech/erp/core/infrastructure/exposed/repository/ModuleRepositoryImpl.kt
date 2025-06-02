@@ -103,4 +103,18 @@ class ModuleRepositoryImpl: ModuleRepository {
         }
     }
 
+    override fun getPermissionKeysByPermissionIdSet(permissionIdSet: Set<Int>): Set<PermissionKey> {
+        return transaction {
+            val permissions = PermissionEntity.find { PermissionsTable.id inList permissionIdSet }.toSet()
+            val permissionKeys = permissions.map { perm ->
+                PermissionKey(
+                    module = perm.category.module.name,
+                    category = perm.category.name,
+                    action = perm.name
+                )
+            }.toSet()
+            return@transaction permissionKeys
+        }
+    }
+
 }

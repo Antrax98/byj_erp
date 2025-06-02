@@ -2,14 +2,22 @@ package dev.byjtech.erp.shared.infrastructure.database
 
 import dev.byjtech.erp.config.ModuleInitializer
 import dev.byjtech.erp.core.infrastructure.exposed.entities.CategoryEntity
+import dev.byjtech.erp.core.infrastructure.exposed.entities.CompanyEntity
 import dev.byjtech.erp.core.infrastructure.exposed.entities.ModuleEntity
 import dev.byjtech.erp.core.infrastructure.exposed.entities.PermissionEntity
+import dev.byjtech.erp.core.infrastructure.exposed.entities.RoleEntity
+import dev.byjtech.erp.core.infrastructure.exposed.entities.RolePermissionEntity
+import dev.byjtech.erp.core.infrastructure.exposed.entities.SubscriptionEntity
+import dev.byjtech.erp.core.infrastructure.exposed.entities.UserEntity
+import dev.byjtech.erp.core.infrastructure.exposed.entities.UserRoleEntity
 import dev.byjtech.erp.core.infrastructure.exposed.tables.ModulesTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.transactions.transaction
 import dev.byjtech.erp.core.infrastructure.exposed.tables.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 
 class DatabaseInitializer (private val database: Database) {
 
@@ -62,7 +70,7 @@ class DatabaseInitializer (private val database: Database) {
                     iterator.remove()
                     println("Tablas creadas del módulo: ${module.definition.name}")
                 } catch (e: Exception) {
-                    println("⚠Error al crear tablas de ${module.definition.name} en ronda $round: ${e.message}")
+                    println("Error al crear tablas de ${module.definition.name} en ronda $round: ${e.message}")
                     // sigue con el siguiente
                 }
             }
@@ -108,13 +116,13 @@ class DatabaseInitializer (private val database: Database) {
                             module = newModule
                         }
                         println("Category ${categoryAct.name} created")
-                        categoryAct.permissions.forEach { permission ->
-                            PermissionEntity.new {
-                                name = permission.action
-                                description = permission.description
-                                category = newCat
-                            }
-                        }
+//                        categoryAct.permissions.forEach { permission ->
+//                            PermissionEntity.new {
+//                                name = permission.action
+//                                description = permission.description
+//                                category = newCat
+//                            }
+//                        }
                         val permissions = categoryAct.permissions
                         permissions.forEach { permission ->
                             PermissionEntity.new {
@@ -131,6 +139,67 @@ class DatabaseInitializer (private val database: Database) {
                 }
 
             }
+        }
+    }
+
+    //esto esta hecho para que solo cree una compañia, si ya existe al menos una no hace nada
+    fun firstDataInitialization(){
+        transaction(database) {
+            val exist = CompanyEntity.all().firstOrNull()
+            if (exist != null) {
+                return@transaction
+            }
+            //compañia
+            val newcompany = CompanyEntity.new {
+                name = "Byjtech"
+                contactEmail = "test@byjtech.com"
+            }
+
+            //usuarios
+            val newUser1 = UserEntity.new {
+                email = "kazapox@gmail.com"
+                company = newcompany
+            }
+            val newUser2 = UserEntity.new {
+                email = "s.sanhuezasalas@gmail.com"
+                company = newcompany
+            }
+
+            //roles
+            //cada vez que se crea una compañia se crea un rol admin (y se añade un user al que se le asigna)
+            //hacer que la palabra admin sea un nombre reservado para que no se puedan crear mas roles admin (o modificarlo?)
+            val adminRole = RoleEntity.new {
+                name = "admin"
+                description = "admin role"
+                company = newcompany
+            }
+
+            //asignar permisos a roles
+            //todos los modulos deverian tener una categoria admin con un permiso "all", para entrar a tod.o lo relacionado con el modulo
+            //el codigo siguiente se asegura de darle el permiso all al rol admin del core especificamente
+            //al momento de subscribir modulos a las compañias, se le asignara el permiso all al rol admin del modulo, (manualmente o automatico)
+            val coreModule = ModuleEntity.find(ModulesTable.name eq "core").firstOrNull()
+            val adminPermission = PermissionEntity.find((PermissionsTable.name eq "all")and (PermissionsTable.categoryId eq CategoryEntity.find((CategoriesTable.name eq "admin")and (CategoriesTable.moduleId eq coreModule?.id?.value)).firstOrNull()?.id?.value)).firstOrNull()
+                ?: throw Exception("No se encontro el permiso all para admin en modulo core")
+            RolePermissionEntity.new {
+                role = adminRole
+                permission = adminPermission
+            }
+
+            //asignar role
+            UserRoleEntity.new {
+                user = newUser1
+                role = adminRole
+            }
+
+            //crear subscripcion a core
+            SubscriptionEntity.new {
+                company = newcompany
+                module = ModuleEntity.find(ModulesTable.name eq "core").firstOrNull()
+                    ?: throw Exception("No se encontro el modulo core")
+            }
+
+
         }
     }
 

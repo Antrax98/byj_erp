@@ -99,5 +99,3 @@ object CoreDefinition : ModuleDefinition {
 
     override val categories = setOf(Users, Admin)
 }
-
-val aux = CoreDefinition.Users.Create.key.toString()
