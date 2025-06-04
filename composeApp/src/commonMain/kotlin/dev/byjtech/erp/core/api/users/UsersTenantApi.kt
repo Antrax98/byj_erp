@@ -7,7 +7,7 @@ import dev.byjtech.erp.core.dto.UserDTO
 interface UsersTenantApi {
 
     @GET("api/core/users/tenant/me")
-    suspend fun getUserById(): UserDTO
+    suspend fun getaActualUser(): UserDTO
 
 
 }

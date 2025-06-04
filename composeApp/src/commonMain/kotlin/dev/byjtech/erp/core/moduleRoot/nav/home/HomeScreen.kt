@@ -20,10 +20,12 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
-import dev.byjtech.erp.common.ModuleRootComponent
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.CoreAdminRootComponent
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.CoreAdminRootScreen
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList.ModuleListComponent
+import dev.byjtech.erp.common.ComponentConfig
+import dev.byjtech.erp.common.FeatureComponent
+import dev.byjtech.erp.common.old.OldModuleRootComponent
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.featuresList.FeatureListComponent
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.featuresList.FeatureListScreen
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList.OldModuleListComponent
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList.ModuleListScreen
 import kotlinx.coroutines.launch
 
@@ -92,15 +94,11 @@ fun HomeScreen(component: HomeComponent) {
             animation = stackAnimation(slide())
         ) { entry ->
             when (val config = entry.configuration) {
-                "home" -> ModuleListScreen(entry.instance as ModuleListComponent)
+                ComponentConfig("core", "home") -> FeatureListScreen(entry.instance as FeatureListComponent)
                 else -> {
-                    val moduleEntry = component.entriesByName[config]
-                    val componente = entry.instance as? ModuleRootComponent
-                    if (moduleEntry != null && componente != null) {
-                        moduleEntry.renderScreen(componente)
-                    } else {
-                        Text("Unknown module: $config")
-                    }
+                    val screenMap = component.screenMap
+                    val screen = screenMap[config.module]?.get(config.feature)
+                    screen?.invoke(entry.instance)
                 }
             }
         }

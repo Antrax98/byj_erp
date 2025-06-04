@@ -1,22 +1,19 @@
 package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.childContext
 import com.arkivanov.decompose.router.stack.StackNavigation
-import dev.byjtech.erp.common.ModuleRootComponent
 import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.core.api.CoreClient
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList.ModuleListComponentImpl
 import kotlinx.coroutines.flow.*
 
-class CoreAdminRootComponentImpl(
+class CoreAdminRootComponentImplOld(
     componentContext: ComponentContext,
     override val userPermissions: StateFlow<Set<PermissionKey>>, //los permisos actuales del usuario
     override val apiClient: ApiClient,
     override val toHome: () -> Unit,
     private val coreClient: CoreClient
-): CoreAdminRootComponent, ComponentContext by componentContext {
+): CoreAdminRootComponentOld, ComponentContext by componentContext {
 
     override val moduleName: String
         get() = "core"

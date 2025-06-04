@@ -9,11 +9,15 @@ import com.arkivanov.decompose.router.stack.replaceCurrent
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.lifecycle.subscribe
+import dev.byjtech.erp.common.ComponentConfig
+import dev.byjtech.erp.common.FeatureComponent
 import dev.byjtech.erp.common.ModuleManager
-import dev.byjtech.erp.common.ModuleRootComponent
+import dev.byjtech.erp.common.old.OldModuleManager
+import dev.byjtech.erp.common.old.OldModuleRootComponent
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.common.session.SessionManager
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList.ModuleListComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.featuresList.FeatureListComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList.OldModuleListComponentImpl
 import kotlinx.coroutines.flow.*
 
 class HomeComponentImpl(
@@ -57,52 +61,100 @@ class HomeComponentImpl(
         }
     }
 
-    //NAVEGACION!!!!
-    override val entriesByName = moduleManager.entriesByName()
-    private val navigation = StackNavigation<String>()
+    //NAVEGACION!!!! OLD
+//    override val entriesByName = oldModuleManager.entriesByName()
+//    private val navigation = StackNavigation<String>()
+//
+//    private fun childFactory(config: String, componentContext: ComponentContext): OldModuleRootComponent {
+//        return when (config) {
+//            "home" -> OldModuleListComponentImpl(
+//                componentContext.childContext("home_moduleList"),
+//                sessionManager.userPermissions,
+//                api,
+//                toHome = ::toHome,
+//                navTo = ::navigateTo,
+//                modulesMetadata = oldModuleManager.metadataMap()
+//            )
+//            else -> {
+//                val factory = entriesByName[config]?.factory
+//                    ?: throw IllegalArgumentException("Invalid config: $config")
+//
+//                factory.create(componentContext.childContext(config), sessionManager.userPermissions, api, ::toHome)
+//            }
+//        }
+//    }
+//
+//
+//    private val stack = childStack(
+//        source = navigation,
+//        serializer = null,
+//        initialStack = { listOf("home") },
+//        handleBackButton = true,
+//        childFactory = ::childFactory
+//    )
+//
+//    override val oldChildStack: Value<ChildStack<*, OldModuleRootComponent>> = stack
+//
+//    //solo usable por el ModuleList
+//    private fun navigateTo(target: String) {
+//        val current = childStack.value.active.configuration
+//        if (current != target) {
+//            navigation.replaceCurrent(target)
+//        }
+//    }
+//    private fun toHome() {
+//        navigation.replaceCurrent("home")
+//    }
 
-    private fun childFactory(config: String, componentContext: ComponentContext): ModuleRootComponent {
+    //NAVEGACION NEW
+
+    private val navigation = StackNavigation<ComponentConfig>()
+
+    //child factory
+    private val childMap = moduleManager.featureFactoryMap(sessionManager.userPermissions.value, sessionManager.allowedModules.value)
+    fun childFactory(config: ComponentConfig, componentContext: ComponentContext): FeatureComponent {
         return when (config) {
-            "home" -> ModuleListComponentImpl(
-                componentContext.childContext("home_moduleList"),
-                sessionManager.userPermissions,
-                api,
+            ComponentConfig("core", "home") -> FeatureListComponentImpl(
+                componentContext.childContext("home_featureList"),
+                userPermissions = sessionManager.userPermissions,
+                apiClient = api,
                 toHome = ::toHome,
                 navTo = ::navigateTo,
-                modulesMetadata = moduleManager.metadataMap()
+                buttonsMap = moduleManager.buttonMap(sessionManager.userPermissions.value, sessionManager.allowedModules.value)
             )
-            else -> {
-                val factory = entriesByName[config]?.factory
-                    ?: throw IllegalArgumentException("Invalid config: $config")
+            //aqui poner mas featreComponents indispensables
 
-                factory.create(componentContext.childContext(config), sessionManager.userPermissions, api, ::toHome)
+            else -> {
+                val factory = childMap[config.module]?.get(config.feature)
+                    ?: throw IllegalArgumentException("Invalid config: $config")
+                factory.create(componentContext.childContext(config.toString()), sessionManager.userPermissions, api, ::toHome)
             }
         }
     }
 
-
     private val stack = childStack(
         source = navigation,
-        serializer = null,
-        initialStack = { listOf("home") },
+        serializer = ComponentConfig.serializer(),
+        initialStack = { listOf(ComponentConfig("core", "home")) },
         handleBackButton = true,
         childFactory = ::childFactory
     )
 
-    override val childStack: Value<ChildStack<*, ModuleRootComponent>> = stack
+    override val childStack: Value<ChildStack<ComponentConfig, FeatureComponent>> = stack
 
-    //solo usable por el ModuleList
-    private fun navigateTo(target: String) {
+    private fun navigateTo(target: ComponentConfig) {
         val current = childStack.value.active.configuration
         if (current != target) {
             navigation.replaceCurrent(target)
         }
     }
     private fun toHome() {
-        navigation.replaceCurrent("home")
+        println("navegando a home (featureList)")
+        navigation.replaceCurrent(ComponentConfig("core", "home"))
     }
 
-
+//    override val screenMap = moduleManager.screenMap(sessionManager.userPermissions.value, sessionManager.allowedModules.value)
+    override val screenMap = moduleManager.screenMap()
 
     /*
     manejando el back button
@@ -122,11 +174,13 @@ class HomeComponentImpl(
     pero si este ya no puede hacer pop (solo le queda un child en el stack),
     entonses le delega el evento al parent, en este caso Home (this)
      */
+
+    //descomentar al terminar la navegacion de este componente
     private val backCallback = BackCallback(
         onBack = {
-            if (childStack.value.active.configuration != "home") {
+            if (childStack.value.active.configuration != ComponentConfig("core", "home")) {
                 println("Back button pressed")
-                navigation.replaceCurrent("home")
+                navigation.replaceCurrent(ComponentConfig("core", "home"))
                 //se consumio el evento???
             } else {
                 println("flujo normal???")
@@ -143,5 +197,7 @@ class HomeComponentImpl(
                 backHandler.unregister(backCallback)
             }
         )
+
+
     }
 }

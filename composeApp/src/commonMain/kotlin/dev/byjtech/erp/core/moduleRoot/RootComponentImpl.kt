@@ -4,7 +4,9 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
 import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.Value
+import dev.byjtech.erp.common.ModuleEntry
 import dev.byjtech.erp.common.ModuleManager
+import dev.byjtech.erp.common.old.OldModuleManager
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.common.session.SessionManager
 import dev.byjtech.erp.common.session.SessionNavigationTarget
@@ -52,11 +54,12 @@ class RootComponentImpl(
     }
 
     private val koin = getKoin()
-    private val moduleManager = koin.get<ModuleManager>()
+    //private val oldModuleManager = koin.get<OldModuleManager>()
+    private val moduleEntrySet = koin.getAll<ModuleEntry>().toSet()
 
     //TODO, en vez de hacer estas funciones, se les puede entrega su contenido directamente al fun child
     private fun homeComponent(componentContext: ComponentContext): HomeComponent =
-        HomeComponentImpl(componentContext, sessionManager, apiClient, moduleManager = moduleManager)
+        HomeComponentImpl(componentContext, sessionManager, apiClient, moduleManager = ModuleManager(moduleEntrySet))
     private fun loginComponent(componentContext: ComponentContext): LoginComponent =
         LoginComponentImpl(componentContext, sessionManager)
     private fun splashComponent(componentContext: ComponentContext): SplashComponent =

@@ -1,58 +1,36 @@
-package dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList
+package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.featuresList
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.byjtech.erp.common.ComponentConfig
 
 @Composable
-fun ModuleListScreen(component: OldModuleListComponent) {
-    Column (
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+fun FeatureListScreen (component: FeatureListComponent) {
+    val state by component.state.collectAsState()
+
+    Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        Text("Lista Modulos ERP")
-//        Button(onClick = { component.navTo("core")}){
-//            Text("to Core")
-//        }
-
-        //ModuleGrid(modules = component.modulesMetadata, onClick = {component.navTo})
-
-        val modulePairList = component.modulesMetadata.toList()
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 120.dp), // Se adapta a la pantalla
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            //modifier = Modifier.fillMaxSize()
-        ) {
-            items(modulePairList) { (name, metadata) ->
-                Button(onClick = { component.navTo(name) }){
-                    Text(name)
-
-                }
-            }
-
-        }
-
+    ) {
         val dummyNames = listOf(
-            "Core", "Boletas", "HR",
+            "users", "roles", "company",
             "Botón 4", "Botón 5", "Botón 6"
         )
+
+        Text("Lista de Features")
 
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 120.dp),
@@ -71,5 +49,29 @@ fun ModuleListScreen(component: OldModuleListComponent) {
             }
         }
 
+        val flattenedButtons = component.buttonsMap.flatMap { (moduleName, featuresMap) ->
+            featuresMap.map { (featureName, buttonMetadata) ->
+                Triple(moduleName, featureName, buttonMetadata)
+            }
+        }
+
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 120.dp),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(flattenedButtons) { (moduleName, featureName, buttonMetadata) ->
+                Button(
+                    onClick = {
+                        val config = ComponentConfig(moduleName, featureName)
+                        component.navTo(config)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(buttonMetadata.displayName)
+                }
+            }
+        }
     }
 }

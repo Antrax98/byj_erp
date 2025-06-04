@@ -1,11 +1,12 @@
-package dev.byjtech.erp.common
+package dev.byjtech.erp.common.old
 
+import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
 import kotlinx.coroutines.flow.StateFlow
 
 
 //solo usar en los root de cada modulo
-interface ModuleRootComponent {
+interface OldModuleRootComponent {
     val userPermissions: StateFlow<Set<PermissionKey>>
     val apiClient: ApiClient
     val moduleName: String //usar EXACTAMENTE el mismo nombre del modulo en la base de datos

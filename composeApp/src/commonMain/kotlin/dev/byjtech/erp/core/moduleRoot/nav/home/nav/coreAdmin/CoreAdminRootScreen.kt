@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @Composable
-fun CoreAdminRootScreen(component: CoreAdminRootComponent) {
+fun CoreAdminRootScreen(component: CoreAdminRootComponentOld) {
     val state by component.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     Column (
