@@ -2,8 +2,8 @@ package dev.byjtech.erp.core.infrastructure.api.auth
 
 import com.github.benmanes.caffeine.cache.Cache
 import dev.byjtech.erp.config.fetchGoogleUserInfo
+import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.application.service.UserService
-import dev.byjtech.erp.core.auth.authenticateAndAuthorize
 import dev.byjtech.erp.core.database.superAdmins.SuperAdminDataSource.Companion.isSuperAdmin
 import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource.Companion.findUserIdBySessionId
 import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource as USDS
@@ -19,9 +19,11 @@ import dev.byjtech.erp.core.domain.repository.UserRepository
 import dev.byjtech.erp.core.infrastructure.auth.CoreAuthWrapper
 import dev.byjtech.erp.core.infrastructure.exposed.extensions.toDTO
 import dev.byjtech.erp.core.response.AccessibleModulesResponse
+import dev.byjtech.erp.core.response.PermissionKeysResponse
 import dev.byjtech.erp.core.response.PermittedModulesResponse
 import dev.byjtech.erp.core.response.SubscribedModulesResponse
 import dev.byjtech.erp.core.response.UserPermissionsResponse
+import dev.byjtech.erp.core.response.UserRolesResponse
 import dev.byjtech.erp.core.session.AppSession
 import java.time.LocalDateTime
 import io.ktor.client.HttpClient
@@ -42,14 +44,8 @@ import java.util.Base64
 
 val logger: Logger = LoggerFactory.getLogger("AuthCallbackLogger")
 
-//data class UserPrincipal(
-//    val userId: Int,
-//    val name: String,
-//    val email: String,
-//    val picture: String?
-//)
 
-//TODO: actualizarlo completamente de forma que solo use services y talvez repositories, no entities directamente
+
 
 fun Route.googleAuthRoutes(
     httpClient: HttpClient,
@@ -63,6 +59,49 @@ fun Route.googleAuthRoutes(
     moduleRepo: ModuleRepository,
     auth: CoreAuthWrapper
 ) {
+
+    //todo lo que ver con roles y user sacarlo de aqui a su propios rutes
+    get("/userRoles/{userId}"){
+        auth.authorizeOrThrow(call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Users.View.key,
+                CoreDefinition.Admin.All.key
+            )
+        )
+        val userId = call.parameters["userId"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+        val user = userRepo.find(userId)
+        if (user == null) {
+            call.respond(HttpStatusCode.NotFound, null)
+            return@get
+        } else {
+            val userRoles = roleRepo.findByUserId(userId)
+            val rolesDTO = userRoles.map { it.toDTO() }
+            call.respond(UserRolesResponse(roles = rolesDTO))
+        }
+
+    }
+
+    get("/userSpecialPermissions/{userId}"){
+        auth.authorizeOrThrow(call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Users.View.key,
+                CoreDefinition.Admin.All.key
+            )
+        )
+        val userId = call.parameters["userId"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+        val user = userRepo.find(userId)
+        if (user == null) {
+            call.respond(HttpStatusCode.NotFound, "User not found")
+        } else {
+            val userSpecialPermissions = userRepo.getSpecialPermissionsByUserId(userId)
+            val nonnullUserSpecialPermissions = userSpecialPermissions?.map {it.id}?.toSet()?: emptySet()
+            val listofPermissionKeys = moduleRepo.getPermissionKeysByPermissionIdSet(nonnullUserSpecialPermissions)
+            call.respond(PermissionKeysResponse(listofPermissionKeys.toList()))
+        }
+
+    }
+
+    //todo asta aqui
     get("/test") {
         val session = auth.authorizeOrThrow(call)
         println("Request Info:")

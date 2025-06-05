@@ -1,0 +1,19 @@
+package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.usersMain.nav.userPage
+
+import dev.byjtech.erp.common.PermissionAwareComponent
+import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.core.dto.RoleDTO
+import dev.byjtech.erp.core.dto.UserDTO
+import kotlinx.coroutines.flow.StateFlow
+
+interface UserPageComponent: PermissionAwareComponent {
+    val userId: Int
+    val apiClient: ApiClient
+    val userInfo: StateFlow<UserDTO?>
+    val userSpecialPermissions: StateFlow<List<PermissionKey>?>
+    val userRoles: StateFlow<List<RoleDTO>?>
+    suspend fun fetchUserSpecialPermissions()
+    suspend fun fetchUserRoles()
+    suspend fun fetchUser()
+}

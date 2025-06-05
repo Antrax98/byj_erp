@@ -3,9 +3,11 @@ package dev.byjtech.erp.core.api
 import de.jensklingenberg.ktorfit.http.*
 import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.response.AccessibleModulesResponse
+import dev.byjtech.erp.core.response.PermissionKeysResponse
 import dev.byjtech.erp.core.response.PermittedModulesResponse
 import dev.byjtech.erp.core.response.SubscribedModulesResponse
 import dev.byjtech.erp.core.response.UserPermissionsResponse
+import dev.byjtech.erp.core.response.UserRolesResponse
 
 interface CoreAuth {
     @GET("/auth/test")
@@ -37,5 +39,10 @@ interface CoreAuth {
     @GET("/auth/user-permissions")
     suspend fun userPermissions(): UserPermissionsResponse
 
+    //borrar despues
+    @GET("/auth/userRoles/{userId}")
+    suspend fun userRoles(@Path("userId") userId: Int): UserRolesResponse
 
+    @GET("/auth/userSpecialPermissions/{userId}")
+    suspend fun getSpecialPermissionsByUserId(@Path("userId") userId: Int): PermissionKeysResponse
 }

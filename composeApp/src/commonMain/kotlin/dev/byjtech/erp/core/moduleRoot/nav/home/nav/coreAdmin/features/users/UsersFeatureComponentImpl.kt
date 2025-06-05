@@ -12,6 +12,8 @@ import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.core.moduleRoot.nav.home.HomeComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.usersMain.UsersMainComponent
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.usersMain.UsersMainComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.usersMain.nav.userPage.UserPageComponent
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.usersMain.nav.userPage.UserPageComponentImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
@@ -28,7 +30,12 @@ class UsersFeatureComponentImpl(
     override val state: StateFlow<UsersFeatureState> = _state
 
     override fun onBack(): Boolean {
-        return false
+        if(childStack.active.configuration==Config.UsersMain){
+            return false
+        } else{
+            navigation.pop()
+            return true
+        }
     }
 
     //navegacion
@@ -36,6 +43,8 @@ class UsersFeatureComponentImpl(
     sealed class Config {
         @Serializable
         data object UsersMain : Config()
+        @Serializable
+        data class UserPage(val userId: Int) : Config()
     }
 
     private val navigation = StackNavigation<Config>()
@@ -52,12 +61,20 @@ class UsersFeatureComponentImpl(
     override val childStack: Value<ChildStack<*, UsersFeatureComponent.Child>> = stack
 
     private fun usersMainComponent(componentContext: ComponentContext): UsersMainComponent =
-        UsersMainComponentImpl(componentContext, userPermissions, apiClient)
+        UsersMainComponentImpl(componentContext, userPermissions, apiClient, ::navigateTo)
+
+    private fun userPageComponent(componentContext: ComponentContext, userId: Int): UserPageComponent =
+        UserPageComponentImpl(componentContext, userPermissions, userId, apiClient)
 
     private fun childFactory(config: Config, componentContext: ComponentContext): UsersFeatureComponent.Child {
         return when (config) {
             is Config.UsersMain -> UsersFeatureComponent.Child.UsersMain(usersMainComponent(componentContext.childContext("usersMain")))
-
+            is Config.UserPage -> UsersFeatureComponent.Child.UserPage(
+                userPageComponent(
+                    componentContext.childContext("userPage"),
+                    userId = config.userId
+                )
+            )
         }
 
     }

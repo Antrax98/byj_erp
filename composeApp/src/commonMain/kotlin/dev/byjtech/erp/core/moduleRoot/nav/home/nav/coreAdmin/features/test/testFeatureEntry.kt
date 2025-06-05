@@ -1,5 +1,8 @@
 package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.test
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.ui.graphics.Color
 import dev.byjtech.erp.common.ButtonMetadata
 import dev.byjtech.erp.common.ComponentConfig
 import dev.byjtech.erp.common.FeatureEntry
@@ -25,8 +28,8 @@ val testFeatureEntry: FeatureEntry = FeatureEntry(
     screen = { component -> TestFeatureScreen(component as TestFeatureComponent) },
     buttonMetadata = ButtonMetadata(
         displayName = "Test",
-        color = "#32a852",
-        icon = "#32a852",
+        color = Color(0xFFB2E5BF),
+        icon = Icons.Filled.Bolt,
         config = ComponentConfig(
             module = CoreDefinition.name,
             feature = "test"

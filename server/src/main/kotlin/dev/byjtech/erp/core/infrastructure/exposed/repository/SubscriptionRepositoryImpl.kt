@@ -10,6 +10,7 @@ import dev.byjtech.erp.core.infrastructure.exposed.entities.SubscriptionEntity
 import dev.byjtech.erp.core.infrastructure.exposed.extensions.toModel
 import dev.byjtech.erp.core.infrastructure.exposed.tables.SubscriptionsTable
 import dev.byjtech.erp.utils.datetime.toJava
+import dev.byjtech.erp.utils.datetime.toKotlinx
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class SubscriptionRepositoryImpl: SubscriptionRepository {
@@ -76,18 +77,34 @@ class SubscriptionRepositoryImpl: SubscriptionRepository {
 
     override fun findByCompanyId(companyId: Int): Set<Subscription> {
         return transaction {
-            val subscriptions = SubscriptionEntity.find {SubscriptionsTable.companyId eq companyId}
-            return@transaction subscriptions.map { it.toModel() }.toSet()
+            SubscriptionEntity
+                .find { SubscriptionsTable.companyId eq companyId }
+                .map { entity ->
+                    val company = entity.company.toModel()
+                    val module = entity.module.toModel()
+                    val billing = entity.billing?.toModel()
+
+                    Subscription(
+                        id = entity.id.value,
+                        company = company,
+                        module = module,
+                        isActive = entity.isActive,
+                        isAccessible = entity.isAccessible,
+                        createdAt = entity.createdAt?.toKotlinx(),
+                        updatedAt = entity.updatedAt?.toKotlinx(),
+                        billing = billing
+                    )
+                }
+                .toSet()
         }
     }
 
     override fun findByCompanyIdAndModule(companyId: Int, module: String): Subscription? {
-        val subscription = transaction {
-            val subscriptions = SubscriptionEntity.find {SubscriptionsTable.companyId eq companyId}
-            val subscription = subscriptions.find {it.module.name == module}
-            return@transaction subscription
+        return transaction {
+            val subscriptions = SubscriptionEntity.find { SubscriptionsTable.companyId eq companyId }
+            val subscription = subscriptions.find { it.module.name == module }
+            subscription?.toModel()
         }
-        return subscription?.toModel()
     }
 
     override fun findByModuleId(moduleId: Int): Set<Subscription> {

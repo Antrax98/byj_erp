@@ -1,5 +1,9 @@
 package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person2
+import androidx.compose.material.icons.filled.Person4
+import androidx.compose.ui.graphics.Color
 import dev.byjtech.erp.common.ButtonMetadata
 import dev.byjtech.erp.common.ComponentConfig
 import dev.byjtech.erp.common.FeatureEntry
@@ -22,8 +26,8 @@ val UsersFeatureEntry: FeatureEntry = FeatureEntry(
     screen = { component -> UsersFeatureScreen(component as UsersFeatureComponent) },
     buttonMetadata = ButtonMetadata(
         displayName = "Users",
-        color = "#32a852",
-        icon = "#32a852",
+        color = Color(0xFFF4B3B3),
+        icon = Icons.Filled.Person2,
         config = ComponentConfig(
             module = CoreDefinition.name,
             feature = "users"

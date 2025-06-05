@@ -28,3 +28,16 @@ fun RoleEntity.toModel(permissionsSet: Set<PermissionEntity>? = null): Role {
         permissions = permissions?.toMutableSet()
     )
 }
+
+//company es 0 hasta que se me ocurra como lo voy a manejar
+fun Role.toDTO(): RoleDTO {
+    return RoleDTO(
+        id = this.id,
+        name = this.name,
+        description = this.description,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
+        companyId = 0
+    )
+
+}
