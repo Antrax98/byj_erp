@@ -1,6 +1,7 @@
 package dev.byjtech.erp.core.api
 
 import de.jensklingenberg.ktorfit.http.*
+import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.response.AccessibleModulesResponse
 import dev.byjtech.erp.core.response.PermittedModulesResponse
 import dev.byjtech.erp.core.response.SubscribedModulesResponse
@@ -18,6 +19,9 @@ interface CoreAuth {
 
     @GET("/auth/me/type")
     suspend fun getMyType(): String
+
+    @GET("/auth/me")
+    suspend fun getMe(): UserDTO
 
 
     //podria cambiar estas funciones a que fueran rutas de Subscriptions o Modules??

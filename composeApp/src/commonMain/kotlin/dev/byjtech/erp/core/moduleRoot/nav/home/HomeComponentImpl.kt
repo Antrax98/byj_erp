@@ -16,9 +16,11 @@ import dev.byjtech.erp.common.old.OldModuleManager
 import dev.byjtech.erp.common.old.OldModuleRootComponent
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.common.session.SessionManager
+import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.featuresList.FeatureListComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList.OldModuleListComponentImpl
 import kotlinx.coroutines.flow.*
+import kotlin.system.exitProcess
 
 class HomeComponentImpl(
     componentContext: ComponentContext,
@@ -41,6 +43,8 @@ class HomeComponentImpl(
     private val _state = MutableStateFlow(HomeState())
     override val state: StateFlow<HomeState> = _state.asStateFlow()
 
+    override val actualUser: StateFlow<UserDTO?> = sessionManager.actualUser
+
     override suspend fun onLogout() {
         _state.update { it.copy(isLoading = true) }
         try {
@@ -60,6 +64,8 @@ class HomeComponentImpl(
             _state.update { it.copy(isLoading = false, error = e.message) }
         }
     }
+
+
 
     //NAVEGACION!!!! OLD
 //    override val entriesByName = oldModuleManager.entriesByName()
@@ -145,12 +151,27 @@ class HomeComponentImpl(
     private fun navigateTo(target: ComponentConfig) {
         val current = childStack.value.active.configuration
         if (current != target) {
+            _state.update { it.copy(isOnListPage = false) }
             navigation.replaceCurrent(target)
         }
     }
     private fun toHome() {
         println("navegando a home (featureList)")
+        _state.update { it.copy(isOnListPage = true) }
         navigation.replaceCurrent(ComponentConfig("core", "home"))
+    }
+
+    override fun onBack() {
+        val current = childStack.value.active
+        if (current.configuration != ComponentConfig("core", "home")) {
+            if(!current.instance.onBack()){
+                println("navegando a home (featureList)")
+                toHome()
+            }
+        } else {
+            //exitProcess(0)
+            println("se intenta salir de la app")
+        }
     }
 
 //    override val screenMap = moduleManager.screenMap(sessionManager.userPermissions.value, sessionManager.allowedModules.value)
@@ -181,23 +202,20 @@ class HomeComponentImpl(
             if (childStack.value.active.configuration != ComponentConfig("core", "home")) {
                 println("Back button pressed")
                 navigation.replaceCurrent(ComponentConfig("core", "home"))
-                //se consumio el evento???
             } else {
-                println("flujo normal???")
-               // no consumió, sigue el flujo normal??????
+                println("Cerrando aplicacion")
+                exitProcess(0)
+                //esto supuestamente no esta recomendado, pero no se como solucionarlo
             }
         }
     )
 
     init {
         backHandler.register(backCallback)
-
         lifecycle.subscribe(
             onDestroy = {
                 backHandler.unregister(backCallback)
             }
         )
-
-
     }
 }

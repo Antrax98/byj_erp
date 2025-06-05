@@ -11,6 +11,7 @@ import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.CoreAdminRootScree
 import org.koin.dsl.module
 import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.test.testFeatureEntry
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.UsersFeatureEntry
 
 
 val CoreModule = module {
@@ -36,6 +37,7 @@ val CoreModule = module {
         //roleFeature,
         //etc.....
         testFeatureEntry,
+        UsersFeatureEntry
     )
 
     single{

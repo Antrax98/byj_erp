@@ -15,7 +15,7 @@ class ModuleManager(
             .associate { moduleEntry ->
                 val permittedFeatures = moduleEntry.features
                     .filter { featureEntry ->
-                        userPermissions.containsAll(featureEntry.requiredPermissions)
+                        featureEntry.requiredAnyPermissions.any { it in userPermissions }
                     }
                     .associate { featureEntry ->
                         featureEntry.name to featureEntry.buttonMetadata
@@ -34,7 +34,7 @@ class ModuleManager(
             .associate { moduleEntry ->
                 val permittedFeatures = moduleEntry.features
                     .filter { featureEntry ->
-                        userPermissions.containsAll(featureEntry.requiredPermissions)
+                        featureEntry.requiredAnyPermissions.any { it in userPermissions }
                     }
                     .associate { featureEntry -> featureEntry.name to featureEntry.factory }
                 moduleEntry.name to permittedFeatures
@@ -80,7 +80,7 @@ class ModuleManager(
             .associate { moduleEntry ->
                 val permittedFeatures = moduleEntry.features
                     .filter { featureEntry ->
-                        userPermissions.containsAll(featureEntry.requiredPermissions)
+                        featureEntry.requiredAnyPermissions.any { it in userPermissions }
                     }.associateBy { featureEntry -> featureEntry.name }
                 moduleEntry.name to permittedFeatures
             }

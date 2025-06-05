@@ -20,4 +20,10 @@ class FeatureListComponentImpl(
 
     private val _state = MutableStateFlow(FeatureListState())
     override val state: StateFlow<FeatureListState> = _state.asStateFlow()
+
+    override fun onBack(): Boolean {
+        return false
+        //no hace nada por que este no deveria de hacerlo
+        //toHome esta de bonito en este componente
+    }
 }

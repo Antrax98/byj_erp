@@ -153,6 +153,17 @@ fun Route.googleAuthRoutes(
         call.respond(userType)//TODO: enviar respuesta como un DTO???
     }
 
+    get("/me") {
+        val session = auth.authorizeOrThrow(call)
+        val userId = findUserIdBySessionId(session.sessionId)?: return@get call.respond(HttpStatusCode.NotFound, "User not found")
+        val user = userRepo.find(userId)
+        if (user == null) {
+            call.respond(HttpStatusCode.NotFound, "User not found")
+        } else {
+            call.respond(user.toDTO())
+        }
+    }
+
     route("/logout"){
         get {
             val session = auth.authorizeOrThrow(call)

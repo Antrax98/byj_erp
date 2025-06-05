@@ -57,6 +57,8 @@ kotlin {
             api(libs.koin.core)
             //implementation(libs.koin.compose)
             implementation(libs.compose.material.icons.extended)
+            implementation(libs.kamel.image)
+            implementation(libs.kamel.decoder.image.bitmap)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

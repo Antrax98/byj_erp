@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 //dependiendo de los permisos necesarios, el usuario lo vera o no
 //(no darle permisos si se quiere que siempre sea visible)
 interface FeatureComponent {
-    //val name: String
     val userPermissions: StateFlow<Set<PermissionKey>>
     val apiClient: ApiClient
-    val toHome: () -> Unit
+    val toHome: () -> Unit //ELIMINAR EN UN FUTURO
+    fun onBack(): Boolean //hace pop a su propia navegacion devolviendo true o si no pudo devuelve false
 }

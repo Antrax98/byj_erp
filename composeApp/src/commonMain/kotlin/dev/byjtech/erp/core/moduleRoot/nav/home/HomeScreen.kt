@@ -1,89 +1,88 @@
 package dev.byjtech.erp.core.moduleRoot.nav.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.More
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
+import com.arkivanov.decompose.router.stack.active
 import dev.byjtech.erp.common.ComponentConfig
-import dev.byjtech.erp.common.FeatureComponent
-import dev.byjtech.erp.common.old.OldModuleRootComponent
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.featuresList.FeatureListComponent
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.featuresList.FeatureListScreen
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList.OldModuleListComponent
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList.ModuleListScreen
+import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(component: HomeComponent) {
     val state by component.state.collectAsState()
+    val actUser by component.actualUser.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     Column (
         modifier = Modifier
             .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
 
-//        Row (
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .background(Color.Blue)
-//            ,
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.SpaceAround
-//        ){
-//            Text("test bar")
-//
-//            if (state.isLoading) {
-//                CircularProgressIndicator()
-//            }
-//
-//            state.error?.let {
-//                Text("Error: $it", color = Color.Red)
-//            }
-//
-//            state.message?.let {
-//                Text("Mensaje: $it", color = Color.Green)
-//            }
-//
-//            Button(onClick = {
-//                coroutineScope.launch { component.onLogout() }
-//            }) {
-//                Text("Logout")
-//            }
-//
-//            Button(onClick = {
-//                coroutineScope.launch { component.onTestClick() }
-//            }) {
-//                Text("Test")
-//            }
-//        }
 
         TopAppBar(
+
             navigationIcon = {
-                IconButton(onClick = {
-                    coroutineScope.launch { component.onLogout() }
-                }){
-                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
+                if(state.isOnListPage){
+                    IconButton(onClick = {  }) { //solo para mantener el espacio por ahora
+                    }
+                    //nada por ahora
+                }else {
+                    IconButton(onClick = {
+                        component.onBack()
+                    }){
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 }
+
+            },
+            actions = {
+                IconButton(onClick = {  }) { //TODO: funcion para navegar a perfil
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "User Profile",
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+                DropdownButtonMenu(component)
+
             },
             title = { Text("Home") },
             colors = TopAppBarDefaults.topAppBarColors()
@@ -105,4 +104,45 @@ fun HomeScreen(component: HomeComponent) {
     }
 
 
+}
+
+@Composable
+fun DropdownButtonMenu(component: HomeComponent) {
+    var expanded by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    Box {
+        IconButton(onClick = { expanded = true }) { //TODO: funcion para navegar a opciones
+            Box {
+                Icon(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = "Configurations",
+                    modifier = Modifier.size(40.dp)
+                )
+
+            }
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                onClick = { expanded = false },
+                text = { Text("Settings") },
+                leadingIcon = {
+                    Icon(Icons.Filled.Settings, contentDescription = "settings")
+                }
+            )
+            DropdownMenuItem(
+                onClick = {
+                    expanded = false
+                    coroutineScope.launch { component.onLogout() }
+                },
+                text = { Text("Logout") },
+                leadingIcon = {
+                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "log out")
+                }
+            )
+        }
+    }
 }

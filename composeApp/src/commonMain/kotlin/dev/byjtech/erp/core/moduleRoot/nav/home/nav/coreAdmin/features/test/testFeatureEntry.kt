@@ -5,11 +5,12 @@ import dev.byjtech.erp.common.ComponentConfig
 import dev.byjtech.erp.common.FeatureEntry
 import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.api.users.UsersTenantApi
+import dev.byjtech.erp.core.api.users.createUsersTenantApi
 
 //test para ver si funciona el featureEntry con el permiso de admin
 val testFeatureEntry: FeatureEntry = FeatureEntry(
     name = "test",
-    requiredPermissions = setOf(
+    requiredAnyPermissions = setOf(
         CoreDefinition.Admin.All.key
     ),
     factory = { context, userPermissions, apiClient, toHome ->
@@ -18,7 +19,7 @@ val testFeatureEntry: FeatureEntry = FeatureEntry(
             userPermissions = userPermissions,
             apiClient = apiClient,
             toHome = toHome,
-            usersTenantApi = apiClient.ktorfit.create<UsersTenantApi>(), //solo para testear si funciona este enfoque
+            usersTenantApi = apiClient.ktorfit.createUsersTenantApi(), //solo para testear si funciona este enfoque
         )
     },
     screen = { component -> TestFeatureScreen(component as TestFeatureComponent) },

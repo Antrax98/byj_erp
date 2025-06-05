@@ -20,4 +20,8 @@ class TestFeatureComponentImpl(
     private val _state = MutableStateFlow(TestFeatureState())
     override val state: StateFlow<TestFeatureState> = _state.asStateFlow()
 
+    override fun onBack(): Boolean {
+        return false
+        //siempre retornar false a menos que se implemente navegacion anidada
+    }
 }

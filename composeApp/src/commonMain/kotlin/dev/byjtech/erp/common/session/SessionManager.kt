@@ -7,6 +7,7 @@ import dev.byjtech.erp.common.api.ApiEvent
 import dev.byjtech.erp.common.api.InvalidSessionException
 import dev.byjtech.erp.core.dto.ModuleDTO
 import dev.byjtech.erp.core.dto.PermissionDTO
+import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.session.AppSession
 import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +49,9 @@ class SessionManager(
     private val _userPermissions = MutableStateFlow<Set<PermissionKey>>(emptySet())
     val userPermissions: StateFlow<Set<PermissionKey>> = _userPermissions.asStateFlow()
 
+    private val _actualUser = MutableStateFlow<UserDTO?>(null)
+    val actualUser: StateFlow<UserDTO?> = _actualUser.asStateFlow()
+
 //    //este es util solo si el usuario es un SuperAdmin, podria eliminarse
 //    private val _contractedModules = MutableStateFlow<Set<ModuleDTO>>(emptySet())
 //    val contractedModules: StateFlow<Set<ModuleDTO>> = _contractedModules.asStateFlow()
@@ -60,6 +64,7 @@ class SessionManager(
             println("Session active, fetching data.")
             try {
                 val myType = apiClient.coreApi.getMyType()
+                updateActualUser()
                 if (myType == "superadmin") {
                     onNavigationRequired(SessionNavigationTarget.SuperHome)
                 } else if (myType == "tenant") {
@@ -115,7 +120,7 @@ class SessionManager(
     }
 
 
-    suspend fun updateAllowedModules() {
+    private suspend fun updateAllowedModules() {
         try {
             val modules = apiClient.coreAuth.permittedModules()
             _allowedModules.value = modules.modules
@@ -128,7 +133,7 @@ class SessionManager(
         }
     }
 
-    suspend fun updatePermissions() {
+    private suspend fun updatePermissions() {
         try {
             val permissions = apiClient.coreAuth.userPermissions()
             _userPermissions.value = permissions.permissions
@@ -138,6 +143,19 @@ class SessionManager(
         } catch (e: Exception) {
             // Otros errores
             println("Error al obtener permisos: ${e.message}")
+        }
+    }
+
+    private suspend fun updateActualUser() {
+        try {
+            val user = apiClient.coreAuth.getMe()
+            _actualUser.value = user
+        } catch (e: InvalidSessionException) {
+            // Si la sesión es inválida
+            handleInvalidSession()
+        } catch (e: Exception) {
+            // Otros errores
+            println("Error al obtener usuario actual: ${e.message}")
         }
     }
 

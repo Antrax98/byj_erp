@@ -1,0 +1,19 @@
+package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users
+
+import com.arkivanov.decompose.router.stack.ChildStack
+import com.arkivanov.decompose.value.Value
+import dev.byjtech.erp.common.FeatureComponent
+import dev.byjtech.erp.common.PermissionAwareComponent
+import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.usersMain.UsersMainComponent
+import kotlinx.coroutines.flow.StateFlow
+
+interface UsersFeatureComponent: FeatureComponent {
+    val state: StateFlow<UsersFeatureState>
+    val childStack: Value<ChildStack<*, Child>>
+
+    sealed class Child {
+        class UsersMain(val component: UsersMainComponent): Child()
+    }
+}
