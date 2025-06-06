@@ -18,13 +18,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -87,11 +92,30 @@ fun UserPageScreen(component: UserPageComponent) {
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Roles",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    Row (
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+
+                    ){
+                        Text(
+                            text = "Roles",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        Button(
+                            onClick = { println("se agrega un rol al usuario") }
+                        ){
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add role to user",
+                                modifier = Modifier.size(20.dp),
+                                tint = Color.White
+                            )
+                        }
+
+                    }
 
                     if (userRoles != null) {
                         if (userRoles!!.isEmpty()) {
@@ -122,11 +146,30 @@ fun UserPageScreen(component: UserPageComponent) {
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Permisos especiales",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    Row (
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+
+                    ){
+                        Text(
+                            text = "Permisos especiales",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        Button(
+                            onClick = { println("se agrega un permiso especial al usuario") }
+                        ){
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add special permission to user",
+                                modifier = Modifier.size(20.dp),
+                                tint = Color.White
+                            )
+                        }
+                    }
+
 
                     if (userSpecialPermissions != null) {
                         if (userSpecialPermissions!!.isEmpty()) {
@@ -192,6 +235,12 @@ fun PermissionKeyCard(permissionKey: PermissionKey) {
                     text = "Acción: ${permissionKey.action}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
+                )
+            }
+            IconButton(onClick = {}) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "More Options"
                 )
             }
 
@@ -329,7 +378,7 @@ fun RolesList(roles: List<RoleDTO>) {
 
 
 @Composable
-fun RoleCard(role: RoleDTO) {
+fun RoleCard(role: RoleDTO, onActionClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -351,7 +400,11 @@ fun RoleCard(role: RoleDTO) {
                     .padding(end = 16.dp),
                 tint = Color(0xFF4CAF50)
             )
-            Column(modifier = Modifier.weight(1f)) {
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
                 Text(
                     text = role.name,
                     style = MaterialTheme.typography.titleMedium
@@ -363,7 +416,15 @@ fun RoleCard(role: RoleDTO) {
                     color = Color.Gray
                 )
             }
+
+            IconButton(onClick = onActionClick) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "More Options"
+                )
+            }
         }
     }
 }
+
 
