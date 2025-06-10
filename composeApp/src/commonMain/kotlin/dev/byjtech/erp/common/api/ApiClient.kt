@@ -18,7 +18,6 @@ import dev.byjtech.erp.core.dto.PermissionDTO
 import dev.byjtech.erp.core.session.AppSession
 import dev.byjtech.erp.common.session.SessionNavigationTarget
 import dev.byjtech.erp.common.session.SettingsCookieStorage
-import dev.byjtech.erp.core.api.users.createUsersTenantApi
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.json
@@ -127,14 +126,10 @@ class ApiClient(
     val coreAuth = ktorfit.create<CoreAuth>() //importante no moverlo
     val coreApi = ktorfit.create<CoreApi>() //importante no moverlo
 
-    fun creatorFactory(creat: creatorInter) {
-
-    }
-
     //TODO() anidarlos de mejor forma, como : apiClient.roles.permission.getPermissions()
     //core-users
     val usersSuperAdminApi = ktorfit.create<UsersSuperAdminApi>()
-    val usersTenantApi = ktorfit.createUsersTenantApi()
+    val usersTenantApi = ktorfit.create<UsersTenantApi>()
 
 
     fun setAuthHeaderProvider(provider: (() -> String?)?) {

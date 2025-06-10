@@ -2,8 +2,10 @@ package dev.byjtech.erp.core.domain.repository
 
 import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.domain.model.User
+import dev.byjtech.erp.core.dto.UserDTO
 
 interface UserRepository {
+    fun create(user: UserDTO): Boolean
     fun create(user: User): User
     fun find(id: Int): User?
     fun findWithRoles(id: Int): User? //TODO: agregar funcion para obtener los permisos especiales del usuario

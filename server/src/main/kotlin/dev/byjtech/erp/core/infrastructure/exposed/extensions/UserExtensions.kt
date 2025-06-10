@@ -64,3 +64,19 @@ fun User.toDTO(): UserDTO {
         companyId = this.companyId
     )
 }
+
+fun UserDTO.toModel(): User {
+    return User(
+        id = this.id,
+        name = this.name,
+        email = this.email,
+        pictureUrl = this.pictureUrl,
+        isActive = this.isActive,
+        googleId = this.googleId,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
+        companyId = this.companyId,
+        roles = emptySet(),
+        specialPermissions = emptySet()
+    )
+}

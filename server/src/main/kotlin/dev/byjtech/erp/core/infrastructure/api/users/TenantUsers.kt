@@ -1,16 +1,21 @@
 package dev.byjtech.erp.core.infrastructure.api.users
 
+import dev.byjtech.erp.shared.ApiResponse
 import dev.byjtech.erp.core.CoreDefinition
-import dev.byjtech.erp.core.auth.authenticateAndAuthorize
+import dev.byjtech.erp.core.domain.repository.ModuleRepository
 import dev.byjtech.erp.core.domain.repository.UserRepository
+import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.infrastructure.auth.CoreAuthWrapper
 import dev.byjtech.erp.core.infrastructure.exposed.extensions.toDTO
+import dev.byjtech.erp.core.request.AssignRoleRequest
+import dev.byjtech.erp.core.request.AssignSpecialPermissionRequest
 import dev.byjtech.erp.core.response.CompanyUsersResponse
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 
-fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository) {
+fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, moduleRepo: ModuleRepository) {
     get("/me") {
 
         val session = authServ.authorizeOrThrow(
@@ -51,7 +56,7 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository) {
     }
 
     get("/{userId}"){
-        val session = authServ.authorizeOrThrow(
+        authServ.authorizeOrThrow(
             call,
             requiredAnyPermissions = setOf(
                 CoreDefinition.Users.View.key,
@@ -67,4 +72,141 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository) {
             call.respond(user.toDTO())
         }
     }
+
+    post("/assign-role") {
+        authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Admin.All.key,
+                CoreDefinition.Roles.Assign.key
+            )
+        )
+        val assignRoleData = call.receive<AssignRoleRequest>()
+
+        //TODO(): hacer que reconosca cuando no existe algun dato o simplemente ya existia la asignacion (SealedClass?)
+        val response = userRepo.addRole(assignRoleData.userId, assignRoleData.roleId)
+
+        if (response) {
+            call.respond(HttpStatusCode.OK, ApiResponse.Success(Unit))
+
+        } else {
+            call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Failed to assign role", "FAILED_TO_ASSIGN_ROLE"))
+        }
+    }
+
+    post("/assign-special-permission") {
+        authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Roles.Assign.key,
+                CoreDefinition.Admin.All.key
+            )
+        )
+        val assignSpecialPermissionData = call.receive<AssignSpecialPermissionRequest>()
+
+
+        if(assignSpecialPermissionData.permissionId != null || assignSpecialPermissionData.permissionKey != null){
+            var permissionId: Int? = null
+            if (assignSpecialPermissionData.permissionId != null){
+                //logica con permissionId
+                permissionId = assignSpecialPermissionData.permissionId
+
+            } else {
+                //logica con permissionKey
+                val permission = moduleRepo.findPermissionByPermissionKey(
+                    assignSpecialPermissionData.permissionKey!!
+                )
+                if (permission != null){
+                    permissionId = permission.id
+                } else {
+                    call.respond(HttpStatusCode.BadRequest, ApiResponse.Error( "Permission not found", code = "PERMISSION_NOT_FOUND"))
+                    return@post
+                }
+            }
+            //logica comun
+            if (permissionId != null){
+                val response = userRepo.addSpecialPermission(assignSpecialPermissionData.userId, permissionId)
+                if (response) {
+                    call.respond(HttpStatusCode.OK, ApiResponse.Success(Unit))
+                } else {
+                    call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Special permission not assigned", code = "PERMISSION_NOT_ASSIGNED"))
+                }
+            }
+
+        } else {
+            call.respond(HttpStatusCode.BadRequest, ApiResponse.Error( "No Permission ID or Permission Key provided", code = "NO_PERMISSION_PROVIDED"))
+        }
+
+
+    }
+    delete("unassign-special-permission/{userId}/{permissionId}"){
+        authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Roles.Assign.key,
+                CoreDefinition.Admin.All.key
+            )
+        )
+        val userId = call.parameters["userId"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error( "Invalid user ID", code = "INVALID_USER_ID"))
+        val permissionId = call.parameters["permissionId"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Invalid permission ID", code = "INVALID_PERMISSION_ID"))
+
+        val response = userRepo.removeSpecialPermission(userId, permissionId)
+        if (response) {
+            call.respond(
+                HttpStatusCode.OK,
+                ApiResponse.Success(Unit)
+            )
+        } else {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ApiResponse.Error( "Special permission not removed", code = "SPECIAL_PERMISSION_NOT_REMOVED")
+            )
+        }
+    }
+
+    delete("/unassign-role/{userId}/{roleId}"){
+        authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Admin.All.key,
+                CoreDefinition.Roles.Assign.key
+            )
+        )
+        val userId = call.parameters["userId"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Invalid user ID", code = "INVALID_USER_ID"))
+        val roleId = call.parameters["roleId"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Invalid role ID", code = "INVALID_ROLE_ID"))
+        val response = userRepo.removeRole(userId, roleId)
+        if (response) {
+            call.respond(HttpStatusCode.OK, ApiResponse.Success(Unit))
+        } else {
+            call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Failed to remove role", code = "FAILED_TO_REMOVE_ROLE"))
+        }
+    }
+
+    //el id de la compañia debe estar en el DTO
+    post("/create-user"){
+        val session = authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Users.Create.key,
+                CoreDefinition.Admin.All.key
+            )
+        )
+        var newUser = call.receive<UserDTO>()
+        if (newUser.companyId == null) {
+            val userCompanyid = userRepo.find(session.userId)?.companyId
+            if (userCompanyid == null) {
+                call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Company id not found", code = "COMPANY_ID_NOT_FOUND"))
+                return@post
+            } else {
+                newUser = newUser.copy(companyId = userCompanyid)
+            }
+        }
+        val response = userRepo.create(newUser)
+        if (response) {
+            call.respond(HttpStatusCode.OK, ApiResponse.Success(Unit))
+        } else {
+            call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Failed to create user", code = "FAILED_TO_CREATE_USER"))
+        }
+    }
+
 }

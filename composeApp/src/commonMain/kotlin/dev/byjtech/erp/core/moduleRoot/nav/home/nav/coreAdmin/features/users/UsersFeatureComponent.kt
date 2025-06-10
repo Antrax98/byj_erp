@@ -7,7 +7,7 @@ import dev.byjtech.erp.common.PermissionAwareComponent
 import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.usersMain.UsersMainComponent
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.usersMain.nav.userPage.UserPageComponent
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.userPage.UserPageComponent
 import kotlinx.coroutines.flow.StateFlow
 
 interface UsersFeatureComponent: FeatureComponent {

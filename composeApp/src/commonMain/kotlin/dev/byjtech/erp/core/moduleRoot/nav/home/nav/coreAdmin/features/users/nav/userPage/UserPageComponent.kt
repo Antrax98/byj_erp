@@ -1,4 +1,4 @@
-package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.usersMain.nav.userPage
+package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.userPage
 
 import dev.byjtech.erp.common.PermissionAwareComponent
 import dev.byjtech.erp.common.PermissionKey

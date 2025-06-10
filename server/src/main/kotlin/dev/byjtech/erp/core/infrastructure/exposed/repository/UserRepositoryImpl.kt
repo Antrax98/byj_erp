@@ -3,6 +3,8 @@ package dev.byjtech.erp.core.infrastructure.exposed.repository
 import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.domain.model.User
 import dev.byjtech.erp.core.domain.repository.UserRepository
+import dev.byjtech.erp.core.dto.UserDTO
+import dev.byjtech.erp.core.infrastructure.exposed.entities.CompanyEntity
 import dev.byjtech.erp.core.infrastructure.exposed.entities.PermissionEntity
 import dev.byjtech.erp.core.infrastructure.exposed.entities.RoleEntity
 import dev.byjtech.erp.core.infrastructure.exposed.entities.UserEntity
@@ -15,11 +17,48 @@ import dev.byjtech.erp.core.infrastructure.exposed.tables.UserRoleTable
 import dev.byjtech.erp.core.infrastructure.exposed.tables.UsersTable
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.LocalDateTime
 
 class UserRepositoryImpl: UserRepository {
-    override fun create(user: User): User {
-        TODO("Not yet implemented")
+    override fun create(user: UserDTO): Boolean {
+        return transaction {
+            try {
+                UserEntity.new {
+                    name = user.name
+                    email = user.email
+                    isActive = true
+                    pictureUrl = user.pictureUrl
+                    company = user.companyId?.let { CompanyEntity[it] }
+                    createdAt = LocalDateTime.now()
+                    updatedAt = LocalDateTime.now()
+                }
+            } catch (e: Exception) {
+                println("Error creating user: ${e.message}")
+                return@transaction false
+            }
+            return@transaction true
+        }
     }
+
+    override fun create(user: User): User{
+        return transaction {
+            try {
+                val userEntity = UserEntity.new {
+                    name = user.name
+                    email = user.email
+                    isActive = true
+                    company = user.companyId?.let { CompanyEntity[it] }
+                    createdAt = LocalDateTime.now()
+                    updatedAt = LocalDateTime.now()
+                }
+                return@transaction userEntity.toModel()
+            } catch (e: Exception) {
+                println("Error creating user: ${e.message}")
+                throw e
+            }
+        }
+    }
+
     override fun find(id: Int): User? {
         return transaction {
             UserEntity.findById(id)?.toModel()

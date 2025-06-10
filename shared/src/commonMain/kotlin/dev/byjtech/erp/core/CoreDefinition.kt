@@ -93,6 +93,29 @@ object CoreDefinition : ModuleDefinition {
         val Delete = permission("delete", "Delete a user")
     }
 
+    object Roles : CategoryBase("roles", "Role and permission management", CoreDefinition) {
+        val Create = permission("create", "Create a new role")
+        val View   = permission("view", "View a role")
+        val Update = permission("update", "Update a role")
+        val Delete = permission("delete", "Delete a role")
+        val Assign = permission("assign", "Assign a role or permissions to a user")
+    }
+
+    object Companies : CategoryBase("companies", "Company management", CoreDefinition) {
+        val Create = permission("create", "Create a new company")
+        val View   = permission("view", "View a company")
+        val Update = permission("update", "Update a company")
+        val Delete = permission("delete", "Delete a company")
+
+    }
+
+    object Subscriptions : CategoryBase("subscriptions", "Subscription management", CoreDefinition) {
+        val Create = permission("create", "Create a new subscription")
+        val View   = permission("view", "View a subscription")
+        val Update = permission("update", "Update a subscription")
+        val Delete = permission("delete", "Delete a subscription")
+    }
+
     object Admin : CategoryBase("admin", "Admin permissions", CoreDefinition) {
         val All = permission("all", "Does everything company level")
     }

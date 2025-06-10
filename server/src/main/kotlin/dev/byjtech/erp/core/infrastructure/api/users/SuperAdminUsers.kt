@@ -11,8 +11,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 
 fun Route.superAdminUsers(authServ: CoreAuthWrapper) {
-    //route("/get")
-    //NO COMENSAR UN GET CON / O SE ROMPE LA RUTA
     get ("{id}"){
         val session = authServ.authorizeOrThrow(call, requiredSuperAdmin = true)
         val id = call.request.queryParameters["id"]
