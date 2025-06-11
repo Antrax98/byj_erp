@@ -17,9 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlusOne
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,39 +37,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import dev.byjtech.erp.common.getPlatformName
+import dev.byjtech.erp.common.getPlatform
+import dev.byjtech.erp.common.tools.containsAnyOf
+import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.UsersFeatureComponentImpl
-import kotlinx.coroutines.launch
 
 @Composable
 fun UsersMainScreen(component: UsersMainComponent) {
 
     val state by component.state.collectAsState()
     val usersList by component.usersList.collectAsState()
-
-    val coroutineScope = rememberCoroutineScope()
-
-
-
-    LaunchedEffect(Unit) {
-//        coroutineScope.launch {
-//            component.updateIsLoading(true)
-//            component.loadUsers()
-//            component.updateIsLoading(false)
-//        }
-        component.updateIsLoading(true)
-        component.loadUsers()
-        component.updateIsLoading(false)
-    }
+    val userPermissions by component.userPermissions.collectAsState()
 
     Scaffold (
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { /* Acción al hacer clic */ },
-                shape = RoundedCornerShape(16.dp) // Esquinas redondeadas personalizadas (opcional)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar usuario")
+            if(userPermissions.containsAnyOf(setOf(CoreDefinition.Users.Create.key))){
+                FloatingActionButton(
+                    onClick = { component.navTo(UsersFeatureComponentImpl.Config.AddUser) },
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar usuario")
+                }
             }
         }
 
@@ -82,7 +69,7 @@ fun UsersMainScreen(component: UsersMainComponent) {
             verticalArrangement = Arrangement.Top
         ) {
             Text("Users Main Screen")
-            Text("actual platform ${getPlatformName()}")
+            Text("actual platform ${getPlatform()}")
 
             if(state.isLoading){
                 CircularProgressIndicator()

@@ -9,13 +9,24 @@ import com.arkivanov.decompose.value.Value
 import dev.byjtech.erp.common.PermissionAwareComponent
 import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.core.dto.RoleDTO
 import dev.byjtech.erp.core.moduleRoot.nav.home.HomeComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.addUser.AddUserComponent
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.addUser.AddUserComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.assignRole.AssignRoleComponent
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.assignRole.AssignRoleComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.assignSpecialPermission.AssignSpecialPermissionComponent
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.assignSpecialPermission.AssignSpecialPermissionComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.usersMain.UsersMainComponent
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.usersMain.UsersMainComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.userPage.UserPageComponent
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.userPage.UserPageComponentImpl
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 class UsersFeatureComponentImpl(
@@ -25,6 +36,8 @@ class UsersFeatureComponentImpl(
     override val toHome: () -> Unit
 ) : UsersFeatureComponent, ComponentContext by componentContext {
 
+
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val _state = MutableStateFlow(UsersFeatureState())
     override val state: StateFlow<UsersFeatureState> = _state
@@ -45,6 +58,12 @@ class UsersFeatureComponentImpl(
         data object UsersMain : Config()
         @Serializable
         data class UserPage(val userId: Int) : Config()
+        @Serializable
+        data class AssignRole(val userId: Int, val assignableRoles: Set<RoleDTO>) : Config()
+        @Serializable
+        data class AssignSpecialPermission(val userId: Int, val assignablePermissions: Set<PermissionKey>) : Config()
+        @Serializable
+        data object AddUser : Config()
     }
 
     private val navigation = StackNavigation<Config>()
@@ -64,7 +83,65 @@ class UsersFeatureComponentImpl(
         UsersMainComponentImpl(componentContext, userPermissions, apiClient, ::navigateTo)
 
     private fun userPageComponent(componentContext: ComponentContext, userId: Int): UserPageComponent =
-        UserPageComponentImpl(componentContext, userPermissions, userId, apiClient)
+        UserPageComponentImpl(componentContext, userPermissions, userId, apiClient, ::navigateTo)
+
+    private fun assignRoleComponent(componentContext: ComponentContext, userId: Int, assignableRoles: Set<RoleDTO>): AssignRoleComponent =
+        AssignRoleComponentImpl(
+            componentContext,
+            userPermissions,
+            userId,
+            assignableRoles
+        ){
+            assigned ->
+            navigation.pop {
+                if (assigned && childStack.active.configuration == Config.UserPage) {
+                    val userPage = (childStack.active.instance as? UsersFeatureComponent.Child.UserPage)?.component
+                    userPage?.let {
+                        coroutineScope.launch {
+                            it.fetchUserRoles()
+                        }
+                    }
+                }
+            }
+        }
+
+    private fun assignSpecialPermissionComponent(componentContext: ComponentContext, userId: Int, assignablePermissions: Set<PermissionKey>): AssignSpecialPermissionComponent =
+        AssignSpecialPermissionComponentImpl(
+            componentContext,
+            userPermissions,
+            userId,
+            assignablePermissions
+        ) { assigned ->
+            navigation.pop {
+                if (assigned && childStack.active.configuration == Config.UserPage) {
+                    val userPage =
+                        (childStack.active.instance as? UsersFeatureComponent.Child.UserPage)?.component
+                    userPage?.let {
+                        coroutineScope.launch {
+                            it.fetchUserSpecialPermissions()
+                        }
+                    }
+                }
+            }
+        }
+
+    private fun addUserComponent(componentContext: ComponentContext): AddUserComponent =
+        AddUserComponentImpl(
+            componentContext,
+            userPermissions
+        ){
+            added ->
+            navigation.pop {
+                if (added && childStack.active.configuration == Config.UsersMain) {
+                    val usersMain = (childStack.active.instance as? UsersFeatureComponent.Child.UsersMain)?.component
+                    usersMain?.let {
+                        coroutineScope.launch {
+                            it.loadUsers()
+                        }
+                    }
+                }
+            }
+        }
 
     private fun childFactory(config: Config, componentContext: ComponentContext): UsersFeatureComponent.Child {
         return when (config) {
@@ -75,6 +152,24 @@ class UsersFeatureComponentImpl(
                     userId = config.userId
                 )
             )
+            is Config.AssignRole -> UsersFeatureComponent.Child.AssignRole(
+                assignRoleComponent(
+                    componentContext.childContext("assignRole"),
+                    userId = config.userId,
+                    assignableRoles = config.assignableRoles
+                )
+            )
+            is Config.AssignSpecialPermission -> UsersFeatureComponent.Child.AssignSpecialPermission(
+                assignSpecialPermissionComponent(
+                    componentContext.childContext("assignSpecialPermission"),
+                    userId = config.userId,
+                    assignablePermissions = config.assignablePermissions
+                )
+            )
+            is Config.AddUser -> UsersFeatureComponent.Child.AddUser(
+                addUserComponent(componentContext.childContext("addUser"))
+            )
+
         }
 
     }

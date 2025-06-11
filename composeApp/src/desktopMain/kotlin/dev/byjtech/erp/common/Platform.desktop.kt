@@ -1,5 +1,5 @@
 package dev.byjtech.erp.common
 
-actual fun getPlatformName(): String {
-    return "desktop"
+actual fun getPlatform(): Platform {
+    return Platform.Desktop
 }

@@ -102,8 +102,10 @@ auth0-jwt = { group = "com.auth0", name = "java-jwt", version.ref = "auth0-jwt" 
 
 decompose-core = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose-compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
-decompose-coroutines = { module = "com.arkivanov.decompose:extensions-coroutines", version.ref = "decompose" }
-essenty = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }
+#decompose-coroutines = { module = "com.arkivanov.decompose:extensions-coroutines", version.ref = "decompose" }
+#essenty = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }
+essenty-lifecycle = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }
+essenty-lifecycle-coroutines = { module = "com.arkivanov.essenty:lifecycle-coroutines", version.ref = "essenty" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 #decompose-jetbrains = { module = "com.arkivanov.decompose:extensions-compose-jetbrains", version.ref = "decompose" }
 #decompose-default = { module = "com.arkivanov.decompose:extensions-compose-jetbrains-navigation", version.ref = "decompose" }

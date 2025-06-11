@@ -2,8 +2,9 @@ package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.na
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import dev.byjtech.erp.common.UnderConstructionScreen
 
 @Composable
 fun AssignRoleScreen(component: AssignRoleComponent) {
-    Text("Assign Role Screen")
+    UnderConstructionScreen("AssignRole")
 }

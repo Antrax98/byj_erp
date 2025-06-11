@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,8 +44,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.common.tools.containsAnyOf
+import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.dto.RoleDTO
 import dev.byjtech.erp.core.dto.UserDTO
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.UsersFeatureComponentImpl
 
 @Composable
 fun UserPageScreen(component: UserPageComponent) {
@@ -53,6 +57,8 @@ fun UserPageScreen(component: UserPageComponent) {
     val userSpecialPermissions by component.userSpecialPermissions.collectAsState()
     val userRoles by component.userRoles.collectAsState()
 
+    val userPermissions by component.userPermissions.collectAsState()
+
     val coroutineScope = rememberCoroutineScope()
 
 //    coroutineScope.launch {
@@ -60,11 +66,11 @@ fun UserPageScreen(component: UserPageComponent) {
 //        component.fetchUserSpecialPermissions()
 //        component.fetchUserRoles()
 //    }
-    LaunchedEffect(component) {
-        component.fetchUser()
-        component.fetchUserSpecialPermissions()
-        component.fetchUserRoles()
-    }
+//    LaunchedEffect(component) {
+//        component.fetchUser()
+//        component.fetchUserSpecialPermissions()
+//        component.fetchUserRoles()
+//    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -76,7 +82,7 @@ fun UserPageScreen(component: UserPageComponent) {
             if (userInfo != null) {
                 UserDetailsScreen(user = userInfo!!)
             } else {
-                Text("Cargando información del usuario...")
+                CircularProgressIndicator()
             }
         }
 
@@ -103,7 +109,7 @@ fun UserPageScreen(component: UserPageComponent) {
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                         Button(
-                            onClick = { println("se agrega un rol al usuario") }
+                            onClick = { component.navTo(UsersFeatureComponentImpl.Config.AssignRole(userId = component.userId, assignableRoles = emptySet())) }
                         ){
                             Icon(
                                 imageVector = Icons.Default.Add,
@@ -123,12 +129,13 @@ fun UserPageScreen(component: UserPageComponent) {
                                 color = Color.Gray
                             )
                         } else {
+                            val canUnassignRole = userPermissions.containsAnyOf(CoreDefinition.Roles.Unassign.key)
                             userRoles!!.forEach { role ->
-                                RoleCard(role)
+                                RoleCard(role, canUnassignRole)
                             }
                         }
                     } else {
-                        Text("Cargando roles del usuario...")
+                        CircularProgressIndicator()
                     }
                 }
             }
@@ -156,15 +163,17 @@ fun UserPageScreen(component: UserPageComponent) {
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        Button(
-                            onClick = { println("se agrega un permiso especial al usuario") }
-                        ){
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add special permission to user",
-                                modifier = Modifier.size(20.dp),
-                                tint = Color.White
-                            )
+                        if (userPermissions.containsAnyOf(CoreDefinition.Roles.Assign.key)) {
+                            Button(
+                                onClick = { component.navTo(UsersFeatureComponentImpl.Config.AssignSpecialPermission(userId = component.userId, assignablePermissions = emptySet())) }
+                            ){
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add special permission to user",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = Color.White
+                                )
+                            }
                         }
                     }
 
@@ -177,12 +186,13 @@ fun UserPageScreen(component: UserPageComponent) {
                                 color = Color.Gray
                             )
                         } else {
+                            val canUnassignPermission = userPermissions.containsAnyOf(CoreDefinition.Roles.Unassign.key)
                             userSpecialPermissions!!.forEach { perm ->
-                                PermissionKeyCard(permissionKey = perm)
+                                PermissionKeyCard(perm, canUnassignPermission)
                             }
                         }
                     } else {
-                        Text("Cargando permisos especiales del usuario...")
+                        CircularProgressIndicator()
                     }
                 }
             }
@@ -194,7 +204,7 @@ fun UserPageScreen(component: UserPageComponent) {
 }
 
 @Composable
-fun PermissionKeyCard(permissionKey: PermissionKey) {
+fun PermissionKeyCard(permissionKey: PermissionKey, canUnassignPermission: Boolean) {
     Card(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 6.dp)
@@ -235,11 +245,13 @@ fun PermissionKeyCard(permissionKey: PermissionKey) {
                     color = Color.Gray
                 )
             }
-            IconButton(onClick = {}) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "More Options"
-                )
+            if (canUnassignPermission) {
+                IconButton(onClick = {}) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Unassign Special Permission"
+                    )
+                }
             }
 
 
@@ -343,40 +355,40 @@ fun InfoRow(label: String, value: String) {
 
 
 //no sirve por que no se puede usar un lazyColumn en otro lazyColumn
-@Composable
-fun RolesList(roles: List<RoleDTO>) {
-    if (roles.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "El usuario no tiene roles asignados.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
-            )
-        }
-    } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 8.dp),
-            contentPadding = PaddingValues(bottom = 16.dp)
-        ) {
-            items(roles) { role ->
-                RoleCard(role)
-            }
-        }
-    }
-}
+//@Composable
+//fun RolesList(roles: List<RoleDTO>) {
+//    if (roles.isEmpty()) {
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(16.dp),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            Text(
+//                text = "El usuario no tiene roles asignados.",
+//                style = MaterialTheme.typography.bodyMedium,
+//                color = Color.Gray
+//            )
+//        }
+//    } else {
+//        LazyColumn(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(top = 8.dp),
+//            contentPadding = PaddingValues(bottom = 16.dp)
+//        ) {
+//            items(roles) { role ->
+//                RoleCard(role)
+//            }
+//        }
+//    }
+//}
 
 
 
 
 @Composable
-fun RoleCard(role: RoleDTO, onActionClick: () -> Unit = {}) {
+fun RoleCard(role: RoleDTO, canUnassignRole: Boolean, onActionClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -415,11 +427,13 @@ fun RoleCard(role: RoleDTO, onActionClick: () -> Unit = {}) {
                 )
             }
 
-            IconButton(onClick = onActionClick) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "More Options"
-                )
+            if (canUnassignRole) {
+                IconButton(onClick = onActionClick) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "More Options"
+                    )
+                }
             }
         }
     }

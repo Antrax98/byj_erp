@@ -99,6 +99,7 @@ object CoreDefinition : ModuleDefinition {
         val Update = permission("update", "Update a role")
         val Delete = permission("delete", "Delete a role")
         val Assign = permission("assign", "Assign a role or permissions to a user")
+        val Unassign = permission("unassign", "Unassign a role or permissions from a user")
     }
 
     object Companies : CategoryBase("companies", "Company management", CoreDefinition) {
