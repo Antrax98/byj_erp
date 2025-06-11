@@ -6,11 +6,10 @@ import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.value.Value
-import dev.byjtech.erp.common.PermissionAwareComponent
+import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.core.dto.RoleDTO
-import dev.byjtech.erp.core.moduleRoot.nav.home.HomeComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.addUser.AddUserComponent
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.addUser.AddUserComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.assignRole.AssignRoleComponent
@@ -37,7 +36,7 @@ class UsersFeatureComponentImpl(
 ) : UsersFeatureComponent, ComponentContext by componentContext {
 
 
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val coroutineScope = componentContext.coroutineScope()
 
     private val _state = MutableStateFlow(UsersFeatureState())
     override val state: StateFlow<UsersFeatureState> = _state

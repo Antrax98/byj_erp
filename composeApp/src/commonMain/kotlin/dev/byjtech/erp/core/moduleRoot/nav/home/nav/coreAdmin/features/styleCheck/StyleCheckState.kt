@@ -1,4 +1,4 @@
-package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.nav.styleCheck
+package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.styleCheck
 
 data class StyleCheckState(
     val isLoading: Boolean = false,

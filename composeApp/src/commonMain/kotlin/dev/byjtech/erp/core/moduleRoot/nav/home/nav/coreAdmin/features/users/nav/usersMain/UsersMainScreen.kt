@@ -28,10 +28,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,7 +39,7 @@ import dev.byjtech.erp.common.getPlatform
 import dev.byjtech.erp.common.tools.containsAnyOf
 import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.dto.UserDTO
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.UsersFeatureComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.UsersFeatureComponentImpl.Config
 
 @Composable
 fun UsersMainScreen(component: UsersMainComponent) {
@@ -54,7 +52,7 @@ fun UsersMainScreen(component: UsersMainComponent) {
         floatingActionButton = {
             if(userPermissions.containsAnyOf(setOf(CoreDefinition.Users.Create.key))){
                 FloatingActionButton(
-                    onClick = { component.navTo(UsersFeatureComponentImpl.Config.AddUser) },
+                    onClick = { component.navTo(Config.AddUser) },
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Agregar usuario")
@@ -79,7 +77,7 @@ fun UsersMainScreen(component: UsersMainComponent) {
                     LazyColumn {
                         usersList?.let { list ->
                             items(list) { user ->
-                                UserContainer(user, onClick = {component.navTo(UsersFeatureComponentImpl.Config.UserPage(user.id))})
+                                UserContainer(user, onClick = {component.navTo(Config.UserPage(user.id))})
                             }
                         }
                         fakeUsers.forEach { user ->

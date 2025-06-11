@@ -2,7 +2,6 @@ package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.na
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,7 +31,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,7 +45,7 @@ import dev.byjtech.erp.common.tools.containsAnyOf
 import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.dto.RoleDTO
 import dev.byjtech.erp.core.dto.UserDTO
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.UsersFeatureComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.UsersFeatureComponentImpl.Config
 
 @Composable
 fun UserPageScreen(component: UserPageComponent) {
@@ -109,7 +106,7 @@ fun UserPageScreen(component: UserPageComponent) {
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                         Button(
-                            onClick = { component.navTo(UsersFeatureComponentImpl.Config.AssignRole(userId = component.userId, assignableRoles = emptySet())) }
+                            onClick = { component.navTo(Config.AssignRole(userId = component.userId, assignableRoles = emptySet())) }
                         ){
                             Icon(
                                 imageVector = Icons.Default.Add,
@@ -165,7 +162,7 @@ fun UserPageScreen(component: UserPageComponent) {
                         )
                         if (userPermissions.containsAnyOf(CoreDefinition.Roles.Assign.key)) {
                             Button(
-                                onClick = { component.navTo(UsersFeatureComponentImpl.Config.AssignSpecialPermission(userId = component.userId, assignablePermissions = emptySet())) }
+                                onClick = { component.navTo(Config.AssignSpecialPermission(userId = component.userId, assignablePermissions = emptySet())) }
                             ){
                                 Icon(
                                     imageVector = Icons.Default.Add,

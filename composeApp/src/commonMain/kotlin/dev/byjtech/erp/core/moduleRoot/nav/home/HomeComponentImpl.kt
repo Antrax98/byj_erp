@@ -12,13 +12,10 @@ import com.arkivanov.essenty.lifecycle.subscribe
 import dev.byjtech.erp.common.ComponentConfig
 import dev.byjtech.erp.common.FeatureComponent
 import dev.byjtech.erp.common.ModuleManager
-import dev.byjtech.erp.common.old.OldModuleManager
-import dev.byjtech.erp.common.old.OldModuleRootComponent
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.common.session.SessionManager
 import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.featuresList.FeatureListComponentImpl
-import dev.byjtech.erp.core.moduleRoot.nav.home.nav.moduleList.OldModuleListComponentImpl
 import kotlinx.coroutines.flow.*
 import kotlin.system.exitProcess
 
@@ -64,53 +61,6 @@ class HomeComponentImpl(
             _state.update { it.copy(isLoading = false, error = e.message) }
         }
     }
-
-
-
-    //NAVEGACION!!!! OLD
-//    override val entriesByName = oldModuleManager.entriesByName()
-//    private val navigation = StackNavigation<String>()
-//
-//    private fun childFactory(config: String, componentContext: ComponentContext): OldModuleRootComponent {
-//        return when (config) {
-//            "home" -> OldModuleListComponentImpl(
-//                componentContext.childContext("home_moduleList"),
-//                sessionManager.userPermissions,
-//                api,
-//                toHome = ::toHome,
-//                navTo = ::navigateTo,
-//                modulesMetadata = oldModuleManager.metadataMap()
-//            )
-//            else -> {
-//                val factory = entriesByName[config]?.factory
-//                    ?: throw IllegalArgumentException("Invalid config: $config")
-//
-//                factory.create(componentContext.childContext(config), sessionManager.userPermissions, api, ::toHome)
-//            }
-//        }
-//    }
-//
-//
-//    private val stack = childStack(
-//        source = navigation,
-//        serializer = null,
-//        initialStack = { listOf("home") },
-//        handleBackButton = true,
-//        childFactory = ::childFactory
-//    )
-//
-//    override val oldChildStack: Value<ChildStack<*, OldModuleRootComponent>> = stack
-//
-//    //solo usable por el ModuleList
-//    private fun navigateTo(target: String) {
-//        val current = childStack.value.active.configuration
-//        if (current != target) {
-//            navigation.replaceCurrent(target)
-//        }
-//    }
-//    private fun toHome() {
-//        navigation.replaceCurrent("home")
-//    }
 
     //NAVEGACION NEW
 

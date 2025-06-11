@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,9 +18,12 @@ import androidx.compose.material.icons.filled.More
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,81 +48,82 @@ import kotlinx.coroutines.launch
 fun HomeScreen(component: HomeComponent) {
     val state by component.state.collectAsState()
     val actUser by component.actualUser.collectAsState()
-
     val coroutineScope = rememberCoroutineScope()
-    Column (
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
 
-
-        TopAppBar(
-
-            navigationIcon = {
-                if(state.isOnListPage){
-                    IconButton(onClick = {  }) { //solo para mantener el espacio por ahora
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    if (state.isOnListPage) {
+                        IconButton(onClick = { /* Espacio reservado */ }) {}
+                    } else {
+                        IconButton(onClick = {
+                            component.onBack()
+                        }) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
                     }
-                    //nada por ahora
-                }else {
-                    IconButton(onClick = {
-                        component.onBack()
-                    }){
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                },
+                title = { Text("Home") },
+                actions = {
+                    IconButton(onClick = { /* TODO: Navegar a perfil */ }) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "User Profile",
+                            modifier = Modifier.size(40.dp)
+                        )
                     }
-                }
+                    DropdownButtonMenu(component)
+                },
+                colors = TopAppBarDefaults.topAppBarColors()
+            )
+        },
+        content = { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                Children(
+                    stack = component.childStack,
+                    animation = stackAnimation(slide())
+                ) { entry ->
+                    when (val config = entry.configuration) {
+                        ComponentConfig("core", "home") -> {
+                            FeatureListScreen(entry.instance as FeatureListComponent)
+                        }
 
-            },
-            actions = {
-                IconButton(onClick = {  }) { //TODO: funcion para navegar a perfil
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "User Profile",
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-                DropdownButtonMenu(component)
-
-            },
-            title = { Text("Home") },
-            colors = TopAppBarDefaults.topAppBarColors()
-        )
-
-        Children(
-            stack = component.childStack,
-            animation = stackAnimation(slide())
-        ) { entry ->
-            when (val config = entry.configuration) {
-                ComponentConfig("core", "home") -> FeatureListScreen(entry.instance as FeatureListComponent)
-                else -> {
-                    val screenMap = component.screenMap
-                    val screen = screenMap[config.module]?.get(config.feature)
-                    screen?.invoke(entry.instance)
+                        else -> {
+                            val screenMap = component.screenMap
+                            val screen = screenMap[config.module]?.get(config.feature)
+                            screen?.invoke(entry.instance)
+                        }
+                    }
                 }
             }
         }
-    }
-
-
+    )
 }
+
 
 @Composable
 fun DropdownButtonMenu(component: HomeComponent) {
     var expanded by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     Box {
-        IconButton(onClick = { expanded = true }) { //TODO: funcion para navegar a opciones
-            Box {
-                Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = "Configurations",
-                    modifier = Modifier.size(40.dp)
-                )
-
-            }
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = "Configurations",
+                modifier = Modifier.size(40.dp)
+            )
         }
+
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
@@ -133,11 +138,36 @@ fun DropdownButtonMenu(component: HomeComponent) {
             DropdownMenuItem(
                 onClick = {
                     expanded = false
-                    coroutineScope.launch { component.onLogout() }
+                    showLogoutDialog = true
                 },
                 text = { Text("Logout") },
                 leadingIcon = {
                     Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "log out")
+                }
+            )
+        }
+
+        if (showLogoutDialog) {
+            AlertDialog(
+                onDismissRequest = { showLogoutDialog = false },
+                title = { Text("¿Cerrar sesión?") },
+                text = { Text("¿Estás seguro de que quieres cerrar sesión?") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showLogoutDialog = false
+                            coroutineScope.launch {
+                                component.onLogout()
+                            }
+                        }
+                    ) {
+                        Text("Sí")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showLogoutDialog = false }) {
+                        Text("Cancelar")
+                    }
                 }
             )
         }
