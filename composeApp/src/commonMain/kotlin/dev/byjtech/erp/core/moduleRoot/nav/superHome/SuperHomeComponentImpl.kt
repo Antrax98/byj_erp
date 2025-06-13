@@ -86,6 +86,7 @@ class SuperHomeComponentImpl (
             added ->
             println("added: $added")
             println("terminar funcion")
+            navigation.pop()
         }
 
     private fun companyPageComponent(componentContext: ComponentContext, company: CompanyDTO): CompanyPageComponent =

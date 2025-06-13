@@ -37,6 +37,7 @@ fun CompanyEntity.toModel(): Company {
 //}
 
 //solo usar en el CompanyRepository
+//y dentro de un transaction//mejor no usarla y hacerlo a mano
 fun Company.toEntity(existingEntity: CompanyEntity? = null): CompanyEntity {
     return if (existingEntity == null) {
         CompanyEntity.new(null) {
@@ -52,4 +53,14 @@ fun Company.toEntity(existingEntity: CompanyEntity? = null): CompanyEntity {
         existingEntity.updatedAt = this.updatedAt?.toJavaLocalDateTime()
         existingEntity
     }
+}
+
+fun Company.toDTO(): CompanyDTO {
+    return CompanyDTO(
+        id = this.id,
+        name = this.name,
+        contactEmail = this.contactEmail,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt
+    )
 }

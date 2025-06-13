@@ -1,6 +1,5 @@
 package dev.byjtech.erp.core.infrastructure.api.users
 
-import dev.byjtech.erp.core.auth.authenticateAndAuthorize
 import dev.byjtech.erp.core.database.users.UserDataSource
 import dev.byjtech.erp.core.infrastructure.auth.CoreAuthWrapper
 import dev.byjtech.erp.core.infrastructure.exposed.extensions.toDTO

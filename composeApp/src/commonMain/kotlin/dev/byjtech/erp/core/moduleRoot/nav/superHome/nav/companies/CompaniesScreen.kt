@@ -1,6 +1,7 @@
 package dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companies
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Business
@@ -48,9 +50,14 @@ fun CompaniesScreen(component: CompaniesComponent) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { component.navTo(SuperHomeComponentImpl.Config.AddCompany) },
-                shape = RoundedCornerShape(16.dp)
-            ){
-                Icon(Icons.Default.Add, contentDescription = "Agregar empresa")
+                shape = RoundedCornerShape(16.dp),
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Agregar empresa",
+                    tint = Color.White
+                )
             }
         }
     ) {
@@ -92,49 +99,54 @@ fun CompaniesScreen(component: CompaniesComponent) {
 fun CompanyContainer(company: CompanyDTO, onClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 8.dp)
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.Business,
-                contentDescription = "Business Icon",
+                contentDescription = "Ícono Empresa",
                 modifier = Modifier
-                    .size(75.dp)
+                    .size(64.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                    .padding(10.dp),
-                tint = MaterialTheme.colorScheme.primary,
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                    .padding(16.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .weight(1f)
+            ) {
                 Text(
                     text = company.name,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = company.contactEmail,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
             IconButton(
                 onClick = onClick,
-                modifier = Modifier.align(Alignment.CenterVertically)
+                modifier = Modifier.padding(start = 8.dp)
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowRight,
-                    contentDescription = "View Company Details"
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "Ver detalles",
+                tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
     }
 }
+

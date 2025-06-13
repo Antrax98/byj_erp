@@ -21,9 +21,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import org.jetbrains.exposed.sql.Table
 import java.util.concurrent.TimeUnit
-
+import dev.byjtech.erp.core.infrastructure.api.companies.CompanyRoutesInstaller
 
 
 val httpClient = HttpClient(CIO) {
@@ -92,7 +91,8 @@ val infrastructureModule = module {
         CoreRoutesInstaller(
             setOf(
                 //AuthRoutesInstaller(), //TODO: justamente separar esta de las demas rutas, los otros si van aqui
-                UserRoutesInstaller(get(), get(), get())
+                UserRoutesInstaller(get(), get(), get()),
+                CompanyRoutesInstaller(get(), get())
             )
         )
     }

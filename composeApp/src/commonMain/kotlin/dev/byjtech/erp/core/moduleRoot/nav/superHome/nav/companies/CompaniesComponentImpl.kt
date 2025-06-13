@@ -3,6 +3,7 @@ package dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companies
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.common.ApiResponse
 import dev.byjtech.erp.core.dto.CompanyDTO
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.SuperHomeComponentImpl
 import kotlinx.coroutines.delay
@@ -31,10 +32,12 @@ class CompaniesComponentImpl(
     override fun loadCompanies() {
         coroutineScope.launch {
             _isLoading.value = true
-            // TODO: Implementar la lógica para cargar las compañías
-            //llenar companieList de basura por ahora
-            delay(500)
-            _companiesList.value = dummyCompanies
+            val response = apiClient.companiesSA.getAllCompanies()
+            if(response.isNotEmpty()){
+                _companiesList.value = response.toList()
+            }else{
+                _companiesList.value = dummyCompanies
+            }
             _isLoading.value = false
         }
     }

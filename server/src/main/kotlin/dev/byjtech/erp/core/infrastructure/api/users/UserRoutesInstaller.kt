@@ -23,7 +23,7 @@ class UserRoutesInstaller (
         route("/users/tenant") {
             tenantUsers(authServ, userRepo, moduleRepo)
         }
-        route("/users/superadmin") {
+        route("/users/super-admin") {
             superAdminUsers(authServ)
         }
         route("/users"){

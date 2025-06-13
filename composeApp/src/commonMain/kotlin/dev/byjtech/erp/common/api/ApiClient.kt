@@ -18,6 +18,8 @@ import dev.byjtech.erp.core.dto.PermissionDTO
 import dev.byjtech.erp.core.session.AppSession
 import dev.byjtech.erp.common.session.SessionNavigationTarget
 import dev.byjtech.erp.common.session.SettingsCookieStorage
+import dev.byjtech.erp.core.api.companies.CompaniesSuperAdminApi
+import dev.byjtech.erp.core.dto.CompanyDTO
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.json
@@ -29,6 +31,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import dev.byjtech.erp.common.ApiResponse
 
 
 class ApiClient(
@@ -52,7 +55,7 @@ class ApiClient(
     private var authHeaderProvider: (() -> String?)? = null
     val cookiesStorage = SettingsCookieStorage(settings)
 
-    private val clientKtor = HttpClient(engine) {
+    val clientKtor = HttpClient(engine) {
         install(HttpCookies) {
             storage = cookiesStorage
         }
@@ -84,21 +87,12 @@ class ApiClient(
 
                     // Lanzar una excepción específica para sesión inválida
                     // AQUI PEDIRLE AL SESSION MANAGER QUE INVALIDE LA SESSION ACTUAL Y REDIRECCIONE AL LOGIN O SPLASH
-                    //throw InvalidSessionException("Session is invalid or expired")
 
-//                    withContext(Dispatchers.Main){
-//                        //usa la clase del sessionmanager para manejar la navegacino en este caso
-//                        onNavigationRequired(SessionNavigationTarget.Splash)
-//                    }
                 }
                 else if(response.status == HttpStatusCode.Forbidden){
                     //SIN ACCESO AL MODULO O PERMISOS INSUFICIENTES
                     emitEvent(ApiEvent.Forbidden)
-
-//                    withContext(Dispatchers.Main){
-//                        //usa la clase del sessionmanager para manejar la navegacino en este caso
-//                        onNavigationRequired(SessionNavigationTarget.Splash)
-//                    }
+                    //envia a la pantalla principal o a una con los permisos suficientes
 
                 }
                 // Para otros errores, usar el comportamiento por defecto
@@ -112,15 +106,8 @@ class ApiClient(
     }
 
     val ktorfit = Ktorfit.Builder()
-        //.baseUrl("http://$baseUrl:$basePort")
         .httpClient(clientKtor)
         .build()
-
-    /*
-    se usa ktorfit.create aunque este deprecado por que la version recomendada tiene problemas con KMP
-    cuando esos problemas se arreglen, se cambiara de:
-    ktorfit.create<CoreAuth>() -> ktorfit.createCoreAuth()
-     */
 
     //core
     val coreAuth = ktorfit.create<CoreAuth>() //importante no moverlo
@@ -130,6 +117,9 @@ class ApiClient(
     //core-users
     val usersSuperAdminApi = ktorfit.create<UsersSuperAdminApi>()
     val usersTenantApi = ktorfit.create<UsersTenantApi>()
+
+    //companies
+    val companiesSA = CompanySA(clientKtor)
 
 
     fun setAuthHeaderProvider(provider: (() -> String?)?) {
@@ -192,4 +182,12 @@ sealed class ApiEvent {
 
 class InvalidSessionException(message: String) : Exception(message)
 
-interface creatorInter
+class CompanySA(private val client: HttpClient) {
+    suspend fun getAllCompanies(): Set<CompanyDTO> {
+        return try {
+            client.get("api/core/companies/super-admin/all-companies").body()
+        } catch (e: Exception) {
+            emptySet()
+        }
+    }
+}
