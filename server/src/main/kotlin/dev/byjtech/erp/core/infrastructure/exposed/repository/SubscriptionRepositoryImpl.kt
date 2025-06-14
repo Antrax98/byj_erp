@@ -11,11 +11,12 @@ import dev.byjtech.erp.core.infrastructure.exposed.extensions.toModel
 import dev.byjtech.erp.core.infrastructure.exposed.tables.SubscriptionsTable
 import dev.byjtech.erp.utils.datetime.toJava
 import dev.byjtech.erp.utils.datetime.toKotlinx
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class SubscriptionRepositoryImpl: SubscriptionRepository {
+class SubscriptionRepositoryImpl(private val db: Database): SubscriptionRepository {
     override fun create(subscription: Subscription): Subscription {
-        return transaction {
+        return transaction(db) {
             val subscriptionEntity = SubscriptionEntity.new {
                 this.company = CompanyEntity[subscription.company.id]
                 this.module = ModuleEntity[subscription.module.id]
@@ -26,7 +27,7 @@ class SubscriptionRepositoryImpl: SubscriptionRepository {
     }
 
     override fun update(subscription: Subscription): Subscription {
-        return transaction {
+        return transaction(db) {
             val subscriptionEntity = SubscriptionEntity[subscription.id]
             subscriptionEntity.isActive = subscription.isActive
             subscriptionEntity.isAccessible = subscription.isAccessible
@@ -42,7 +43,7 @@ class SubscriptionRepositoryImpl: SubscriptionRepository {
     }
 
     override fun updateBilling(billing: Billing): Billing {
-        return transaction {
+        return transaction(db) {
             val billingEntity = BillingEntity[billing.id]
             billingEntity.lastPaymentDate = billing.lastPaymentDate?.toJava()
             billingEntity.nextPaymentDue = billing.nextPaymentDue?.toJava()
@@ -51,14 +52,14 @@ class SubscriptionRepositoryImpl: SubscriptionRepository {
     }
 
     override fun findBilling(id: Int): Billing? {
-        return transaction {
+        return transaction(db) {
             val billing = BillingEntity.findById(id)
             return@transaction billing?.toModel()
         }
     }
 
     override fun createBilling(billing: Billing): Billing {
-        return transaction {
+        return transaction(db) {
             val billingEntity = BillingEntity.new {
                 this.subscription = SubscriptionEntity[billing.subscription.id]
                 this.lastPaymentDate = billing.lastPaymentDate?.toJava()
@@ -69,14 +70,14 @@ class SubscriptionRepositoryImpl: SubscriptionRepository {
     }
 
     override fun find(id: Int): Subscription? {
-        return transaction {
+        return transaction(db) {
             val subscription = SubscriptionEntity.findById(id)
             return@transaction subscription?.toModel()
         }
     }
 
     override fun findByCompanyId(companyId: Int): Set<Subscription> {
-        return transaction {
+        return transaction(db) {
             SubscriptionEntity
                 .find { SubscriptionsTable.companyId eq companyId }
                 .map { entity ->
@@ -100,7 +101,7 @@ class SubscriptionRepositoryImpl: SubscriptionRepository {
     }
 
     override fun findByCompanyIdAndModule(companyId: Int, module: String): Subscription? {
-        return transaction {
+        return transaction(db) {
             val subscriptions = SubscriptionEntity.find { SubscriptionsTable.companyId eq companyId }
             val subscription = subscriptions.find { it.module.name == module }
             subscription?.toModel()
@@ -108,20 +109,20 @@ class SubscriptionRepositoryImpl: SubscriptionRepository {
     }
 
     override fun findByModuleId(moduleId: Int): Set<Subscription> {
-        return transaction {
+        return transaction(db) {
             val subscriptions = SubscriptionEntity.find {SubscriptionsTable.moduleId eq moduleId}
             return@transaction subscriptions.map { it.toModel() }.toSet()
         }
     }
 
     override fun delete(id: Int) {
-        transaction {
+        transaction(db) {
             SubscriptionEntity[id].delete()
         }
     }
 
     override fun deleteBilling(id: Int) {
-        transaction {
+        transaction(db) {
             BillingEntity[id].delete()
         }
     }

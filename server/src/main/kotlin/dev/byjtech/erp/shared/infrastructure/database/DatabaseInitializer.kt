@@ -21,73 +21,45 @@ import org.jetbrains.exposed.sql.and
 
 class DatabaseInitializer (private val database: Database) {
 
-    //no muy usable por ahora
-    fun initialize(vararg tables: Table) {
-        transaction(database) {
-            SchemaUtils.create(
-                *tables
-                //*CoreTables.all.toTypedArray()
-            )
-        }
-    }
-
-    //no muy usable por ahora
-    fun createTables(vararg tables: Table) {
-        transaction(database) {
-            SchemaUtils.create(
-                *tables
-            )
-        }
-    }
-
-
-    fun nuke() {
-        transaction(database) {
-//            SchemaUtils.drop(
-//                *CoreTables.all.reversed().toTypedArray()
-//            )
-        }
-    }
-
-    fun multiCreate(
-        modules: List<ModuleInitializer>,
-        maxRounds: Int = 10
-    ) {
-        val remaining = modules.toMutableSet()
-        var round = 0
-
-        while (remaining.isNotEmpty() && round < maxRounds) {
-            val iterator = remaining.iterator()
-            var atLeastOneCreated = false
-
-            while (iterator.hasNext()) {
-                val module = iterator.next()
-                try {
-                    transaction(database) {
-                        SchemaUtils.create(*module.tables.toTypedArray())
-                    }
-                    atLeastOneCreated = true
-                    iterator.remove()
-                    println("Tablas creadas del módulo: ${module.definition.name}")
-                } catch (e: Exception) {
-                    println("Error al crear tablas de ${module.definition.name} en ronda $round: ${e.message}")
-                    // sigue con el siguiente
-                }
-            }
-
-            if (!atLeastOneCreated) {
-                throw IllegalStateException("No se pudo crear ninguna tabla en la ronda $round. Verifica dependencias o errores.")
-            }
-
-            round++
-        }
-
-        if (remaining.isNotEmpty()) {
-            throw IllegalStateException("No se pudieron crear todas las tablas después de $round intentos.")
-        }
-
-        println("Todas las tablas fueron creadas correctamente.")
-    }
+//    fun multiCreate(
+//        modules: List<ModuleInitializer>,
+//        maxRounds: Int = 10
+//    ) {
+//        val remaining = modules.toMutableSet()
+//        var round = 0
+//
+//        while (remaining.isNotEmpty() && round < maxRounds) {
+//            val iterator = remaining.iterator()
+//            var atLeastOneCreated = false
+//
+//            while (iterator.hasNext()) {
+//                val module = iterator.next()
+//                try {
+//                    transaction(database) {
+//                        SchemaUtils.create(*module.tables.toTypedArray())
+//                    }
+//                    atLeastOneCreated = true
+//                    iterator.remove()
+//                    println("Tablas creadas del módulo: ${module.definition.name}")
+//                } catch (e: Exception) {
+//                    println("Error al crear tablas de ${module.definition.name} en ronda $round: ${e.message}")
+//                    // sigue con el siguiente
+//                }
+//            }
+//
+//            if (!atLeastOneCreated) {
+//                throw IllegalStateException("No se pudo crear ninguna tabla en la ronda $round. Verifica dependencias o errores.")
+//            }
+//
+//            round++
+//        }
+//
+//        if (remaining.isNotEmpty()) {
+//            throw IllegalStateException("No se pudieron crear todas las tablas después de $round intentos.")
+//        }
+//
+//        println("Todas las tablas fueron creadas correctamente.")
+//    }
 
     //TODO() hacer que la funcion use un service de core para guardar los modulos y permisos
     //por ahora se hace a mano aqui directamente con el transaction y entities
@@ -116,13 +88,6 @@ class DatabaseInitializer (private val database: Database) {
                             module = newModule
                         }
                         println("Category ${categoryAct.name} created")
-//                        categoryAct.permissions.forEach { permission ->
-//                            PermissionEntity.new {
-//                                name = permission.action
-//                                description = permission.description
-//                                category = newCat
-//                            }
-//                        }
                         val permissions = categoryAct.permissions
                         permissions.forEach { permission ->
                             PermissionEntity.new {

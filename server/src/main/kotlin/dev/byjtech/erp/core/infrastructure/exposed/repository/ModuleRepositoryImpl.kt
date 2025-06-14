@@ -13,10 +13,11 @@ import dev.byjtech.erp.core.infrastructure.exposed.extensions.toModel
 import dev.byjtech.erp.core.infrastructure.exposed.tables.CategoriesTable
 import dev.byjtech.erp.core.infrastructure.exposed.tables.ModulesTable
 import dev.byjtech.erp.core.infrastructure.exposed.tables.PermissionsTable
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class ModuleRepositoryImpl: ModuleRepository {
+class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
     override fun create(module: Module): Module {
         TODO("Not yet implemented")
     }
@@ -69,7 +70,7 @@ class ModuleRepositoryImpl: ModuleRepository {
     }
 
     override fun findPermissionByPermissionKey(permissionKey: PermissionKey): Permission? {
-        return transaction {
+        return transaction(db) {
             val module = ModuleEntity.find { ModulesTable.name eq permissionKey.module }.firstOrNull()
             if(module != null) {
                 val category = CategoryEntity.find { (CategoriesTable.name eq permissionKey.category) and (CategoriesTable.moduleId eq module.id) }.firstOrNull()
@@ -94,7 +95,7 @@ class ModuleRepositoryImpl: ModuleRepository {
     //mapear los permissionKey de forma no repetida y por cada dato hacer una busqueda
     //ej: por cada moduleName se busca su modulo y por cada uno de sus categoryName se busca su category y asi hasta añadir el permission al set
     override fun findPermissionsByPermissionKeySet(permissionKeySet: Set<PermissionKey>): Set<Permission> {
-        return transaction {
+        return transaction(db) {
             val permissions = mutableSetOf<Permission>()
             permissionKeySet.forEach { permissionKey ->
                 findPermissionByPermissionKey(permissionKey)?.let {permissions.add(it) }
@@ -106,7 +107,7 @@ class ModuleRepositoryImpl: ModuleRepository {
     override fun getPermissionKeysByPermissionIdSet(permissionIdSet: Set<Int>): Set<PermissionKey> {
         if (permissionIdSet.isEmpty()) return emptySet()
 
-        return transaction {
+        return transaction(db) {
             PermissionEntity.find { PermissionsTable.id inList permissionIdSet }
                 .map { perm ->
                     PermissionKey(

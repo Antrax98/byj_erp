@@ -4,12 +4,13 @@ import com.github.benmanes.caffeine.cache.Cache
 import dev.byjtech.erp.config.fetchGoogleUserInfo
 import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.application.service.UserService
-import dev.byjtech.erp.core.database.superAdmins.SuperAdminDataSource.Companion.isSuperAdmin
-import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource.Companion.findUserIdBySessionId
-import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource as USDS
-import dev.byjtech.erp.core.database.users.findUserByEmail
-import dev.byjtech.erp.core.database.users.updateUserFromGoogleInfo
+//import dev.byjtech.erp.core.database.superAdmins.SuperAdminDataSource.Companion.isSuperAdmin
+//import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource.Companion.findUserIdBySessionId
+//import dev.byjtech.erp.core.database.userSessions.UserSessionsDataSource as USDS
+//import dev.byjtech.erp.core.database.users.findUserByEmail
+//import dev.byjtech.erp.core.database.users.updateUserFromGoogleInfo
 import dev.byjtech.erp.core.domain.model.Permission
+import dev.byjtech.erp.core.domain.model.Session
 import dev.byjtech.erp.core.domain.repository.ModuleRepository
 import dev.byjtech.erp.core.domain.repository.RoleRepository
 import dev.byjtech.erp.core.domain.repository.SessionRepository
@@ -25,6 +26,7 @@ import dev.byjtech.erp.core.response.SubscribedModulesResponse
 import dev.byjtech.erp.core.response.UserPermissionsResponse
 import dev.byjtech.erp.core.response.UserRolesResponse
 import dev.byjtech.erp.core.session.AppSession
+import dev.byjtech.erp.utils.datetime.toKotlinx
 import java.time.LocalDateTime
 import io.ktor.client.HttpClient
 import io.ktor.http.ContentType
@@ -36,10 +38,15 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.toMap
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.Base64
 
 val logger: Logger = LoggerFactory.getLogger("AuthCallbackLogger")
@@ -184,7 +191,7 @@ fun Route.googleAuthRoutes(
     get("/me/type") {
         val session = auth.authorizeOrThrow(call)
 
-        val userType = if (isSuperAdmin(session.userId)) {
+        val userType = if (superAdminRepo.getByUserId(session.userId)!=null) {
             "superadmin"
         } else {
             "tenant"
@@ -194,7 +201,7 @@ fun Route.googleAuthRoutes(
 
     get("/me") {
         val session = auth.authorizeOrThrow(call)
-        val userId = findUserIdBySessionId(session.sessionId)?: return@get call.respond(HttpStatusCode.NotFound, "User not found")
+        val userId = session.userId
         val user = userRepo.find(userId)
         if (user == null) {
             call.respond(HttpStatusCode.NotFound, "User not found")
@@ -251,41 +258,61 @@ fun Route.googleAuthRoutes(
 
 
                 if (googleUserInfo != null) {
-                    val userEntity = findUserByEmail(googleUserInfo.email)  //TODO MODIFICAR
-                    if (userEntity != null) {
-                        updateUserFromGoogleInfo(userEntity, googleUserInfo)  //TODO MODIFICAR
+//                    val userEntity = findUserByEmail(googleUserInfo.email)  //TODO MODIFICAR
+                    val user = userRepo.findByEmail(googleUserInfo.email)
+                    if (user != null) {
+//                        updateUserFromGoogleInfo(userEntity, googleUserInfo)  //TODO MODIFICAR
+                        userServ.updateUserFromGoogleInfo(user, googleUserInfo)
+
                         val userAgent = call.request.headers["User-Agent"] ?: ""
                         val sessionExpiresAt = if (googleUserInfo.expiresAt > 0) {
                             Instant.ofEpochMilli(googleUserInfo.expiresAt)
                         } else {
                             logger.warn("No expiration found in ID token. Using default (7 days).")
-                            LocalDateTime.now().plusDays(7).toInstant(java.time.ZoneOffset.UTC) //Example: 7 days from now. Adjust as needed
+                            LocalDateTime.now().plusDays(7).toInstant(ZoneOffset.UTC) //Example: 7 days from now. Adjust as needed
                         }
-                        val existingSession = USDS.findSessionByUserIdAndDeviceId(userEntity.id.value, deviceId)  //TODO MODIFICAR
+//                        val existingSession = USDS.findSessionByUserIdAndDeviceId(userEntity.id.value, deviceId)  //TODO MODIFICAR
+                        val userSessionsSet = sessionRepo.findByUserId(user.id)
+                        var existingSessionAux = userSessionsSet.firstOrNull {
+                            it.deviceId == deviceId
+                        }
+
                         val sessionCookie : AppSession
-                        if (existingSession != null && existingSession.isValid) {
-                            // actualizar el ya existente
-                            USDS.updateSession( //TODO MODIFICAR
-                                existingSession.id.value,
-                                accessToken = accessToken,
+                        if (existingSessionAux != null && existingSessionAux.isValid) {
+                            existingSessionAux = existingSessionAux.copy(
+                                accessTokens = accessToken,
                                 refreshToken = principal.refreshToken ?: "",
                                 userAgent = userAgent,
                                 platform = platform,
-                                expiresAt = sessionExpiresAt // Update expiration
+                                expiresAt = LocalDateTime.ofInstant(sessionExpiresAt, ZoneId.systemDefault()).toKotlinx() // Update expiration
                             )
-                            sessionCookie = AppSession(existingSession.id.value, sessionExpiresAt.toEpochMilli())
+                            sessionRepo.update(existingSessionAux)
+                            sessionCookie = AppSession(existingSessionAux.id, sessionExpiresAt.toEpochMilli())
                             logger.debug("Updated appSession: {}", sessionCookie)
                         } else {
-                            val newSession = USDS.createSession( //TODO MODIFICAR
-                                userId = userEntity.id.value,
-                                accessToken = accessToken,
-                                refreshToken = principal.refreshToken ?: "",
-                                userAgent = userAgent,
+//                            val newSession = USDS.createSession( //TODO MODIFICAR
+//                                userId = userEntity.id.value,
+//                                accessToken = accessToken,
+//                                refreshToken = principal.refreshToken ?: "",
+//                                userAgent = userAgent,
+//                                deviceId = deviceId,
+//                                platform = platform,
+//                                expiresAt = sessionExpiresAt  // Store expiration
+//                            )
+                            val newSession = sessionRepo.create(Session(
+                                userId = user.id,
+                                id = 1, //este no importa pero hay que darlo igual
                                 deviceId = deviceId,
+                                accessTokens = accessToken,
+                                refreshToken = principal.refreshToken ?: "",
                                 platform = platform,
-                                expiresAt = sessionExpiresAt  // Store expiration
-                            )
-                            sessionCookie = AppSession(newSession.id.value, sessionExpiresAt.toEpochMilli())
+                                userAgent = userAgent,
+                                isValid = true,
+                                createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                                updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                                expiresAt = LocalDateTime.ofInstant(sessionExpiresAt, ZoneId.systemDefault()).toKotlinx(),
+                            ))
+                            sessionCookie = AppSession(newSession.id, sessionExpiresAt.toEpochMilli())
                             logger.debug("Created new appSession: {}", sessionCookie)
                         }
                         val jsonCookie = Json.encodeToString(AppSession.serializer(), sessionCookie)

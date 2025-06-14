@@ -4,9 +4,10 @@ import dev.byjtech.erp.core.domain.model.Session
 import dev.byjtech.erp.core.domain.repository.SessionRepository
 import dev.byjtech.erp.core.infrastructure.exposed.entities.SessionEntity
 import dev.byjtech.erp.core.infrastructure.exposed.extensions.toModel
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class SessionRepositoryImpl: SessionRepository {
+class SessionRepositoryImpl(private val db: Database): SessionRepository {
     override fun create(session: Session): Session {
         TODO("Not yet implemented")
     }
@@ -14,7 +15,7 @@ class SessionRepositoryImpl: SessionRepository {
         TODO("Not yet implemented")
     }
     override fun find(id: Int): Session? {
-        return transaction {
+        return transaction(db) {
             val session = SessionEntity.findById(id)?.toModel()
             return@transaction session
         }
@@ -26,7 +27,7 @@ class SessionRepositoryImpl: SessionRepository {
         TODO("Not yet implemented")
     }
     override fun delete(id: Int) {
-        transaction {
+        transaction(db) {
             SessionEntity.findById(id)?.delete()
         }
     }

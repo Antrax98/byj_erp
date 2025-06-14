@@ -15,13 +15,14 @@ import dev.byjtech.erp.core.infrastructure.exposed.extensions.toModel
 import dev.byjtech.erp.core.infrastructure.exposed.tables.UserPermissionTable
 import dev.byjtech.erp.core.infrastructure.exposed.tables.UserRoleTable
 import dev.byjtech.erp.core.infrastructure.exposed.tables.UsersTable
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 
-class UserRepositoryImpl: UserRepository {
+class UserRepositoryImpl(private val db: Database): UserRepository {
     override fun create(user: UserDTO): Boolean {
-        return transaction {
+        return transaction(db) {
             try {
                 UserEntity.new {
                     name = user.name
@@ -41,7 +42,7 @@ class UserRepositoryImpl: UserRepository {
     }
 
     override fun create(user: User): User{
-        return transaction {
+        return transaction(db) {
             try {
                 val userEntity = UserEntity.new {
                     name = user.name
@@ -60,13 +61,13 @@ class UserRepositoryImpl: UserRepository {
     }
 
     override fun find(id: Int): User? {
-        return transaction {
+        return transaction(db) {
             UserEntity.findById(id)?.toModel()
         }
     }
 
     override fun findWithRoles(id: Int): User? {
-        return transaction {
+        return transaction(db) {
             val userRoles = UserRoleEntity.find { UserRoleTable.userId eq id }.mapNotNull { RoleEntity.findById(it.role.id) }
             val userModel = UserEntity.findById(id)?.toModel(userRoles.toSet())
             return@transaction userModel
@@ -80,7 +81,7 @@ class UserRepositoryImpl: UserRepository {
     //no usar para hacer update a los roles del user, usar el metodo update del repository de roles
     //solo hase update al user, no a su relacion con roles
     override fun update(user: User): User {
-        return transaction {
+        return transaction(db) {
             val userEntity = UserEntity.findById(user.id) ?: throw Exception("User not found")
             userEntity.fromModel(user)
             return@transaction userEntity.toModel()
@@ -89,7 +90,7 @@ class UserRepositoryImpl: UserRepository {
 
     // si el usuario ya tiene el rol, retorna false
     override fun addRole(userId: Int, roleId: Int): Boolean {
-        return transaction {
+        return transaction(db) {
             val exist = UserRoleEntity.find { (UserRoleTable.userId eq userId) and (UserRoleTable.roleId eq roleId) }.firstOrNull()
             if(exist != null){
                 return@transaction false
@@ -105,7 +106,7 @@ class UserRepositoryImpl: UserRepository {
 
     // si el usuario no tenia el rol, retorna false
     override fun removeRole(userId: Int, roleId: Int): Boolean {
-        return transaction {
+        return transaction(db) {
             val exist = UserRoleEntity.find { (UserRoleTable.userId eq userId) and (UserRoleTable.roleId eq roleId) }.firstOrNull()
             if(exist == null){
                 return@transaction false
@@ -118,12 +119,12 @@ class UserRepositoryImpl: UserRepository {
 
     //mejor si no se usa
     override fun delete(id: Int) {
-        transaction {
+        transaction(db) {
             UserEntity[id].delete()
         }
     }
     override fun findByCompanyId(companyId: Int): Set<User> {
-        return transaction {
+        return transaction(db) {
             UserEntity.find { UsersTable.companyId eq companyId }.map { it.toModel() }.toSet()
         }
     }
@@ -131,7 +132,7 @@ class UserRepositoryImpl: UserRepository {
     //funciones dedicadas a permisos especiales
 
     override fun addSpecialPermission(userId: Int, permissionId: Int): Boolean {
-        return transaction {
+        return transaction(db) {
             //chekear si existe el usuario y el permiso, por ahora solo retornan false de no existir
             val user = UserEntity.findById(userId)
             val permission = PermissionEntity.findById(permissionId)
@@ -152,7 +153,7 @@ class UserRepositoryImpl: UserRepository {
         }
     }
     override fun removeSpecialPermission(userId: Int, permissionId: Int): Boolean {
-        return transaction {
+        return transaction(db) {
             //chekear si existe el usuario y el permiso, por ahora solo retornan false de no existir
             val user = UserEntity.findById(userId)
             val permission = PermissionEntity.findById(permissionId)
@@ -171,7 +172,7 @@ class UserRepositoryImpl: UserRepository {
         }
     }
     override fun getSpecialPermissionsByUserId(userId: Int): Set<Permission>? {
-        return transaction {
+        return transaction(db) {
             UserEntity.findById(userId) ?: return@transaction null
             val permissions = UserPermissionEntity.find { UserPermissionTable.userId eq userId }.map { it.permission }
             return@transaction permissions.map { it.toModel() }.toSet()

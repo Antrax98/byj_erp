@@ -15,6 +15,7 @@ import dev.byjtech.erp.shared.contracts.core.auth.AuthenticationException
 import dev.byjtech.erp.shared.contracts.core.auth.AuthorizationException
 import dev.byjtech.erp.core.CoreInitializer
 import dev.byjtech.erp.shared.infrastructure.database.DatabaseInitializer
+import dev.byjtech.erp.shared.infrastructure.database.createTables
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -55,20 +56,20 @@ fun Application.module() {
 
     moduleInitializers.forEach {
         println("Module ${it.definition.name} detected")
+        println("Initializing ${it.definition.name} database...")
+        it.database.createTables(it.tables.toList())
+        println("${it.definition.name} database initialized")
     }
 
-
-    val databaseInitializer: DatabaseInitializer = koin.get()
-
-    println("Initializing database...")
-    databaseInitializer.multiCreate(moduleInitializers)
-    databaseInitializer.registerModuleDefinitions(moduleInitializers)
-    println("Database initialized")
-    println("Initializing first data...")
+    val databaseInitializer= DatabaseInitializer(coreInitializer.database)
+    println("registering modules...")
+    databaseInitializer.registerModuleDefinitions(allModules)
+    println("modules registered")
+    println("adding first test data...")
     databaseInitializer.firstDataInitialization()
-    println("First data initialized")
+    println("first test data added")
 
-    //databaseInitializer.nuke() //borra las tablas.. no sirbe para nada, hacerlo manualmente mejor por ahora
+
 
     install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) {
         json(Json {

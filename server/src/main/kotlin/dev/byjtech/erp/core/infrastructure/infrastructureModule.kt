@@ -23,6 +23,8 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 import dev.byjtech.erp.core.infrastructure.api.companies.CompanyRoutesInstaller
+import org.jetbrains.exposed.sql.Database
+import org.koin.core.qualifier.named
 
 
 val httpClient = HttpClient(CIO) {
@@ -42,13 +44,13 @@ val stateCache: Cache<String, String> = Caffeine.newBuilder()
 // los instaladores de rutas (y por consiguiente sus rutas) por ser los que hablan al exterior (por lo que entiendo, hacerlo a tu propia discrecion)
 val infrastructureModule = module {
     //repositories
-    single<CompanyRepository> { CompanyRepositoryImpl() }
-    single<UserRepository> { UserRepositoryImpl() }
-    single<SessionRepository> { SessionRepositoryImpl() }
-    single<SuperAdminRepository> { SuperAdminRepositoryImpl() }
-    single<RoleRepository> { RoleRepositoryImpl() }
-    single<ModuleRepository> { ModuleRepositoryImpl() }
-    single<SubscriptionRepository> { SubscriptionRepositoryImpl() }
+    single<CompanyRepository> { CompanyRepositoryImpl(get(named("coreDatabase"))) }
+    single<UserRepository> { UserRepositoryImpl(get(named("coreDatabase"))) }
+    single<SessionRepository> { SessionRepositoryImpl(get(named("coreDatabase"))) }
+    single<SuperAdminRepository> { SuperAdminRepositoryImpl(get(named("coreDatabase"))) }
+    single<RoleRepository> { RoleRepositoryImpl(get(named("coreDatabase"))) }
+    single<ModuleRepository> { ModuleRepositoryImpl(get(named("coreDatabase"))) }
+    single<SubscriptionRepository> { SubscriptionRepositoryImpl(get(named("coreDatabase"))) }
 
     //tables
     //single<CoreTables> { CoreTables } //no supe como hacerlo funcionar, lo dare directametne en el initializer por ahora
@@ -91,7 +93,7 @@ val infrastructureModule = module {
         CoreRoutesInstaller(
             setOf(
                 //AuthRoutesInstaller(), //TODO: justamente separar esta de las demas rutas, los otros si van aqui
-                UserRoutesInstaller(get(), get(), get()),
+                UserRoutesInstaller(get(), get(), get(), get()),
                 CompanyRoutesInstaller(get(), get())
             )
         )
