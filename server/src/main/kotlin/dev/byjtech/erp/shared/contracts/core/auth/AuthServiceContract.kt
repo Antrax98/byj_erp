@@ -3,6 +3,7 @@ package dev.byjtech.erp.shared.contracts.core.auth
 //este class esta en el shared del proyecto completo, no en la carpeta core real
 import dev.byjtech.erp.common.PermissionKey
 import io.ktor.server.application.ApplicationCall
+import java.util.UUID
 
 
 //enviarlo a otro archivo compartido de ser necesario? (para juntar todos los dto y clases compartidas)
@@ -10,8 +11,9 @@ import io.ktor.server.application.ApplicationCall
 //TODO: darle mas informacion de forma que cubra lo esencial
 // lo mas probable es que sea todo lo relacionado con google, informacion basica del usuario y talvez diferencair si es un tenant o un SuperAdmin
 data class ValidatedSessionInfo(
-    val userId: Int,
-    val sessionId: Int
+    val userId: UUID,
+    val sessionId: UUID,
+    val companyId: UUID?,
     // no se cual usare por ahora, asi que lo dejare asi
     //agregar mas campos de ser necesarios
 )

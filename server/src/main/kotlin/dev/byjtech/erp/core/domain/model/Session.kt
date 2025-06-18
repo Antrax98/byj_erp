@@ -1,10 +1,11 @@
 package dev.byjtech.erp.core.domain.model
 
 import kotlinx.datetime.LocalDateTime
+import java.util.UUID
 
 data class Session(
-    val id: Int,
-    val userId: Int,
+    val id: UUID,
+    val userId: UUID,
     val deviceId: String,
     val accessTokens: String,
     val refreshToken: String,

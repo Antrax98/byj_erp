@@ -14,6 +14,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
+import java.util.UUID
 
 fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, moduleRepo: ModuleRepository) {
     get("/me") {
@@ -63,8 +64,8 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
                 CoreDefinition.Admin.All.key
             )
         )
-        val userId = call.parameters["userId"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
-        val user = userRepo.find(userId)
+        val userId = call.parameters["userId"]?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+        val user = userRepo.find(UUID.fromString(userId))
         if (user == null) {
             call.respond(HttpStatusCode.NotFound, null)
             return@get
@@ -84,7 +85,7 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
         val assignRoleData = call.receive<AssignRoleRequest>()
 
         //TODO(): hacer que reconosca cuando no existe algun dato o simplemente ya existia la asignacion (SealedClass?)
-        val response = userRepo.addRole(assignRoleData.userId, assignRoleData.roleId)
+        val response = userRepo.addRole(UUID.fromString(assignRoleData.userId), UUID.fromString(assignRoleData.roleId))
 
         if (response) {
             call.respond(HttpStatusCode.OK, ApiResponse.Success(Unit))
@@ -106,10 +107,10 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
 
 
         if(assignSpecialPermissionData.permissionId != null || assignSpecialPermissionData.permissionKey != null){
-            var permissionId: Int? = null
+            var permissionId: UUID? = null
             if (assignSpecialPermissionData.permissionId != null){
                 //logica con permissionId
-                permissionId = assignSpecialPermissionData.permissionId
+                permissionId = UUID.fromString(assignSpecialPermissionData.permissionId)
 
             } else {
                 //logica con permissionKey
@@ -125,7 +126,7 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
             }
             //logica comun
             if (permissionId != null){
-                val response = userRepo.addSpecialPermission(assignSpecialPermissionData.userId, permissionId)
+                val response = userRepo.addSpecialPermission(UUID.fromString(assignSpecialPermissionData.userId), permissionId)
                 if (response) {
                     call.respond(HttpStatusCode.OK, ApiResponse.Success(Unit))
                 } else {
@@ -147,10 +148,10 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
                 CoreDefinition.Admin.All.key
             )
         )
-        val userId = call.parameters["userId"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error( "Invalid user ID", code = "INVALID_USER_ID"))
-        val permissionId = call.parameters["permissionId"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Invalid permission ID", code = "INVALID_PERMISSION_ID"))
+        val userId = call.parameters["userId"]?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error( "Invalid user ID", code = "INVALID_USER_ID"))
+        val permissionId = call.parameters["permissionId"]?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Invalid permission ID", code = "INVALID_PERMISSION_ID"))
 
-        val response = userRepo.removeSpecialPermission(userId, permissionId)
+        val response = userRepo.removeSpecialPermission(UUID.fromString(userId), UUID.fromString(permissionId))
         if (response) {
             call.respond(
                 HttpStatusCode.OK,
@@ -172,9 +173,9 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
                 CoreDefinition.Roles.Assign.key
             )
         )
-        val userId = call.parameters["userId"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Invalid user ID", code = "INVALID_USER_ID"))
-        val roleId = call.parameters["roleId"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Invalid role ID", code = "INVALID_ROLE_ID"))
-        val response = userRepo.removeRole(userId, roleId)
+        val userId = call.parameters["userId"]?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Invalid user ID", code = "INVALID_USER_ID"))
+        val roleId = call.parameters["roleId"]?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Invalid role ID", code = "INVALID_ROLE_ID"))
+        val response = userRepo.removeRole(UUID.fromString(userId), UUID.fromString(roleId))
         if (response) {
             call.respond(HttpStatusCode.OK, ApiResponse.Success(Unit))
         } else {
@@ -198,7 +199,7 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
                 call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Company id not found", code = "COMPANY_ID_NOT_FOUND"))
                 return@post
             } else {
-                newUser = newUser.copy(companyId = userCompanyid)
+                newUser = newUser.copy(companyId = userCompanyid.toString())
             }
         }
         val response = userRepo.create(newUser)

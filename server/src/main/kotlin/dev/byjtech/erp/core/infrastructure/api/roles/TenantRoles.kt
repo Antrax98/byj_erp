@@ -11,6 +11,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
+import java.util.UUID
 
 fun Route.tenantRoles(authServ: CoreAuthWrapper, roleRepo: RoleRepository, userRepo: UserRepository) {
     post("/assign-role-to-user") {
@@ -24,7 +25,7 @@ fun Route.tenantRoles(authServ: CoreAuthWrapper, roleRepo: RoleRepository, userR
         val assignRoleData = call.receive<AssignRoleRequest>()
 
         //TODO(): hacer que reconosca cuando no existe algun dato o simplemente ya existia la asignacion
-        val response = userRepo.addRole(assignRoleData.userId, assignRoleData.roleId)
+        val response = userRepo.addRole(UUID.fromString(assignRoleData.userId), UUID.fromString(assignRoleData.roleId))
 
         if (response) {
             call.respond(HttpStatusCode.OK, ApiResponse.Success(Unit))

@@ -4,9 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SubscriptionDTO(
-    val id: Int,
-    val companyId: Int,
-    val moduleId: Int,
+    val id: String,
+    val companyId: String,
+    val moduleId: String,
     val isActive: Boolean,
     val isAccessible: Boolean
 )

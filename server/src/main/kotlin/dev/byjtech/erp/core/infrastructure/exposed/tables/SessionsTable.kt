@@ -1,9 +1,10 @@
 package dev.byjtech.erp.core.infrastructure.exposed.tables
 
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.javatime.datetime
 
-object SessionsTable : IntIdTable("sessions") {
+object SessionsTable : UUIDTable("sessions") {
     val userId = reference("user_id", UsersTable)
     //val sessionId = uuid("session_id").uniqueIndex()
     val isValid = bool("is_valid").default(true)

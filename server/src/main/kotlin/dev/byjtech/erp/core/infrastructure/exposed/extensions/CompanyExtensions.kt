@@ -9,7 +9,7 @@ import kotlinx.datetime.toJavaLocalDateTime
 
 fun CompanyEntity.toDTO(): CompanyDTO {
     return CompanyDTO(
-        id = this.id.value,
+        id = this.id.value.toString(),
         name = this.name,
         contactEmail = this.contactEmail,
         createdAt = this.createdAt?.toKotlinx(),
@@ -57,7 +57,7 @@ fun Company.toEntity(existingEntity: CompanyEntity? = null): CompanyEntity {
 
 fun Company.toDTO(): CompanyDTO {
     return CompanyDTO(
-        id = this.id,
+        id = this.id.toString(),
         name = this.name,
         contactEmail = this.contactEmail,
         createdAt = this.createdAt,

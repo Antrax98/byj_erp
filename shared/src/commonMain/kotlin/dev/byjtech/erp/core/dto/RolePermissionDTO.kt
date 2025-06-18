@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RolePermissionDTO(
-    val id: Int,
-    val roleId: Int,
-    val permissionId: Int,
+    val id: String,
+    val roleId: String,
+    val permissionId: String,
     val createdAt: LocalDateTime?,
 )

@@ -10,8 +10,8 @@ import kotlinx.datetime.toLocalDateTime
 fun SessionEntity.toDTO(): SessionDTO {
     val now = kotlinx.datetime.Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.UTC)
     return SessionDTO(
-        id = this.id.value,
-        userId = this.user.id.value,
+        id = this.id.value.toString(),
+        userId = this.user.id.value.toString(),
         deviceId = this.deviceId,
         platform = this.platform,
         createdAt = this.createdAt.toKotlinx(),

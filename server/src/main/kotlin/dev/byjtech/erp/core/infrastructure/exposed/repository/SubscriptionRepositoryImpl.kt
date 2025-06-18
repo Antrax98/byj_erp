@@ -13,11 +13,12 @@ import dev.byjtech.erp.utils.datetime.toJava
 import dev.byjtech.erp.utils.datetime.toKotlinx
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.UUID
 
 class SubscriptionRepositoryImpl(private val db: Database): SubscriptionRepository {
     override fun create(subscription: Subscription): Subscription {
         return transaction(db) {
-            val subscriptionEntity = SubscriptionEntity.new {
+            val subscriptionEntity = SubscriptionEntity.new(UUID.randomUUID()) {
                 this.company = CompanyEntity[subscription.company.id]
                 this.module = ModuleEntity[subscription.module.id]
                 this.isActive = subscription.isActive
@@ -51,7 +52,7 @@ class SubscriptionRepositoryImpl(private val db: Database): SubscriptionReposito
         }
     }
 
-    override fun findBilling(id: Int): Billing? {
+    override fun findBilling(id: UUID): Billing? {
         return transaction(db) {
             val billing = BillingEntity.findById(id)
             return@transaction billing?.toModel()
@@ -69,14 +70,14 @@ class SubscriptionRepositoryImpl(private val db: Database): SubscriptionReposito
         }
     }
 
-    override fun find(id: Int): Subscription? {
+    override fun find(id: UUID): Subscription? {
         return transaction(db) {
             val subscription = SubscriptionEntity.findById(id)
             return@transaction subscription?.toModel()
         }
     }
 
-    override fun findByCompanyId(companyId: Int): Set<Subscription> {
+    override fun findByCompanyId(companyId: UUID): Set<Subscription> {
         return transaction(db) {
             SubscriptionEntity
                 .find { SubscriptionsTable.companyId eq companyId }
@@ -100,7 +101,7 @@ class SubscriptionRepositoryImpl(private val db: Database): SubscriptionReposito
         }
     }
 
-    override fun findByCompanyIdAndModule(companyId: Int, module: String): Subscription? {
+    override fun findByCompanyIdAndModule(companyId: UUID, module: String): Subscription? {
         return transaction(db) {
             val subscriptions = SubscriptionEntity.find { SubscriptionsTable.companyId eq companyId }
             val subscription = subscriptions.find { it.module.name == module }
@@ -108,20 +109,20 @@ class SubscriptionRepositoryImpl(private val db: Database): SubscriptionReposito
         }
     }
 
-    override fun findByModuleId(moduleId: Int): Set<Subscription> {
+    override fun findByModuleId(moduleId: UUID): Set<Subscription> {
         return transaction(db) {
             val subscriptions = SubscriptionEntity.find {SubscriptionsTable.moduleId eq moduleId}
             return@transaction subscriptions.map { it.toModel() }.toSet()
         }
     }
 
-    override fun delete(id: Int) {
+    override fun delete(id: UUID) {
         transaction(db) {
             SubscriptionEntity[id].delete()
         }
     }
 
-    override fun deleteBilling(id: Int) {
+    override fun deleteBilling(id: UUID) {
         transaction(db) {
             BillingEntity[id].delete()
         }

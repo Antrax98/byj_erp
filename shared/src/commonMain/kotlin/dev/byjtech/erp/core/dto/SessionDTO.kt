@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SessionDTO(
-    val id: Int,
-    val userId: Int,
+    val id: String,
+    val userId: String,
     val deviceId: String,
     val platform: String,
     val userAgent: String?,

@@ -1,9 +1,10 @@
 package dev.byjtech.erp.core.domain.model
 
 import kotlinx.datetime.LocalDateTime
+import java.util.UUID
 
 data class User (
-    val id: Int,
+    val id: UUID,
     val name: String?,
     val email: String,
     val googleId: String?,
@@ -11,7 +12,7 @@ data class User (
     val isActive: Boolean,
     var createdAt: LocalDateTime?,
     var updatedAt: LocalDateTime?,
-    val companyId: Int?,
+    val companyId: UUID?,
     val roles: Set<Role>?,
     val specialPermissions: Set<Permission>?
 ) {

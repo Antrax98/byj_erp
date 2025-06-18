@@ -16,8 +16,8 @@ fun BillingEntity.toModel(): Billing {
 
 fun BillingEntity.toDTO(): BillingDTO {
     return BillingDTO(
-        id = this.id.value,
-        subscriptionId = this.subscription.id.value,
+        id = this.id.value.toString(),
+        subscriptionId = this.subscription.id.value.toString(),
         lastPaymentDate = this.lastPaymentDate?.toKotlinx(),
         nextPaymentDue = this.nextPaymentDue?.toKotlinx()
     )

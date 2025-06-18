@@ -1,8 +1,9 @@
 package dev.byjtech.erp.core.infrastructure.exposed.tables
 
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 
-object UserPermissionTable: IntIdTable("user_permission") {
+object UserPermissionTable: UUIDTable("user_permission") {
     val userId = reference("user_id", UsersTable)
     val permissionId = reference("permission_id", PermissionsTable)
 

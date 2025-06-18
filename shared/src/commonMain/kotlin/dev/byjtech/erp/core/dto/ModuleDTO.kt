@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ModuleDTO(
-    val id: Int,
+    val id: String,
     val name: String,
     val displayName: String,
     val description: String,

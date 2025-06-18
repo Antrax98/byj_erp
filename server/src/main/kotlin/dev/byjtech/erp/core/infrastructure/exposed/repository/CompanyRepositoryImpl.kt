@@ -9,6 +9,7 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
 
 import org.koin.core.Koin.*
+import java.util.UUID
 
 class CompanyRepositoryImpl(private val db: Database) : CompanyRepository {
     override fun save(company: Company): Company = transaction(db) {
@@ -16,7 +17,7 @@ class CompanyRepositoryImpl(private val db: Database) : CompanyRepository {
         company
     }
 
-    override fun findById(id: Int): Company? = transaction(db) {
+    override fun findById(id: UUID): Company? = transaction(db) {
         val auxCompany: CompanyEntity? = CompanyEntity.findById(id)
         auxCompany?.toModel() ?: return@transaction null
     }
@@ -25,7 +26,7 @@ class CompanyRepositoryImpl(private val db: Database) : CompanyRepository {
         CompanyEntity.all().map { it.toModel() }
     }
 
-    override fun delete(id: Int) {
+    override fun delete(id: UUID) {
         transaction(db) {
             CompanyEntity.findById(id)?.delete()
         }

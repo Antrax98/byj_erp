@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CategoryDTO(
-    val id: Int,
+    val id: String,
     val name: String,
     val description: String,
-    val moduleId: Int? // este es nullable
+    val moduleId: String? // este es nullable
 )
 

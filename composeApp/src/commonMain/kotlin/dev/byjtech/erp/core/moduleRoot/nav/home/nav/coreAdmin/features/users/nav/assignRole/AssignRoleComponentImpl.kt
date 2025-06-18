@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 class AssignRoleComponentImpl(
     componentContext: ComponentContext,
     override val userPermissions: StateFlow<Set<PermissionKey>>,
-    override val userIdToAssign: Int,
+    override val userIdToAssign: String,
     override val assignableRoles: Set<RoleDTO>,
     override val onFinished: (assigned: Boolean) -> Unit
 ): AssignRoleComponent, ComponentContext by componentContext {

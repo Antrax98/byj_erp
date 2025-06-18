@@ -5,22 +5,23 @@ import dev.byjtech.erp.core.domain.model.Category
 import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.dto.CategoryDTO //TODO() crear un DTO especifico para crear categorys???
 import dev.byjtech.erp.core.dto.PermissionDTO
+import java.util.UUID
 
 interface ModuleRepository {
     fun create(module: Module): Module
-    fun get(moduleId: Int): Module? //solo el module
-    fun getWithCategories(moduleId: Int): Module? //con categories
-    fun getWithCategoriesAndPermissions(moduleId: Int): Module? //con categories y permissions
-    fun getCategoryById(categoryId: Int): Category?
-    fun getPermissionById(permissionId: Int): Permission?
-    fun delete(moduleId: Int)
-    fun getCategoryByPermissionId(permissionId: Int): Category?
-    fun getByCategoryId(categoryId: Int): Module?
-    fun getByPermissionId(permissionId: Int): Module?
-    fun addCategory(moduleId: Int, newCategory: CategoryDTO): Category
-    fun addPermissionToCategory(categoryId: Int, newPermission: PermissionDTO): Permission
+    fun get(moduleId: UUID): Module? //solo el module
+    fun getWithCategories(moduleId: UUID): Module? //con categories
+    fun getWithCategoriesAndPermissions(moduleId: UUID): Module? //con categories y permissions
+    fun getCategoryById(categoryId: UUID): Category?
+    fun getPermissionById(permissionId: UUID): Permission?
+    fun delete(moduleId: UUID)
+    fun getCategoryByPermissionId(permissionId: UUID): Category?
+    fun getByCategoryId(categoryId: UUID): Module?
+    fun getByPermissionId(permissionId: UUID): Module?
+    fun addCategory(moduleId: UUID, newCategory: CategoryDTO): Category
+    fun addPermissionToCategory(categoryId: UUID, newPermission: PermissionDTO): Permission
     fun findPermissionByPermissionKey(permissionKey: PermissionKey): Permission?
     fun findPermissionsByPermissionKeySet(permissionKeySet: Set<PermissionKey>): Set<Permission>
-    fun getPermissionKeysByPermissionIdSet(permissionIdSet: Set<Int>): Set<PermissionKey>
+    fun getPermissionKeysByPermissionIdSet(permissionIdSet: Set<UUID>): Set<PermissionKey>
     //TODo() si faltan mas se agregan nomas
 }

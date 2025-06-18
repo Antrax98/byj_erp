@@ -1,7 +1,9 @@
 package dev.byjtech.erp.core.domain.model
 
+import java.util.UUID
+
 data class SuperAdmin(
-    val id: Int,
-    val userId: Int,
+    val id: UUID,
+    val userId: UUID,
     val description: String?
 )

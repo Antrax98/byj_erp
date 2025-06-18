@@ -3,10 +3,13 @@ package dev.byjtech.erp.core.infrastructure.exposed.entities
 import dev.byjtech.erp.core.infrastructure.exposed.tables.UsersTable
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import java.util.UUID
 
-class UserEntity(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<UserEntity>(UsersTable)
+class UserEntity(id: EntityID<UUID>) : UUIDEntity(id) {
+    companion object : UUIDEntityClass<UserEntity>(UsersTable)
 
     var name by UsersTable.name
     var email by UsersTable.email

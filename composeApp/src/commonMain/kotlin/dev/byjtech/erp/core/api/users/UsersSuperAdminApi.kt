@@ -6,6 +6,6 @@ import dev.byjtech.erp.core.dto.UserDTO
 interface UsersSuperAdminApi {
 
     @GET("api/core/users/super-admin/{id}")
-    suspend fun getUserById(@Path("id") id: Int): UserDTO
+    suspend fun getUserById(@Path("id") id: String): UserDTO
 
 }

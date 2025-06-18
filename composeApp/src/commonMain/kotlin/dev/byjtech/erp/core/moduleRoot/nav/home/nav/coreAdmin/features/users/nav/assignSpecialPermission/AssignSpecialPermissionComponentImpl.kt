@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 class AssignSpecialPermissionComponentImpl(
     componentContext: ComponentContext,
     override val userPermissions: StateFlow<Set<PermissionKey>>,
-    override val userIdToAssign: Int,
+    override val userIdToAssign: String,
     override val assignablePermissions: Set<PermissionKey>,
     override val onFinished: (assigned: Boolean) -> Unit
 ): AssignSpecialPermissionComponent, ComponentContext by componentContext {

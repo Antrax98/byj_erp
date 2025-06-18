@@ -46,41 +46,42 @@ class CompaniesComponentImpl(
     //datos de prueba
     private val dummyCompanies = listOf(
         CompanyDTO(
-            id = 1,
+            id = "8f3b1824-0f8d-42c2-b394-278dfcc17b3a",
             name = "TechNova Inc.",
             contactEmail = "contact@technova.com",
             createdAt = LocalDateTime.parse("2023-01-10T09:30:00"),
             updatedAt = LocalDateTime.parse("2024-05-01T15:45:00")
         ),
         CompanyDTO(
-            id = 2,
+            id = "64bcfe3c-ef92-4b82-931b-221bc163a6e4",
             name = "GreenFields Ltd.",
             contactEmail = "info@greenfields.co",
             createdAt = LocalDateTime.parse("2022-11-05T13:15:00"),
             updatedAt = LocalDateTime.parse("2024-01-20T10:00:00")
         ),
         CompanyDTO(
-            id = 3,
+            id = "b4d49816-4de1-42c2-9d4f-e13ec5aebc3f",
             name = "Skyreach Solutions",
             contactEmail = "support@skyreach.io",
             createdAt = LocalDateTime.parse("2021-06-18T08:00:00"),
             updatedAt = LocalDateTime.parse("2023-12-10T16:30:00")
         ),
         CompanyDTO(
-            id = 4,
+            id = "7d0caa1e-cc5b-4b1d-aeaf-4e00b84a4f76",
             name = "AquaCore Enterprises",
             contactEmail = "hello@aquacore.org",
             createdAt = LocalDateTime.parse("2023-03-22T11:20:00"),
             updatedAt = null
         ),
         CompanyDTO(
-            id = 5,
+            id = "70f1ce91-8a63-4803-bfef-19a3681b86e0",
             name = "NexusWorks",
             contactEmail = "team@nexus.works",
             createdAt = LocalDateTime.parse("2024-02-14T17:50:00"),
             updatedAt = LocalDateTime.parse("2025-01-10T09:00:00")
         )
     )
+
 
 }
 

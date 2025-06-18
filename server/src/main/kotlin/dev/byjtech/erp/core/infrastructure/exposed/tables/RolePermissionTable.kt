@@ -2,9 +2,10 @@ package dev.byjtech.erp.core.infrastructure.exposed.tables
 
 import dev.byjtech.erp.core.infrastructure.exposed.tables.BillingsTable.nullable
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.javatime.datetime
 
-object RolePermissionTable : IntIdTable("role_permission") {
+object RolePermissionTable : UUIDTable("role_permission") {
     val roleId = reference("role_id", RolesTable)
     val permissionId = reference("permission_id", PermissionsTable)
     val createdAt = datetime("created_at").nullable()

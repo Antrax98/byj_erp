@@ -68,7 +68,11 @@ fun Application.module() {
 
     val databaseInitializer= DatabaseInitializer(coreInitializer.database)
     println("registering modules...")
-    databaseInitializer.registerModuleDefinitions(allModules)
+    try {
+        databaseInitializer.registerModuleDefinitions(moduleInitializers)
+    } catch (e: Exception) {
+        println("Error registering modules: ${e.message}")
+    }
     println("modules registered")
     println("adding first test data...")
     databaseInitializer.firstDataInitialization()

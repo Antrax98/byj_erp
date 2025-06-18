@@ -1,10 +1,11 @@
 package dev.byjtech.erp.core.infrastructure.exposed.tables
 
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.javatime.datetime
 
 
-object UsersTable : IntIdTable("users") {
+object UsersTable : UUIDTable("users") {
     val name = text("name").nullable()
     val email = text("email")
     val googleId = text("google_id").nullable()

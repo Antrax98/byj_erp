@@ -9,9 +9,10 @@ import dev.byjtech.erp.core.infrastructure.exposed.entities.UserEntity
 import dev.byjtech.erp.utils.datetime.toKotlinx
 import kotlinx.datetime.toJavaLocalDateTime
 
+//no usar de ser posible, solo como ejemplo
 fun UserEntity.toDTO(): UserDTO {
     return UserDTO(
-        id = this.id.value,
+        id = this.id.value.toString(),
         name = this.name,
         email = this.email,
         pictureUrl = this.pictureUrl,
@@ -19,7 +20,7 @@ fun UserEntity.toDTO(): UserDTO {
         googleId = this.googleId,
         createdAt = this.createdAt?.toKotlinx(),
         updatedAt = this.updatedAt?.toKotlinx(),
-        companyId = this.company?.id?.value
+        companyId = this.company?.id?.value.toString()
     )
 }
 
@@ -53,7 +54,7 @@ fun UserEntity.fromModel(user: User) {
 
 fun User.toDTO(): UserDTO {
     return UserDTO(
-        id = this.id,
+        id = this.id.toString(),
         name = this.name,
         email = this.email,
         pictureUrl = this.pictureUrl,
@@ -61,22 +62,22 @@ fun User.toDTO(): UserDTO {
         googleId = this.googleId,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
-        companyId = this.companyId
+        companyId = this.companyId.toString()
     )
 }
 
-fun UserDTO.toModel(): User {
-    return User(
-        id = this.id,
-        name = this.name,
-        email = this.email,
-        pictureUrl = this.pictureUrl,
-        isActive = this.isActive,
-        googleId = this.googleId,
-        createdAt = this.createdAt,
-        updatedAt = this.updatedAt,
-        companyId = this.companyId,
-        roles = emptySet(),
-        specialPermissions = emptySet()
-    )
-}
+//fun UserDTO.toModel(): User {
+//    return User(
+//        id = this.id,
+//        name = this.name,
+//        email = this.email,
+//        pictureUrl = this.pictureUrl,
+//        isActive = this.isActive,
+//        googleId = this.googleId,
+//        createdAt = this.createdAt,
+//        updatedAt = this.updatedAt,
+//        companyId = this.companyId,
+//        roles = emptySet(),
+//        specialPermissions = emptySet()
+//    )
+//}

@@ -10,11 +10,16 @@ class UserService(
     private val userRepo: UserRepository,
 ) {
     fun updateUserFromGoogleInfo(user: User, googleUserInfo: UserInfo): User {
-        if (user.name== null) user.rename(googleUserInfo.name)
-        if (user.googleId == null) user.changeGoogleId(googleUserInfo.sub)
-        if (user.pictureUrl == null) user.changePictureUrl(googleUserInfo.picture)
-        user.updatedAt = LocalDateTime.now().toKotlinx()
-        userRepo.update(user)
-        return user
+        var updatedUser = user
+
+        if (updatedUser.name == null) updatedUser = updatedUser.rename(googleUserInfo.name)
+        if (updatedUser.googleId == null) updatedUser = updatedUser.changeGoogleId(googleUserInfo.sub)
+        if (updatedUser.pictureUrl == null) updatedUser = updatedUser.changePictureUrl(googleUserInfo.picture)
+
+        updatedUser = updatedUser.copy(updatedAt = LocalDateTime.now().toKotlinx())
+
+        userRepo.update(updatedUser)
+        return updatedUser
     }
+
 }

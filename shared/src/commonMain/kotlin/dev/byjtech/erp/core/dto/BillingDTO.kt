@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BillingDTO(
-    val id: Int,
-    val subscriptionId: Int,
+    val id: String,
+    val subscriptionId: String,
     val lastPaymentDate: LocalDateTime?,
     val nextPaymentDue: LocalDateTime?
 )

@@ -1,10 +1,11 @@
 package dev.byjtech.erp.core.domain.model
 
 import kotlinx.datetime.LocalDateTime
+import java.util.UUID
 
 //CompanyModule relacion entre empresa y modulo
 data class Subscription (
-    val id: Int,
+    val id: UUID,
     val company: Company,
     val module: Module,
     val isActive: Boolean,//el tenant admin puede manejar este

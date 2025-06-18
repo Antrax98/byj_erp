@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserDTO(
-    val id: Int,
+    val id: String,
     val name: String?,
     val email: String,
     val googleId: String?,
@@ -13,5 +13,5 @@ data class UserDTO(
     val isActive: Boolean,
     val createdAt: LocalDateTime?,
     val updatedAt: LocalDateTime?,
-    val companyId: Int?
+    val companyId: String?
 )

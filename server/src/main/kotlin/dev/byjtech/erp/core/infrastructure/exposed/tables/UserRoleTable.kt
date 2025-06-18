@@ -1,9 +1,10 @@
 package dev.byjtech.erp.core.infrastructure.exposed.tables
 
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.javatime.datetime
 
-object UserRoleTable : IntIdTable("user_role") {
+object UserRoleTable : UUIDTable("user_role") {
     val userId = reference("user_id", UsersTable)
     val roleId = reference("role_id", RolesTable)
     val createdAt = datetime("created_at").nullable()

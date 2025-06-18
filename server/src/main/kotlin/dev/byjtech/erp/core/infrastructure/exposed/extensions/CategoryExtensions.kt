@@ -9,10 +9,10 @@ import dev.byjtech.erp.utils.datetime.toKotlinx
 // Extensión para convertir CategoryEntity a CategoryDTO
 fun CategoryEntity.toDTO(): CategoryDTO {
     return CategoryDTO(
-        id = this.id.value,
+        id = this.id.value.toString(),
         name = this.name,
         description = this.description,
-        moduleId = this.module.id.value // Si 'module' es nullable, maneja el valor como nullable también
+        moduleId = this.module.id.value.toString() // Si 'module' es nullable, maneja el valor como nullable también
     )
 }
 
