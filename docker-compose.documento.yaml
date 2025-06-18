@@ -1,0 +1,17 @@
+services:
+  mysql_documentos:
+    image: mysql:8.3
+    container_name: documentos-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: docrootpassword
+      MYSQL_DATABASE: documentos_db
+      MYSQL_USER: doc_user
+      MYSQL_PASSWORD: doc_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - documentos_data:/var/lib/mysql
+
+volumes:
+  documentos_data:
