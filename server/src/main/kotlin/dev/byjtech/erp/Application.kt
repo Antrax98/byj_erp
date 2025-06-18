@@ -54,7 +54,12 @@ fun Application.module() {
     val allModules = moduleInitializers.filterNot { it is CoreInitializer } //sin el core, de ser necesario
     val coreInitializer = moduleInitializers.find { it is CoreInitializer } as CoreInitializer
 
-    moduleInitializers.forEach {
+    println("Module ${coreInitializer.definition.name} detected")
+    println("Initializing ${coreInitializer.definition.name} database...")
+    coreInitializer.database.createTables(coreInitializer.tables.toList())
+    println("${coreInitializer.definition.name} database initialized")
+
+    allModules.forEach {
         println("Module ${it.definition.name} detected")
         println("Initializing ${it.definition.name} database...")
         it.database.createTables(it.tables.toList())

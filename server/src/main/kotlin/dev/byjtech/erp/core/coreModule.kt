@@ -8,7 +8,7 @@ import dev.byjtech.erp.core.infrastructure.api.CoreRoutesInstaller
 import dev.byjtech.erp.core.infrastructure.api.auth.AuthRoutesInstaller
 import dev.byjtech.erp.core.infrastructure.exposed.CoreTables
 import dev.byjtech.erp.shared.infrastructure.database.CreateDatabase
-import dev.byjtech.erp.shared.infrastructure.database.DatabaseFactory
+//import dev.byjtech.erp.shared.infrastructure.database.DatabaseFactory
 import io.github.cdimascio.dotenv.dotenv
 import org.jetbrains.exposed.sql.Database
 import org.koin.core.qualifier.named
