@@ -6,6 +6,7 @@ import java.util.UUID
 
 data class Company(
     val id: UUID,
+    val rut: String,
     val name: String,
     val contactEmail: String,
     val createdAt: LocalDateTime?,

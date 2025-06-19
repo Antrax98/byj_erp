@@ -94,7 +94,7 @@ val infrastructureModule = module {
             setOf(
                 //AuthRoutesInstaller(), //TODO: justamente separar esta de las demas rutas, los otros si van aqui
                 UserRoutesInstaller(get(), get(), get(), get()),
-                CompanyRoutesInstaller(get(), get())
+                CompanyRoutesInstaller(get(), get(), get(), get())
             )
         )
     }

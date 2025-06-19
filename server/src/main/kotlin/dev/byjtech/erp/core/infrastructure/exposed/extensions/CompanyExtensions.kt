@@ -13,7 +13,8 @@ fun CompanyEntity.toDTO(): CompanyDTO {
         name = this.name,
         contactEmail = this.contactEmail,
         createdAt = this.createdAt?.toKotlinx(),
-        updatedAt = this.updatedAt?.toKotlinx()
+        updatedAt = this.updatedAt?.toKotlinx(),
+        rut = this.rut
     )
 }
 
@@ -23,7 +24,8 @@ fun CompanyEntity.toModel(): Company {
         name = this.name,
         contactEmail = this.contactEmail,
         createdAt = this.createdAt?.toKotlinx(),
-        updatedAt = this.updatedAt?.toKotlinx()
+        updatedAt = this.updatedAt?.toKotlinx(),
+        rut = this.rut
     )
 }
 
@@ -61,6 +63,7 @@ fun Company.toDTO(): CompanyDTO {
         name = this.name,
         contactEmail = this.contactEmail,
         createdAt = this.createdAt,
-        updatedAt = this.updatedAt
+        updatedAt = this.updatedAt,
+        rut = this.rut
     )
 }

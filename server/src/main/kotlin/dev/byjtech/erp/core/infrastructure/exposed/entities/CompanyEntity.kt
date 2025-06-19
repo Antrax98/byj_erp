@@ -12,6 +12,7 @@ class CompanyEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<CompanyEntity>(CompaniesTable)
 
     var name by CompaniesTable.name
+    var rut by CompaniesTable.rut
     var contactEmail by CompaniesTable.contactEmail
     var createdAt by CompaniesTable.createdAt
     var updatedAt by CompaniesTable.updatedAt
