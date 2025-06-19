@@ -64,22 +64,37 @@ fun CompanyInfoCard(company: CompanyDTO) {
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .size(64.dp)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        shape = CircleShape
+                    )
                     .padding(16.dp)
             )
+
             Spacer(Modifier.width(16.dp))
+
             Column {
                 Text(
                     text = company.name,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
+
                 Text(
                     text = company.contactEmail,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
+
+                // ✔️ Nuevo campo: RUT
+                Text(
+                    text = "RUT: ${company.rut}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+
                 Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = "Creado: ${company.createdAt}",
                     style = MaterialTheme.typography.bodySmall,
@@ -89,6 +104,7 @@ fun CompanyInfoCard(company: CompanyDTO) {
         }
     }
 }
+
 
 
 @Composable
