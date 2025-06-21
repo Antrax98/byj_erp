@@ -30,7 +30,7 @@ val coreModule = module {
     }
 
     //TODO() posiblemente hacer lo mismo de routes pero con los permission y las tablas
-    single<ModuleInitializer> {
+    single<ModuleInitializer>(named("coreInit")) {
         CoreInitializer(
             definition = CoreDefinition, //son el nombre y los permisos con category
             moduleRoutesInstaller = get<CoreRoutesInstaller>(), //rutas
