@@ -8,4 +8,5 @@ interface CompanyRepository {
     fun findById(id: UUID): Company?
     fun findAll(): List<Company>
     fun delete(id: UUID)
+    fun existWithRut(rut: String): Boolean
 }

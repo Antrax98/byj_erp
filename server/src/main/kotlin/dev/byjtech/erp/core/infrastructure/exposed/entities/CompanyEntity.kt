@@ -14,6 +14,7 @@ class CompanyEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     var name by CompaniesTable.name
     var rut by CompaniesTable.rut
     var contactEmail by CompaniesTable.contactEmail
+    var billing by BillingEntity optionalReferencedOn CompaniesTable.billing
     var createdAt by CompaniesTable.createdAt
     var updatedAt by CompaniesTable.updatedAt
 }

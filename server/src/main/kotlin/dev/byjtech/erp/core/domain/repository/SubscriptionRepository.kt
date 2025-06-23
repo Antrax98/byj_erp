@@ -7,13 +7,13 @@ import java.util.UUID
 interface SubscriptionRepository {
     fun create(subscription: Subscription): Subscription
     fun update(subscription: Subscription): Subscription
-    fun updateBilling(billing:Billing): Billing
-    fun findBilling(id: UUID): Billing?
-    fun createBilling(billing: Billing): Billing
+//    fun updateBilling(billing:Billing): Billing
+//    fun findBilling(id: UUID): Billing?
+//    fun createBilling(billing: Billing): Billing
     fun find(id: UUID): Subscription?
     fun findByCompanyId(companyId: UUID): Set<Subscription>
     fun findByCompanyIdAndModule(companyId: UUID, module: String): Subscription?
     fun findByModuleId(moduleId: UUID): Set<Subscription>
     fun delete(id: UUID)
-    fun deleteBilling(id: UUID)
+//    fun deleteBilling(id: UUID)
 }

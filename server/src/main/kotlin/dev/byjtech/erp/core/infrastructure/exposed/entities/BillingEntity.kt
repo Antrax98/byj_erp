@@ -11,7 +11,7 @@ import java.util.UUID
 class BillingEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<BillingEntity>(BillingsTable)
 
-    var subscription by SubscriptionEntity referencedOn BillingsTable.subscriptionId
+    var subscription by SubscriptionEntity referencedOn BillingsTable.company
     var lastPaymentDate by BillingsTable.lastPaymentDate
     var nextPaymentDue by BillingsTable.nextPaymentDue
 }

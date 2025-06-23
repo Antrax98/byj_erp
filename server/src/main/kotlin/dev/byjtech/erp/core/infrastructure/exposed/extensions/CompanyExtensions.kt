@@ -1,5 +1,6 @@
 package dev.byjtech.erp.core.infrastructure.exposed.extensions
 
+import dev.byjtech.erp.core.domain.model.Billing
 import dev.byjtech.erp.core.domain.model.Company
 import dev.byjtech.erp.core.dto.CompanyDTO
 import dev.byjtech.erp.core.infrastructure.exposed.entities.CompanyEntity
@@ -7,25 +8,27 @@ import dev.byjtech.erp.core.infrastructure.exposed.entities.CompanyEntity
 import dev.byjtech.erp.utils.datetime.toKotlinx
 import kotlinx.datetime.toJavaLocalDateTime
 
-fun CompanyEntity.toDTO(): CompanyDTO {
+fun CompanyEntity.toDTO(billingId: String? = null): CompanyDTO {
     return CompanyDTO(
         id = this.id.value.toString(),
         name = this.name,
         contactEmail = this.contactEmail,
         createdAt = this.createdAt?.toKotlinx(),
         updatedAt = this.updatedAt?.toKotlinx(),
-        rut = this.rut
+        rut = this.rut,
+        billingId = billingId
     )
 }
 
-fun CompanyEntity.toModel(): Company {
+fun CompanyEntity.toModel(billing: Billing? = null): Company {
     return Company(
         id = this.id.value,
         name = this.name,
         contactEmail = this.contactEmail,
         createdAt = this.createdAt?.toKotlinx(),
         updatedAt = this.updatedAt?.toKotlinx(),
-        rut = this.rut
+        rut = this.rut,
+        billing = billing
     )
 }
 
@@ -45,6 +48,7 @@ fun Company.toEntity(existingEntity: CompanyEntity? = null): CompanyEntity {
         CompanyEntity.new(null) {
             name = this@toEntity.name
             contactEmail = this@toEntity.contactEmail
+            rut = this@toEntity.rut
             createdAt = this@toEntity.createdAt?.toJavaLocalDateTime()
             updatedAt = this@toEntity.updatedAt?.toJavaLocalDateTime()
         }
@@ -53,6 +57,7 @@ fun Company.toEntity(existingEntity: CompanyEntity? = null): CompanyEntity {
         existingEntity.contactEmail = this.contactEmail
         existingEntity.createdAt = this.createdAt?.toJavaLocalDateTime()
         existingEntity.updatedAt = this.updatedAt?.toJavaLocalDateTime()
+        existingEntity.rut = this.rut
         existingEntity
     }
 }
@@ -64,6 +69,7 @@ fun Company.toDTO(): CompanyDTO {
         contactEmail = this.contactEmail,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
-        rut = this.rut
+        rut = this.rut,
+        billingId = this.billing?.id.toString()
     )
 }

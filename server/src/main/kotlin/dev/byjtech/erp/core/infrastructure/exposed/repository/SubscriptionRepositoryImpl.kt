@@ -33,42 +33,36 @@ class SubscriptionRepositoryImpl(private val db: Database): SubscriptionReposito
             subscriptionEntity.isActive = subscription.isActive
             subscriptionEntity.isAccessible = subscription.isAccessible
             subscriptionEntity.updatedAt = subscription.updatedAt?.toJava()
-            subscriptionEntity.billing = subscription.billing?.let { billing ->
-                val billingAux = BillingEntity[billing.id]
-                billingAux.lastPaymentDate = billing.lastPaymentDate?.toJava()
-                billingAux.nextPaymentDue = billing.nextPaymentDue?.toJava()
-                return@let billingAux
-            }
             return@transaction subscriptionEntity.toModel()
         }
     }
 
-    override fun updateBilling(billing: Billing): Billing {
-        return transaction(db) {
-            val billingEntity = BillingEntity[billing.id]
-            billingEntity.lastPaymentDate = billing.lastPaymentDate?.toJava()
-            billingEntity.nextPaymentDue = billing.nextPaymentDue?.toJava()
-            return@transaction billingEntity.toModel()
-        }
-    }
+//    override fun updateBilling(billing: Billing): Billing {
+//        return transaction(db) {
+//            val billingEntity = BillingEntity[billing.id]
+//            billingEntity.lastPaymentDate = billing.lastPaymentDate?.toJava()
+//            billingEntity.nextPaymentDue = billing.nextPaymentDue?.toJava()
+//            return@transaction billingEntity.toModel()
+//        }
+//    }
 
-    override fun findBilling(id: UUID): Billing? {
-        return transaction(db) {
-            val billing = BillingEntity.findById(id)
-            return@transaction billing?.toModel()
-        }
-    }
+//    override fun findBilling(id: UUID): Billing? {
+//        return transaction(db) {
+//            val billing = BillingEntity.findById(id)
+//            return@transaction billing?.toModel()
+//        }
+//    }
 
-    override fun createBilling(billing: Billing): Billing {
-        return transaction(db) {
-            val billingEntity = BillingEntity.new {
-                this.subscription = SubscriptionEntity[billing.subscription.id]
-                this.lastPaymentDate = billing.lastPaymentDate?.toJava()
-                this.nextPaymentDue = billing.nextPaymentDue?.toJava()
-            }
-            return@transaction billingEntity.toModel()
-        }
-    }
+//    override fun createBilling(billing: Billing): Billing {
+//        return transaction(db) {
+//            val billingEntity = BillingEntity.new {
+//                this.subscription = SubscriptionEntity[billing.subscription.id]
+//                this.lastPaymentDate = billing.lastPaymentDate?.toJava()
+//                this.nextPaymentDue = billing.nextPaymentDue?.toJava()
+//            }
+//            return@transaction billingEntity.toModel()
+//        }
+//    }
 
     override fun find(id: UUID): Subscription? {
         return transaction(db) {
@@ -84,7 +78,6 @@ class SubscriptionRepositoryImpl(private val db: Database): SubscriptionReposito
                 .map { entity ->
                     val company = entity.company.toModel()
                     val module = entity.module.toModel()
-                    val billing = entity.billing?.toModel()
 
                     Subscription(
                         id = entity.id.value,
@@ -93,8 +86,7 @@ class SubscriptionRepositoryImpl(private val db: Database): SubscriptionReposito
                         isActive = entity.isActive,
                         isAccessible = entity.isAccessible,
                         createdAt = entity.createdAt?.toKotlinx(),
-                        updatedAt = entity.updatedAt?.toKotlinx(),
-                        billing = billing
+                        updatedAt = entity.updatedAt?.toKotlinx()
                     )
                 }
                 .toSet()
@@ -122,9 +114,9 @@ class SubscriptionRepositoryImpl(private val db: Database): SubscriptionReposito
         }
     }
 
-    override fun deleteBilling(id: UUID) {
-        transaction(db) {
-            BillingEntity[id].delete()
-        }
-    }
+//    override fun deleteBilling(id: UUID) {
+//        transaction(db) {
+//            BillingEntity[id].delete()
+//        }
+//    }
 }

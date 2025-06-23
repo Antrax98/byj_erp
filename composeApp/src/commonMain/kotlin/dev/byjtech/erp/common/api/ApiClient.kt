@@ -32,6 +32,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import dev.byjtech.erp.common.ApiResponse
+import dev.byjtech.erp.core.request.CreateCompanyRequest
+import dev.byjtech.erp.core.response.ErrorList
+import io.ktor.client.utils.EmptyContent.contentType
 
 
 class ApiClient(
@@ -96,10 +99,10 @@ class ApiClient(
 
                 }
                 // Para otros errores, usar el comportamiento por defecto
-                else if (response.status.value >= 300) {
-                    val clientException = ClientRequestException(response, response.bodyAsText())
-                    throw clientException
-                }
+//                else if (response.status.value >= 300) {
+//                    val clientException = ClientRequestException(response, response.bodyAsText())
+//                    throw clientException
+//                }
 
             }
         }
@@ -174,7 +177,7 @@ class ApiClient(
 }
 
 
-//TODO: mover estos a sus propios archivos o algo
+//TODO: mover todo lo de abajo a sus propios archivos o algo
 sealed class ApiEvent {
     data object Unauthorized : ApiEvent()
     data object Forbidden : ApiEvent()
@@ -183,11 +186,45 @@ sealed class ApiEvent {
 class InvalidSessionException(message: String) : Exception(message)
 
 class CompanySA(private val client: HttpClient) {
+    //TODO(): usar ApiResponse en los que no lo usen
     suspend fun getAllCompanies(): Set<CompanyDTO> {
         return try {
             client.get("api/core/companies/super-admin/all-companies").body()
         } catch (e: Exception) {
             emptySet()
+        }
+    }
+
+    suspend fun createCompany(data: CreateCompanyRequest): ApiResponse<Unit,ErrorList?> {
+        return try {
+            val response = client.post("api/core/companies/super-admin/create-company") {
+                contentType(ContentType.Application.Json)
+                setBody(data)
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    println("OK")
+                    ApiResponse.Success(Unit)
+                }
+                HttpStatusCode.Conflict -> {
+                    val requestBody = response.body<ErrorList>()
+                    println("CONFLICT_REQUEST")
+                    ApiResponse.Error(requestBody, "CONFLICT_REQUEST")
+                }
+                HttpStatusCode.BadRequest -> {
+                    println("BAD_REQUEST")
+                    ApiResponse.Error(null, "BAD_REQUEST")
+                }
+                else -> {
+                    println("UNKNOWN_REQUEST_ERROR")
+                    ApiResponse.Error(null, "UNKNOWN_REQUEST_ERROR")
+                }
+                //TODO(): agregar mas errores
+            }
+        } catch (e: Exception) {
+            println(e)
+            ApiResponse.Error(null, "NETWORK_ERROR")
         }
     }
 }

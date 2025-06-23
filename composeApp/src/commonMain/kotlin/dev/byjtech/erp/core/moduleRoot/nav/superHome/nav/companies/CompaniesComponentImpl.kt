@@ -51,7 +51,8 @@ class CompaniesComponentImpl(
             contactEmail = "contact@technova.com",
             rut = "76.543.210-K",
             createdAt = LocalDateTime.parse("2023-01-10T09:30:00"),
-            updatedAt = LocalDateTime.parse("2024-05-01T15:45:00")
+            updatedAt = LocalDateTime.parse("2024-05-01T15:45:00"),
+            billingId = null
         ),
         CompanyDTO(
             id = "64bcfe3c-ef92-4b82-931b-221bc163a6e4",
@@ -59,7 +60,8 @@ class CompaniesComponentImpl(
             contactEmail = "info@greenfields.co",
             rut = "80.112.345-2",
             createdAt = LocalDateTime.parse("2022-11-05T13:15:00"),
-            updatedAt = LocalDateTime.parse("2024-01-20T10:00:00")
+            updatedAt = LocalDateTime.parse("2024-01-20T10:00:00"),
+            billingId = null
         ),
         CompanyDTO(
             id = "b4d49816-4de1-42c2-9d4f-e13ec5aebc3f",
@@ -67,7 +69,8 @@ class CompaniesComponentImpl(
             contactEmail = "support@skyreach.io",
             rut = "89.654.321-7",
             createdAt = LocalDateTime.parse("2021-06-18T08:00:00"),
-            updatedAt = LocalDateTime.parse("2023-12-10T16:30:00")
+            updatedAt = LocalDateTime.parse("2023-12-10T16:30:00"),
+            billingId = null
         ),
         CompanyDTO(
             id = "7d0caa1e-cc5b-4b1d-aeaf-4e00b84a4f76",
@@ -75,7 +78,8 @@ class CompaniesComponentImpl(
             contactEmail = "hello@aquacore.org",
             rut = "77.001.999-K",
             createdAt = LocalDateTime.parse("2023-03-22T11:20:00"),
-            updatedAt = null
+            updatedAt = null,
+            billingId = null
         ),
         CompanyDTO(
             id = "70f1ce91-8a63-4803-bfef-19a3681b86e0",
@@ -83,7 +87,8 @@ class CompaniesComponentImpl(
             contactEmail = "team@nexus.works",
             rut = "72.345.678-1",
             createdAt = LocalDateTime.parse("2024-02-14T17:50:00"),
-            updatedAt = LocalDateTime.parse("2025-01-10T09:00:00")
+            updatedAt = LocalDateTime.parse("2025-01-10T09:00:00"),
+            billingId = null
         )
     )
 

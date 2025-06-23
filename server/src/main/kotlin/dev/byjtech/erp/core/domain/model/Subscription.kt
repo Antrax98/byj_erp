@@ -11,7 +11,6 @@ data class Subscription (
     val isActive: Boolean,//el tenant admin puede manejar este
     val isAccessible: Boolean,// el SuperAdmin maneja este otro
     val createdAt: LocalDateTime?,
-    val updatedAt: LocalDateTime?,
-    val billing: Billing?
+    val updatedAt: LocalDateTime?
     //agregar datos de pago o algo asi aqui
     )

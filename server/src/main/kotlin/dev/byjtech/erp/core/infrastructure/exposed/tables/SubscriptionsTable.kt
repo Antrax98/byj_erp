@@ -12,7 +12,6 @@ object SubscriptionsTable : UUIDTable("subscription") {
     val isAccessible = bool("is_accessible").default(true)
     val createdAt = datetime("created_at").nullable()
     val updatedAt = datetime("updated_at").nullable()
-    val billingId = optReference("billing_id", BillingsTable.id)
 
     init {
         index(true,

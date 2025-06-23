@@ -19,5 +19,4 @@ class SubscriptionEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     var isAccessible by SubscriptionsTable.isAccessible
     var createdAt by SubscriptionsTable.createdAt
     var updatedAt by SubscriptionsTable.updatedAt
-    var billing by BillingEntity optionalReferencedOn SubscriptionsTable.billingId
 }

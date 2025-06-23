@@ -35,7 +35,6 @@ fun SubscriptionEntity.toDTO(): SubscriptionDTO {
 fun SubscriptionEntity.toModel(
     company: Company = this.company.toModel(),
     module: Module = this.module.toModel(),
-    billing: Billing? = this.billing?.toModel()
 ): Subscription {
     return Subscription(
         id = this.id.value,
@@ -45,6 +44,5 @@ fun SubscriptionEntity.toModel(
         isAccessible = this.isAccessible,
         createdAt = this.createdAt?.toKotlinx(),
         updatedAt = this.updatedAt?.toKotlinx(),
-        billing = billing
     )
 }

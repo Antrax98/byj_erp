@@ -13,4 +13,5 @@ object CompaniesTable : UUIDTable("companies") {
     val contactEmail = text("contact_email")
     val createdAt = datetime("created_at").nullable()
     val updatedAt = datetime("updated_at").nullable()
+    val billing = optReference("billing", BillingsTable.id)
 }
