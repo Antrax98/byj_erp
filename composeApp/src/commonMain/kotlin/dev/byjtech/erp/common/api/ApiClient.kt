@@ -32,9 +32,14 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import dev.byjtech.erp.common.ApiResponse
+import dev.byjtech.erp.core.dto.RoleDTO
+import dev.byjtech.erp.core.request.AssignPermissionRoleRequest
+import dev.byjtech.erp.core.request.AssignRoleRequest
 import dev.byjtech.erp.core.request.CreateCompanyRequest
 import dev.byjtech.erp.core.response.ErrorList
+import dev.byjtech.erp.core.response.RolePermisisonKeysResponse
 import io.ktor.client.utils.EmptyContent.contentType
+import java.util.UUID
 
 
 class ApiClient(
@@ -49,15 +54,16 @@ class ApiClient(
     private val _events = MutableSharedFlow<ApiEvent>()
     val events: SharedFlow<ApiEvent> = _events
 
-    suspend fun emitEvent(event: ApiEvent){
+    private suspend fun emitEvent(event: ApiEvent){
         _events.emit(event)
     }
 
     //esta aqui para agilisar el manejo de sesiones
     val sessionKey = "session_active"
     private var authHeaderProvider: (() -> String?)? = null
-    val cookiesStorage = SettingsCookieStorage(settings)
+    private val cookiesStorage = SettingsCookieStorage(settings)
 
+    //este tiene que ser publico para poder usarlo en las apis de los demas modulos
     val clientKtor = HttpClient(engine) {
         install(HttpCookies) {
             storage = cookiesStorage
@@ -69,7 +75,7 @@ class ApiClient(
                 ignoreUnknownKeys = true
             })
         }
-        install(AuthorizationPlugin { settings.getStringOrNull(sessionKey) })
+        install(authorizationPlugin { settings.getStringOrNull(sessionKey) })
         defaultRequest {
             url {
                 protocol = URLProtocol.HTTP
@@ -108,6 +114,7 @@ class ApiClient(
         }
     }
 
+    //!!!NO USAR KTORFIT!!!!
     val ktorfit = Ktorfit.Builder()
         .httpClient(clientKtor)
         .build()
@@ -116,13 +123,16 @@ class ApiClient(
     val coreAuth = ktorfit.create<CoreAuth>() //importante no moverlo
     val coreApi = ktorfit.create<CoreApi>() //importante no moverlo
 
-    //TODO() anidarlos de mejor forma, como : apiClient.roles.permission.getPermissions()
+    //TODO() QUITAR TODOS LOS KTORFIT y usar ktorClient directamente
     //core-users
     val usersSuperAdminApi = ktorfit.create<UsersSuperAdminApi>()
     val usersTenantApi = ktorfit.create<UsersTenantApi>()
 
     //companies
     val companiesSA = CompanySA(clientKtor)
+
+    //roles
+    val rolesT = RoleT(clientKtor)
 
 
     fun setAuthHeaderProvider(provider: (() -> String?)?) {
@@ -166,7 +176,7 @@ class ApiClient(
         return clientKtor.get("/modules/contracted").body()
     }
 
-    private fun AuthorizationPlugin(tokenProvider: () -> String?) = createClientPlugin("AuthorizationPlugin") {
+    private fun authorizationPlugin(tokenProvider: () -> String?) = createClientPlugin("AuthorizationPlugin") {
         onRequest { request, _ ->
             tokenProvider()?.let { token ->
                 request.headers.append("Authentication", "Bearer $token")
@@ -227,4 +237,97 @@ class CompanySA(private val client: HttpClient) {
             ApiResponse.Error(null, "NETWORK_ERROR")
         }
     }
+}
+
+class RoleT(private val client: HttpClient) {
+    suspend fun getAllRoles(): ApiResponse<Set<RoleDTO>, Unit?> {
+        return try {
+            val response = client.get("api/core/roles/tenant/all-roles")
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val roles = response.body<Set<RoleDTO>>()
+                    ApiResponse.Success(roles)
+                }
+                HttpStatusCode.BadRequest -> {
+                    ApiResponse.Error(null, "NO_COMPANY")
+                }
+                else -> {
+                    ApiResponse.Error(null, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+
+        } catch (e: Exception) {
+            ApiResponse.Error(null, "NETWORK_ERROR")
+        }
+    }
+    suspend fun assignRoleToUser(data: AssignRoleRequest): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.post("api/core/roles/tenant/assign-role-to-user") {
+                contentType(ContentType.Application.Json)
+                setBody(data)
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+                HttpStatusCode.BadRequest -> {
+                    ApiResponse.Error(Unit, "ERROR_ASSIGNING_ROLE")
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            println(e)
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun getPermissionsByRoleId(roleId: String): ApiResponse<RolePermisisonKeysResponse, Unit?> {
+        return try {
+            val response = client.get("api/core/roles/tenant/role-permissions/$roleId")
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val permissions = response.body<RolePermisisonKeysResponse>()
+                    ApiResponse.Success(permissions)
+                }
+                HttpStatusCode.BadRequest -> {
+                    ApiResponse.Error(null, "NO_ROLE_ID")
+                }
+                else -> {
+                    ApiResponse.Error(null, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(null, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun assignPermissionsToRole(data : AssignPermissionRoleRequest): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.post("api/core/roles/tenant/assign-permissions-to-role") {
+                contentType(ContentType.Application.Json)
+                setBody(data)
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    println(errorMessage)
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
 }

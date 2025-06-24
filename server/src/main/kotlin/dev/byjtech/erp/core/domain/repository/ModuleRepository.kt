@@ -6,6 +6,7 @@ import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.dto.CategoryDTO //TODO() crear un DTO especifico para crear categorys???
 import dev.byjtech.erp.core.dto.PermissionDTO
 import java.util.UUID
+import dev.byjtech.erp.core.domain.model.Module
 
 interface ModuleRepository {
     fun create(module: Module): Module
@@ -23,5 +24,7 @@ interface ModuleRepository {
     fun findPermissionByPermissionKey(permissionKey: PermissionKey): Permission?
     fun findPermissionsByPermissionKeySet(permissionKeySet: Set<PermissionKey>): Set<Permission>
     fun getPermissionKeysByPermissionIdSet(permissionIdSet: Set<UUID>): Set<PermissionKey>
+    fun getPermissionKeyById(permissionId: UUID): PermissionKey?
+    fun findByName(name: String): Module?
     //TODo() si faltan mas se agregan nomas
 }

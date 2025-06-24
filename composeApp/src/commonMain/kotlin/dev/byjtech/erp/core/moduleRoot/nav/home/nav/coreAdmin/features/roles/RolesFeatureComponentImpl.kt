@@ -34,7 +34,7 @@ class RolesFeatureComponentImpl(
     private val navigation = StackNavigation<Config>()
 
     private fun rolesMain(componentContext: ComponentContext): RolesMainComponent =
-        RolesMainComponentImpl(componentContext, userPermissions)
+        RolesMainComponentImpl(componentContext, userPermissions, apiClient, ::navigateTo)
 
     private fun childFactory(config: Config, componentContext: ComponentContext): Child {
         return when (config) {
@@ -54,5 +54,9 @@ class RolesFeatureComponentImpl(
 
     override fun onBack(): Boolean {
         return false
+    }
+
+    private fun navigateTo(target: Config) {
+        navigation.pushNew(target)
     }
 }

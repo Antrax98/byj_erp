@@ -5,9 +5,11 @@ import dev.byjtech.erp.core.infrastructure.auth.CoreAuthWrapper
 import dev.byjtech.erp.common.ApiResponse
 import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.domain.model.Company
+import dev.byjtech.erp.core.domain.model.Subscription
 import dev.byjtech.erp.core.domain.model.User
 import dev.byjtech.erp.core.domain.repository.ModuleRepository
 import dev.byjtech.erp.core.domain.repository.RoleRepository
+import dev.byjtech.erp.core.domain.repository.SubscriptionRepository
 import dev.byjtech.erp.core.domain.repository.UserRepository
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
@@ -22,7 +24,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.util.UUID
 
-fun Route.superAdminCompanies(authServ: CoreAuthWrapper, companyRepo: CompanyRepository, userRepo: UserRepository, moduleRepo: ModuleRepository) {
+fun Route.superAdminCompanies(authServ: CoreAuthWrapper, companyRepo: CompanyRepository, userRepo: UserRepository, moduleRepo: ModuleRepository, subscriptionRepo: SubscriptionRepository) {
     get("/all-companies"){
         authServ.authorizeOrThrow(call, requiredSuperAdmin = true)
 
@@ -35,7 +37,7 @@ fun Route.superAdminCompanies(authServ: CoreAuthWrapper, companyRepo: CompanyRep
     post("/create-company"){
         val authResult = authServ.authorizeOrThrow(call, requiredSuperAdmin = true)
 
-        //esto esta aqui para aserciorarse que no se elimine este permiso
+        //esto esta aqui para aserciorarse que no se elimine este permiso y exista el Modulo Core
         val adminAllKey = CoreDefinition.Admin.All.key
 
         //TODO(): validar que no exista una empresa con el mismo rut y que el adminEmail no exista en otro usuario
@@ -70,6 +72,14 @@ fun Route.superAdminCompanies(authServ: CoreAuthWrapper, companyRepo: CompanyRep
                 rut = createCompanyRequest.companyRut,
             )
         )
+
+        //añadir suscripcion a Core
+        val coreModule = moduleRepo.findByName("core")!!
+        val coreSubscription = subscriptionRepo.create(Subscription(
+            company = newCompany,
+            module = coreModule,
+        ))
+
         //crear user con Admin role
         val newUser = userRepo.create(User(
             companyId = newCompany.id,

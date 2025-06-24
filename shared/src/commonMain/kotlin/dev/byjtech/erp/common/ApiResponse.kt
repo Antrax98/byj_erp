@@ -3,6 +3,7 @@ package dev.byjtech.erp.common
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+//NO USAR ESTA CLASE
 @Serializable
 sealed class ApiResponse<out S,out E> {
     @Serializable

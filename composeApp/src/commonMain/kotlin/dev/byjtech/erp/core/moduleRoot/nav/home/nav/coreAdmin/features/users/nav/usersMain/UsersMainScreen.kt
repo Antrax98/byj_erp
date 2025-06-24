@@ -66,12 +66,8 @@ fun UsersMainScreen(component: UsersMainComponent) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Text("Users Main Screen")
-            Text("actual platform ${getPlatform()}")
-
             if(state.isLoading){
                 CircularProgressIndicator()
-
             }else{
                 if(usersList != null){
                     LazyColumn {

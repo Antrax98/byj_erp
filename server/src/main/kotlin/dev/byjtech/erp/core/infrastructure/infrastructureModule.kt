@@ -8,6 +8,7 @@ import dev.byjtech.erp.core.infrastructure.api.CoreRoutesInstaller
 import dev.byjtech.erp.core.infrastructure.exposed.repository.*
 import dev.byjtech.erp.core.infrastructure.api.auth.AuthRoutesInstaller
 import dev.byjtech.erp.core.infrastructure.api.users.UserRoutesInstaller
+import dev.byjtech.erp.core.infrastructure.api.roles.RoleRoutesInstaller
 import org.koin.dsl.module
 
 //contracts
@@ -94,7 +95,8 @@ val infrastructureModule = module {
             setOf(
                 //AuthRoutesInstaller(), //TODO: justamente separar esta de las demas rutas, los otros si van aqui
                 UserRoutesInstaller(get(), get(), get(), get()),
-                CompanyRoutesInstaller(get(), get(), get(), get())
+                CompanyRoutesInstaller(get(), get(), get(), get(), get()),
+                RoleRoutesInstaller(get(), get(), get(), get())
             )
         )
     }

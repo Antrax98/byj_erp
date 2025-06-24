@@ -17,6 +17,7 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
+import dev.byjtech.erp.core.domain.model.Module
 
 class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
     override fun create(module: Module): Module {
@@ -117,6 +118,27 @@ class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
                         action = perm.name
                     )
                 }.toSet()
+        }
+    }
+
+    override fun getPermissionKeyById(permissionId: UUID): PermissionKey? {
+        return transaction(db) {
+            val permission = PermissionEntity.findById(permissionId)
+            if (permission != null) {
+                PermissionKey(
+                    module = permission.category.module.name,
+                    category = permission.category.name,
+                    action = permission.name
+                )
+            } else{
+                null
+            }
+        }
+    }
+
+    override fun findByName(name: String): Module? {
+        return transaction(db) {
+            ModuleEntity.find { ModulesTable.name eq name }.firstOrNull()?.toModel()
         }
     }
 
