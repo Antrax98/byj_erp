@@ -42,6 +42,9 @@ class HomeComponentImpl(
 
     override val actualUser: StateFlow<UserDTO?> = sessionManager.actualUser
 
+    private val _isOnMainPage = MutableStateFlow(true)
+    override val isOnMainPage: StateFlow<Boolean> = _isOnMainPage.asStateFlow()
+
     override suspend fun onLogout() {
         _state.update { it.copy(isLoading = true) }
         try {

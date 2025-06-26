@@ -18,6 +18,27 @@ import java.util.UUID
 
 fun Route.tenantRoles(authServ: CoreAuthWrapper, roleRepo: RoleRepository, userRepo: UserRepository, moduleRepo: ModuleRepository) {
 
+    get("/{roleId}") {
+        val session = authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Admin.All.key,
+                CoreDefinition.Roles.View.key
+            )
+        )
+        val roleId = call.parameters["roleId"]
+        if (roleId == null) {
+            call.respond(HttpStatusCode.BadRequest, message = "NO_ROLE_ID")
+            return@get
+        }
+        val role = roleRepo.getById(UUID.fromString(roleId))
+        if (role == null) {
+            call.respond(HttpStatusCode.NotFound, message = "NO_ROLE")
+            return@get
+        }
+        call.respond(HttpStatusCode.OK, role.toDTO())
+    }
+
     get("/all-roles") {
         val session = authServ.authorizeOrThrow(
             call,

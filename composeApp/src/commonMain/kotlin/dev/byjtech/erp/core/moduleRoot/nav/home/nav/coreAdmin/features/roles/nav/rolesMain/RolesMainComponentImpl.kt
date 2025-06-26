@@ -54,6 +54,10 @@ class RolesMainComponentImpl(
         }
     }
 
+    override val navToRolePage: (roleId: String) -> Unit = { roleId ->
+        navTo(RolesFeatureComponentImpl.Config.RolePage(roleId))
+    }
+
     init {
         coroutineScope.launch {
             _isLoading.value = true

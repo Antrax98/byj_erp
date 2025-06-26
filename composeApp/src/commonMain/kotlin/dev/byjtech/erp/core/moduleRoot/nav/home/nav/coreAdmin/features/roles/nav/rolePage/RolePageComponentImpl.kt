@@ -2,6 +2,7 @@ package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.na
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
+import dev.byjtech.erp.common.ApiResponse
 import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.PermissionWithKey
 import dev.byjtech.erp.common.api.ApiClient
@@ -31,7 +32,14 @@ class RolePageComponentImpl(
     override val isLoading: StateFlow<Boolean> = _isLoading
 
     override suspend fun fetchRole() {
-        TODO("Not yet implemented")
+        coroutineScope.launch {
+            val roleResponse = apiClient.rolesT.getRoleById(roleId)
+            if (roleResponse is ApiResponse.Success) {
+                _roleInfo.value = roleResponse.data
+            } else if (roleResponse is ApiResponse.Error) {
+                _roleInfo.value = null
+            }
+        }
     }
     override suspend fun fetchRolePermissions() {
         TODO("Not yet implemented")
@@ -40,7 +48,7 @@ class RolePageComponentImpl(
     init {
         coroutineScope.launch {
             _isLoading.value = true
-            //fetchRole()
+            fetchRole()
             //fetchRolePermissions()
             _isLoading.value = false
         }

@@ -240,6 +240,26 @@ class CompanySA(private val client: HttpClient) {
 }
 
 class RoleT(private val client: HttpClient) {
+    suspend fun getRoleById(roleId: String): ApiResponse<RoleDTO, Unit?> {
+        return try {
+            val response = client.get("api/core/roles/tenant/$roleId")
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val role = response.body<RoleDTO>()
+                    ApiResponse.Success(role)
+                }
+                HttpStatusCode.BadRequest -> {
+                    ApiResponse.Error(null, "NO_ROLE_ID")
+                }
+                else -> {
+                    ApiResponse.Error(null, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(null, "NETWORK_ERROR")
+        }
+    }
+
     suspend fun getAllRoles(): ApiResponse<Set<RoleDTO>, Unit?> {
         return try {
             val response = client.get("api/core/roles/tenant/all-roles")

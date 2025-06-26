@@ -14,4 +14,5 @@ interface RolesMainComponent: PermissionAwareComponent {
     suspend fun fetchAllRoles()
     val apiClient: ApiClient
     val navTo: (Config) -> Unit
+    val navToRolePage: (roleId: String) -> Unit
 }

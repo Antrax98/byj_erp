@@ -1,11 +1,18 @@
 package dev.byjtech.erp.core.moduleRoot.nav.home
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -34,6 +41,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.Path
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.slide
@@ -48,14 +59,19 @@ import kotlinx.coroutines.launch
 fun HomeScreen(component: HomeComponent) {
     val state by component.state.collectAsState()
     val actUser by component.actualUser.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 navigationIcon = {
                     if (state.isOnListPage) {
-                        IconButton(onClick = { /* Espacio reservado */ }) {}
+                        IconButton(onClick = { /* Espacio reservado */ }, enabled = false) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = null,
+                                modifier = Modifier.alpha(0f)
+                            )
+                        }
                     } else {
                         IconButton(onClick = {
                             component.onBack()
@@ -67,7 +83,11 @@ fun HomeScreen(component: HomeComponent) {
                         }
                     }
                 },
-                title = { Text("Home") },
+                title = { Text(
+                    text="Home",
+                    textAlign = TextAlign.Center,
+
+                ) },
                 actions = {
                     IconButton(onClick = { /* TODO: Navegar a perfil */ }) {
                         Icon(

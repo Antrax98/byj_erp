@@ -35,6 +35,7 @@ import dev.byjtech.erp.common.UnderConstructionScreen
 import dev.byjtech.erp.common.tools.containsAnyOf
 import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.dto.RoleDTO
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.RolesFeatureComponentImpl.Config
 import kotlinx.datetime.toKotlinLocalDateTime
 import java.time.LocalDateTime
 
@@ -48,7 +49,7 @@ fun RolesMainScreen(component: RolesMainComponent){
         floatingActionButton = {
             if(userPermissions.containsAnyOf(setOf(CoreDefinition.Users.Create.key))){
                 FloatingActionButton(
-                    onClick = { /*component.navTo(Config.AddRole)*/println("Clicked on add Role") },
+                    onClick = { component.navTo(Config.AddRole) },
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Agregar Rol")
@@ -68,7 +69,8 @@ fun RolesMainScreen(component: RolesMainComponent){
                 ) {
                     rolesSet?.forEach { role ->
                         item {
-                            RoleContainer(role, onClick = {println("Clicked on role ${role.name}")})
+                            RoleContainer(role, onClick = /*{ component.navToRolePage(role.id) }*/{component.navTo(
+                                Config.RolePage(role.id))})
                         }
                     }
                     if(rolesSet!!.isEmpty()){
