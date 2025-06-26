@@ -64,22 +64,37 @@ fun CompanyInfoCard(company: CompanyDTO) {
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .size(64.dp)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        shape = CircleShape
+                    )
                     .padding(16.dp)
             )
+
             Spacer(Modifier.width(16.dp))
+
             Column {
                 Text(
                     text = company.name,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
+
                 Text(
                     text = company.contactEmail,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
+
+                // ✔️ Nuevo campo: RUT
+                Text(
+                    text = "RUT: ${company.rut}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+
                 Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = "Creado: ${company.createdAt}",
                     style = MaterialTheme.typography.bodySmall,
@@ -89,6 +104,7 @@ fun CompanyInfoCard(company: CompanyDTO) {
         }
     }
 }
+
 
 
 @Composable
@@ -114,13 +130,50 @@ fun BillingInfoCard() {
 
 
 val dummySubscriptions = listOf(
-    SubscriptionDTO(id = 1, companyId = 100, moduleId = 1, isActive = true, isAccessible = true),
-    SubscriptionDTO(id = 2, companyId = 100, moduleId = 2, isActive = true, isAccessible = false),
-    SubscriptionDTO(id = 3, companyId = 100, moduleId = 3, isActive = false, isAccessible = false),
-    SubscriptionDTO(id = 4, companyId = 100, moduleId = 1, isActive = true, isAccessible = true),
-    SubscriptionDTO(id = 5, companyId = 100, moduleId = 2, isActive = false, isAccessible = true),
-    SubscriptionDTO(id = 6, companyId = 100, moduleId = 3, isActive = true, isAccessible = true)
+    SubscriptionDTO(
+        id = "ec6f1fa6-c7b4-4bd0-b96a-28a50ef0c7c3",
+        companyId = "f9e8c61b-6227-4e59-8645-279fa0b83265",
+        moduleId = "a1772077-f230-4d34-a02e-4893d1916aef",
+        isActive = true,
+        isAccessible = true
+    ),
+    SubscriptionDTO(
+        id = "e27b8a3f-3be6-4fa1-b9cb-d37a6806d65f",
+        companyId = "f9e8c61b-6227-4e59-8645-279fa0b83265",
+        moduleId = "83e4c34d-79cf-49b1-a78e-390a2ef542e6",
+        isActive = true,
+        isAccessible = false
+    ),
+    SubscriptionDTO(
+        id = "9f180d55-9962-4602-8e34-9aa3adcc84d3",
+        companyId = "f9e8c61b-6227-4e59-8645-279fa0b83265",
+        moduleId = "f98cd18c-d707-4e31-b7e0-7203020dcf66",
+        isActive = false,
+        isAccessible = false
+    ),
+    SubscriptionDTO(
+        id = "97f4a1ac-1705-445b-bc1c-0fa2a4649050",
+        companyId = "f9e8c61b-6227-4e59-8645-279fa0b83265",
+        moduleId = "a1772077-f230-4d34-a02e-4893d1916aef",
+        isActive = true,
+        isAccessible = true
+    ),
+    SubscriptionDTO(
+        id = "2cf52c31-49c4-4391-a758-e831ce00f01a",
+        companyId = "f9e8c61b-6227-4e59-8645-279fa0b83265",
+        moduleId = "83e4c34d-79cf-49b1-a78e-390a2ef542e6",
+        isActive = false,
+        isAccessible = true
+    ),
+    SubscriptionDTO(
+        id = "29320990-d29f-4f52-99b0-54062a40eeed",
+        companyId = "f9e8c61b-6227-4e59-8645-279fa0b83265",
+        moduleId = "f98cd18c-d707-4e31-b7e0-7203020dcf66",
+        isActive = true,
+        isAccessible = true
+    )
 )
+
 
 @Composable
 fun SubscriptionsList(subscriptions: List<SubscriptionDTO>) {

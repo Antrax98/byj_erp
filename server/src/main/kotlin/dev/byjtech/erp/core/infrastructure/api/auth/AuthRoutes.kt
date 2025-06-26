@@ -48,6 +48,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.Base64
+import java.util.UUID
 
 val logger: Logger = LoggerFactory.getLogger("AuthCallbackLogger")
 
@@ -75,13 +76,13 @@ fun Route.googleAuthRoutes(
                 CoreDefinition.Admin.All.key
             )
         )
-        val userId = call.parameters["userId"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
-        val user = userRepo.find(userId)
+        val userId = call.parameters["userId"]?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+        val user = userRepo.find(UUID.fromString(userId))
         if (user == null) {
             call.respond(HttpStatusCode.NotFound, null)
             return@get
         } else {
-            val userRoles = roleRepo.findByUserId(userId)
+            val userRoles = roleRepo.findByUserId(UUID.fromString(userId))
             val rolesDTO = userRoles.map { it.toDTO() }
             call.respond(UserRolesResponse(roles = rolesDTO))
         }
@@ -95,12 +96,12 @@ fun Route.googleAuthRoutes(
                 CoreDefinition.Admin.All.key
             )
         )
-        val userId = call.parameters["userId"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
-        val user = userRepo.find(userId)
+        val userId = call.parameters["userId"]?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+        val user = userRepo.find(UUID.fromString(userId))
         if (user == null) {
             call.respond(HttpStatusCode.NotFound, "User not found")
         } else {
-            val userSpecialPermissions = userRepo.getSpecialPermissionsByUserId(userId)
+            val userSpecialPermissions = userRepo.getSpecialPermissionsByUserId(UUID.fromString(userId))
             val nonnullUserSpecialPermissions = userSpecialPermissions?.map {it.id}?.toSet()?: emptySet()
             val listofPermissionKeys = moduleRepo.getPermissionKeysByPermissionIdSet(nonnullUserSpecialPermissions)
             call.respond(PermissionKeysResponse(listofPermissionKeys.toList()))
@@ -258,10 +259,11 @@ fun Route.googleAuthRoutes(
 
 
                 if (googleUserInfo != null) {
-//                    val userEntity = findUserByEmail(googleUserInfo.email)  //TODO MODIFICAR
                     val user = userRepo.findByEmail(googleUserInfo.email)
                     if (user != null) {
-//                        updateUserFromGoogleInfo(userEntity, googleUserInfo)  //TODO MODIFICAR
+                        println("User found: ${user.id}")
+                        println("Updating user from Google info...")
+                        println(googleUserInfo)
                         userServ.updateUserFromGoogleInfo(user, googleUserInfo)
 
                         val userAgent = call.request.headers["User-Agent"] ?: ""
@@ -269,9 +271,8 @@ fun Route.googleAuthRoutes(
                             Instant.ofEpochMilli(googleUserInfo.expiresAt)
                         } else {
                             logger.warn("No expiration found in ID token. Using default (7 days).")
-                            LocalDateTime.now().plusDays(7).toInstant(ZoneOffset.UTC) //Example: 7 days from now. Adjust as needed
+                            LocalDateTime.now().plusDays(7).toInstant(ZoneOffset.UTC) //en 7 dias
                         }
-//                        val existingSession = USDS.findSessionByUserIdAndDeviceId(userEntity.id.value, deviceId)  //TODO MODIFICAR
                         val userSessionsSet = sessionRepo.findByUserId(user.id)
                         var existingSessionAux = userSessionsSet.firstOrNull {
                             it.deviceId == deviceId
@@ -287,7 +288,7 @@ fun Route.googleAuthRoutes(
                                 expiresAt = LocalDateTime.ofInstant(sessionExpiresAt, ZoneId.systemDefault()).toKotlinx() // Update expiration
                             )
                             sessionRepo.update(existingSessionAux)
-                            sessionCookie = AppSession(existingSessionAux.id, sessionExpiresAt.toEpochMilli())
+                            sessionCookie = AppSession(existingSessionAux.id.toString(), sessionExpiresAt.toEpochMilli())
                             logger.debug("Updated appSession: {}", sessionCookie)
                         } else {
 //                            val newSession = USDS.createSession( //TODO MODIFICAR
@@ -301,7 +302,7 @@ fun Route.googleAuthRoutes(
 //                            )
                             val newSession = sessionRepo.create(Session(
                                 userId = user.id,
-                                id = 1, //este no importa pero hay que darlo igual
+                                id = UUID.randomUUID(), //este no importa pero hay que darlo igual
                                 deviceId = deviceId,
                                 accessTokens = accessToken,
                                 refreshToken = principal.refreshToken ?: "",
@@ -312,7 +313,7 @@ fun Route.googleAuthRoutes(
                                 updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                                 expiresAt = LocalDateTime.ofInstant(sessionExpiresAt, ZoneId.systemDefault()).toKotlinx(),
                             ))
-                            sessionCookie = AppSession(newSession.id, sessionExpiresAt.toEpochMilli())
+                            sessionCookie = AppSession(newSession.id.toString(), sessionExpiresAt.toEpochMilli())
                             logger.debug("Created new appSession: {}", sessionCookie)
                         }
                         val jsonCookie = Json.encodeToString(AppSession.serializer(), sessionCookie)

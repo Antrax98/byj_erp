@@ -6,10 +6,10 @@ import dev.byjtech.erp.core.infrastructure.exposed.entities.PermissionEntity
 
 fun PermissionEntity.toDTO(): PermissionDTO {
     return PermissionDTO(
-        id = this.id.value,
+        id = this.id.value.toString(),
         name = this.name,
         description = this.description,
-        categoryId = this.category.id.value // Relación con Category
+        categoryId = this.category.id.value.toString() // Relación con Category
     )
 }
 

@@ -17,6 +17,7 @@ import dev.byjtech.erp.shared.contracts.core.auth.MissingPermissionsException
 import dev.byjtech.erp.shared.contracts.core.auth.MissingSuperAdminException
 import dev.byjtech.erp.shared.contracts.core.auth.ModuleAccessException
 import io.ktor.server.application.ApplicationCall
+import java.util.UUID
 
 //este se podria crear como un wrapper de la clase AuthService, destiando a solo servir el service interno a los demas
 
@@ -53,7 +54,7 @@ class AuthServiceContractImpl(
             throw IllegalStateException("AppSession is null")
         }
 
-        val session = sessionRepo.find(appSession.sessionId)
+        val session = sessionRepo.find(UUID.fromString(appSession.sessionId))
         if(session == null){
             throw SessionNotFoundException(appSession.sessionId.toString())
         }
@@ -104,7 +105,7 @@ class AuthServiceContractImpl(
             superAdminRepo.getByUserId(user.id) ?: throw MissingSuperAdminException()
         }
 
-        return ValidatedSessionInfo(user.id, session.id) //TODO() darle mas valores necesarorios a este objeto
+        return ValidatedSessionInfo(user.id, session.id, user.companyId) //TODO() darle mas valores necesarorios a este objeto
         //por ahora userid y sessionid parecen ser los unicos necesarios, se podria agregar el company nullable
 
 

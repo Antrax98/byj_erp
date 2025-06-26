@@ -19,7 +19,7 @@ interface UsersTenantApi {
     suspend fun getCompanyUsers(): CompanyUsersResponse?
 
     @GET("api/core/users/tenant/{userId}")
-    suspend fun getUser(@Path("userId") userId: Int): UserDTO?
+    suspend fun getUser(@Path("userId") userId: String): UserDTO?
 
     @POST("api/core/users/assign-role")
     suspend fun assignRole(@Body assignRoleRequest: AssignRoleRequest): ApiResponse<Unit>
@@ -28,10 +28,10 @@ interface UsersTenantApi {
     suspend fun assignSpecialPermission(@Body assignSpecialPermissionRequest: AssignSpecialPermissionRequest): ApiResponse<Unit>
 
     @DELETE("api/core/users/unassign-role/{userId}/{roleId}")
-    suspend fun unassignRole(@Path("userId") userId: Int, @Path("roleId") roleId: Int): ApiResponse<Unit>
+    suspend fun unassignRole(@Path("userId") userId: String, @Path("roleId") roleId: String): ApiResponse<Unit>
 
     @DELETE("api/core/users/unassign-special-permission/{userId}/{permissionId}")
-    suspend fun unassignSpecialPermission(@Path("userId") userId: Int, @Path("permissionId") permissionId: Int): ApiResponse<Unit>
+    suspend fun unassignSpecialPermission(@Path("userId") userId: String, @Path("permissionId") permissionId: String): ApiResponse<Unit>
 
     @POST("api/core/users/create-user")
     suspend fun createUser(@Body userDTO: UserDTO): ApiResponse<Unit>

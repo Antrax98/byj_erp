@@ -10,7 +10,7 @@ import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.Use
 import kotlinx.coroutines.flow.StateFlow
 
 interface UserPageComponent: PermissionAwareComponent {
-    val userId: Int
+    val userId: String
     val apiClient: ApiClient
     val userInfo: StateFlow<UserDTO?>
     val userSpecialPermissions: StateFlow<List<PermissionKey>?>

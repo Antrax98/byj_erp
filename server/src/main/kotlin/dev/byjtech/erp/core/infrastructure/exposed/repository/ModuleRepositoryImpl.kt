@@ -16,54 +16,56 @@ import dev.byjtech.erp.core.infrastructure.exposed.tables.PermissionsTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.UUID
+import dev.byjtech.erp.core.domain.model.Module
 
 class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
     override fun create(module: Module): Module {
         TODO("Not yet implemented")
     }
 
-    override fun get(moduleId: Int): Module? {
+    override fun get(moduleId: UUID): Module? {
         TODO("Not yet implemented")
     }
 
-    override fun getWithCategories(moduleId: Int): Module? {
+    override fun getWithCategories(moduleId: UUID): Module? {
         TODO("Not yet implemented")
     }
 
-    override fun getWithCategoriesAndPermissions(moduleId: Int): Module? {
+    override fun getWithCategoriesAndPermissions(moduleId: UUID): Module? {
         TODO("Not yet implemented")
     }
 
-    override fun getCategoryById(categoryId: Int): Category? {
+    override fun getCategoryById(categoryId: UUID): Category? {
         TODO("Not yet implemented")
     }
 
-    override fun getPermissionById(permissionId: Int): Permission? {
+    override fun getPermissionById(permissionId: UUID): Permission? {
         TODO("Not yet implemented")
     }
 
-    override fun delete(moduleId: Int) {
+    override fun delete(moduleId: UUID) {
         TODO("Not yet implemented")
     }
 
-    override fun getCategoryByPermissionId(permissionId: Int): Category? {
+    override fun getCategoryByPermissionId(permissionId: UUID): Category? {
         TODO("Not yet implemented")
     }
 
-    override fun getByCategoryId(categoryId: Int): Module? {
+    override fun getByCategoryId(categoryId: UUID): Module? {
         TODO("Not yet implemented")
     }
 
-    override fun getByPermissionId(permissionId: Int): Module? {
+    override fun getByPermissionId(permissionId: UUID): Module? {
         TODO("Not yet implemented")
     }
 
-    override fun addCategory(moduleId: Int, newCategory: CategoryDTO): Category {
+    override fun addCategory(moduleId: UUID, newCategory: CategoryDTO): Category {
         TODO("Not yet implemented")
     }
 
     override fun addPermissionToCategory(
-        categoryId: Int,
+        categoryId: UUID,
         newPermission: PermissionDTO
     ): Permission {
         TODO("Not yet implemented")
@@ -104,7 +106,7 @@ class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
         }
     }
 
-    override fun getPermissionKeysByPermissionIdSet(permissionIdSet: Set<Int>): Set<PermissionKey> {
+    override fun getPermissionKeysByPermissionIdSet(permissionIdSet: Set<UUID>): Set<PermissionKey> {
         if (permissionIdSet.isEmpty()) return emptySet()
 
         return transaction(db) {
@@ -116,6 +118,27 @@ class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
                         action = perm.name
                     )
                 }.toSet()
+        }
+    }
+
+    override fun getPermissionKeyById(permissionId: UUID): PermissionKey? {
+        return transaction(db) {
+            val permission = PermissionEntity.findById(permissionId)
+            if (permission != null) {
+                PermissionKey(
+                    module = permission.category.module.name,
+                    category = permission.category.name,
+                    action = permission.name
+                )
+            } else{
+                null
+            }
+        }
+    }
+
+    override fun findByName(name: String): Module? {
+        return transaction(db) {
+            ModuleEntity.find { ModulesTable.name eq name }.firstOrNull()?.toModel()
         }
     }
 

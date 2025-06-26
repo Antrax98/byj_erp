@@ -8,6 +8,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import java.util.UUID
 
 fun Route.superAdminUsers(authServ: CoreAuthWrapper, userRepo: UserRepository) {
     get ("{id}"){
@@ -18,7 +19,7 @@ fun Route.superAdminUsers(authServ: CoreAuthWrapper, userRepo: UserRepository) {
             call.respondText("Missing id")
             return@get
         }else{
-            val user = userRepo.find(id.toInt())
+            val user = userRepo.find(UUID.fromString(id))
             if (user == null) {
                 call.respond(HttpStatusCode.NotFound, "Usuario no encontrado")
             } else {

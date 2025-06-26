@@ -13,6 +13,10 @@ import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.RolesFeatureComponent.Child
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.addRole.AddRoleComponent
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.addRole.AddRoleComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.rolePage.RolePageComponent
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.rolePage.RolePageComponentImpl
 
 class RolesFeatureComponentImpl(
     componentContext: ComponentContext,
@@ -21,24 +25,33 @@ class RolesFeatureComponentImpl(
     override val toHome: () -> Unit
 ): RolesFeatureComponent, ComponentContext by componentContext {
 
-
-
-
     //navegacion
     @Serializable
     sealed class Config {
         @Serializable
         data object RolesMain : Config()
+        @Serializable
+        data class RolePage(val roleId: String) : Config()
+        @Serializable
+        data object AddRole : Config()
     }
 
     private val navigation = StackNavigation<Config>()
 
     private fun rolesMain(componentContext: ComponentContext): RolesMainComponent =
-        RolesMainComponentImpl(componentContext, userPermissions)
+        RolesMainComponentImpl(componentContext, userPermissions, apiClient, ::navigateTo)
+
+    private fun rolePage(componentContext: ComponentContext, roleId: String): RolePageComponent =
+        RolePageComponentImpl(componentContext, userPermissions,roleId, apiClient, ::navigateTo)
+
+    private fun addRole(componentContext: ComponentContext): AddRoleComponent =
+        AddRoleComponentImpl(componentContext, userPermissions, apiClient, ::navigateTo)
 
     private fun childFactory(config: Config, componentContext: ComponentContext): Child {
         return when (config) {
             is Config.RolesMain -> Child.RolesMain(rolesMain(componentContext.childContext("rolesMain")))
+            is Config.RolePage -> Child.RolePage(rolePage(componentContext.childContext("rolePage"), config.roleId))
+            is Config.AddRole -> Child.AddRole(addRole(componentContext.childContext("addRole")))
         }
     }
 
@@ -53,6 +66,15 @@ class RolesFeatureComponentImpl(
     override val childStack: Value<ChildStack<*, Child>> = stack
 
     override fun onBack(): Boolean {
-        return false
+        if(childStack.active.configuration==Config.RolesMain){
+            return false
+        } else{
+            navigation.pop()
+            return true
+        }
+    }
+
+    private fun navigateTo(target: Config) {
+        navigation.pushNew(target)
     }
 }

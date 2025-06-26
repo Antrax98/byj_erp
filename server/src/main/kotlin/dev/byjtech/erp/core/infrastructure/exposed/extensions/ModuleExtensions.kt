@@ -8,7 +8,7 @@ import dev.byjtech.erp.utils.datetime.toKotlinx
 
 fun ModuleEntity.toDTO(): ModuleDTO {
     return ModuleDTO(
-        id = this.id.value,
+        id = this.id.value.toString(),
         name = this.name,
         displayName = this.displayName,
         description = this.description,
@@ -30,7 +30,7 @@ fun ModuleEntity.toModel(categoriesSet: Set<CategoryEntity>? = null): Module {
 
 fun Module.toDTO(): ModuleDTO {
     return ModuleDTO(
-        id = this.id,
+        id = this.id.toString(),
         name = this.name,
         displayName = this.displayName,
         description = this.description,

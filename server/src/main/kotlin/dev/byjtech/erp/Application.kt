@@ -20,6 +20,7 @@ import io.github.cdimascio.dotenv.dotenv
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.routing.get
+import org.koin.core.qualifier.named
 import org.koin.ktor.ext.getKoin
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
@@ -50,11 +51,16 @@ fun Application.module() {
 
     //val koin = GlobalContext.get()
     val koin = this.getKoin()
-    val moduleInitializers: List<ModuleInitializer> = koin.getAll()
+    val moduleInitializers: List<ModuleInitializer> = koin.get<Set<ModuleInitializer>>(named("allInit")).toList()
     val allModules = moduleInitializers.filterNot { it is CoreInitializer } //sin el core, de ser necesario
     val coreInitializer = moduleInitializers.find { it is CoreInitializer } as CoreInitializer
 
-    moduleInitializers.forEach {
+    println("Module ${coreInitializer.definition.name} detected")
+    println("Initializing ${coreInitializer.definition.name} database...")
+    coreInitializer.database.createTables(coreInitializer.tables.toList())
+    println("${coreInitializer.definition.name} database initialized")
+
+    allModules.forEach {
         println("Module ${it.definition.name} detected")
         println("Initializing ${it.definition.name} database...")
         it.database.createTables(it.tables.toList())
@@ -63,7 +69,11 @@ fun Application.module() {
 
     val databaseInitializer= DatabaseInitializer(coreInitializer.database)
     println("registering modules...")
-    databaseInitializer.registerModuleDefinitions(allModules)
+    try {
+        databaseInitializer.registerModuleDefinitions(moduleInitializers)
+    } catch (e: Exception) {
+        println("Error registering modules: ${e.message}")
+    }
     println("modules registered")
     println("adding first test data...")
     databaseInitializer.firstDataInitialization()

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SuperAdminDTO(
-    val id: Int,
-    val userId: Int,
+    val id: String,
+    val userId: String,
     val description: String?
 )

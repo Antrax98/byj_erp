@@ -56,11 +56,11 @@ class UsersFeatureComponentImpl(
         @Serializable
         data object UsersMain : Config()
         @Serializable
-        data class UserPage(val userId: Int) : Config()
+        data class UserPage(val userId: String) : Config()
         @Serializable
-        data class AssignRole(val userId: Int, val assignableRoles: Set<RoleDTO>) : Config()
+        data class AssignRole(val userId: String, val assignableRoles: Set<RoleDTO>) : Config()
         @Serializable
-        data class AssignSpecialPermission(val userId: Int, val assignablePermissions: Set<PermissionKey>) : Config()
+        data class AssignSpecialPermission(val userId: String, val assignablePermissions: Set<PermissionKey>) : Config()
         @Serializable
         data object AddUser : Config()
     }
@@ -81,10 +81,10 @@ class UsersFeatureComponentImpl(
     private fun usersMainComponent(componentContext: ComponentContext): UsersMainComponent =
         UsersMainComponentImpl(componentContext, userPermissions, apiClient, ::navigateTo)
 
-    private fun userPageComponent(componentContext: ComponentContext, userId: Int): UserPageComponent =
+    private fun userPageComponent(componentContext: ComponentContext, userId: String): UserPageComponent =
         UserPageComponentImpl(componentContext, userPermissions, userId, apiClient, ::navigateTo)
 
-    private fun assignRoleComponent(componentContext: ComponentContext, userId: Int, assignableRoles: Set<RoleDTO>): AssignRoleComponent =
+    private fun assignRoleComponent(componentContext: ComponentContext, userId: String, assignableRoles: Set<RoleDTO>): AssignRoleComponent =
         AssignRoleComponentImpl(
             componentContext,
             userPermissions,
@@ -104,7 +104,7 @@ class UsersFeatureComponentImpl(
             }
         }
 
-    private fun assignSpecialPermissionComponent(componentContext: ComponentContext, userId: Int, assignablePermissions: Set<PermissionKey>): AssignSpecialPermissionComponent =
+    private fun assignSpecialPermissionComponent(componentContext: ComponentContext, userId: String, assignablePermissions: Set<PermissionKey>): AssignSpecialPermissionComponent =
         AssignSpecialPermissionComponentImpl(
             componentContext,
             userPermissions,

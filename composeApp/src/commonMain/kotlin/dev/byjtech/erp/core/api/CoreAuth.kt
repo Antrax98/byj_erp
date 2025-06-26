@@ -41,8 +41,8 @@ interface CoreAuth {
 
     //borrar despues
     @GET("/auth/userRoles/{userId}")
-    suspend fun userRoles(@Path("userId") userId: Int): UserRolesResponse
+    suspend fun userRoles(@Path("userId") userId: String): UserRolesResponse
 
     @GET("/auth/userSpecialPermissions/{userId}")
-    suspend fun getSpecialPermissionsByUserId(@Path("userId") userId: Int): PermissionKeysResponse
+    suspend fun getSpecialPermissionsByUserId(@Path("userId") userId: String): PermissionKeysResponse
 }

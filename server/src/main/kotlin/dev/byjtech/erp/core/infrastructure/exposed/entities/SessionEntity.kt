@@ -4,9 +4,12 @@ import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import dev.byjtech.erp.core.infrastructure.exposed.tables.SessionsTable
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
+import java.util.UUID
 
-class SessionEntity(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<SessionEntity>(SessionsTable)
+class SessionEntity(id: EntityID<UUID>) : UUIDEntity(id) {
+    companion object : UUIDEntityClass<SessionEntity>(SessionsTable)
 
     var user by UserEntity referencedOn SessionsTable.userId
     var accessToken by SessionsTable.accessToken

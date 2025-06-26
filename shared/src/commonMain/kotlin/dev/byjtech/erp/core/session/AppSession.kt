@@ -6,7 +6,7 @@ import kotlin.text.toByteArray
 import java.util.Base64
 
 @Serializable
-data class AppSession(val sessionId: Int, val expiresAt: Long = 0) {
+data class AppSession(val sessionId: String, val expiresAt: Long = 0) {
 
     fun toEncoded(): String {
         return String(Base64.getUrlEncoder().encode(Json.encodeToString(this).toByteArray()))

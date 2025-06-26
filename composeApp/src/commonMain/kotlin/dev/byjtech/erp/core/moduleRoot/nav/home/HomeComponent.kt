@@ -18,6 +18,7 @@ interface HomeComponent {
     val screenMap: Map<String,Map<String, @Composable (FeatureComponent) -> Unit>>
     val moduleManager: ModuleManager
     val actualUser: StateFlow<UserDTO?>
+    val isOnMainPage: StateFlow<Boolean>
     fun onBack()
     suspend fun onLogout()
     suspend fun onTestClick()

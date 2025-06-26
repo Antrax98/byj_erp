@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 class UserPageComponentImpl(
     componentContext: ComponentContext,
     override val userPermissions: StateFlow<Set<PermissionKey>>,
-    override val userId: Int,
+    override val userId: String,
     override val apiClient: ApiClient,
     override val navTo: (UsersFeatureComponentImpl.Config) -> Unit
 ): UserPageComponent, ComponentContext by componentContext {

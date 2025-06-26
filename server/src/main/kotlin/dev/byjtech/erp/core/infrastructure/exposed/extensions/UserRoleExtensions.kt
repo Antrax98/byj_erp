@@ -6,8 +6,8 @@ import dev.byjtech.erp.utils.datetime.toKotlinx
 
 fun UserRoleEntity.toDTO(): UserRoleDTO {
     return UserRoleDTO(
-        id = this.id.value,
-        userId = this.user.id.value,
-        roleId = this.role.id.value,
+        id = this.id.value.toString(),
+        userId = this.user.id.value.toString(),
+        roleId = this.role.id.value.toString(),
     )
 }
