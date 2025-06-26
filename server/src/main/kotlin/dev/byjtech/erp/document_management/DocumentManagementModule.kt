@@ -6,7 +6,6 @@ import dev.byjtech.erp.modules.document_management.application.documentManagemen
 import dev.byjtech.erp.modules.document_management.infrastructure.documentManagementInfrastructureModule
 import dev.byjtech.erp.modules.document_management.infrastructure.api.DocumentManagementRoutesInstaller
 import dev.byjtech.erp.modules.document_management.infrastructure.exposed.DocumentManagementTables
-import dev.byjtech.erp.shared.infrastructure.database.CreateDatabase
 import io.github.cdimascio.dotenv.dotenv
 import org.jetbrains.exposed.sql.Database
 import org.koin.core.qualifier.named
@@ -38,6 +37,7 @@ val documentManagementModule = module {
             definition = DocumentManagementDefinition,
             database = get(named("documentManagementDatabase")),
             moduleRoutesInstaller = get<DocumentManagementRoutesInstaller>(),
+            tables = DocumentManagementTables.all
         )
     }
 }
