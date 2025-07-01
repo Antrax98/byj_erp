@@ -115,4 +115,11 @@ class RoleRepositoryImpl(private val db: Database): RoleRepository {
         }
 
     }
+
+    override fun findByName(name: String): Role? {
+        return transaction(db) {
+            val roleEntity = RoleEntity.find { RolesTable.name eq name }.firstOrNull()
+            return@transaction roleEntity?.toModel()
+        }
+    }
 }

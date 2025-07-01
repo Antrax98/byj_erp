@@ -1,13 +1,19 @@
 package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.addUser
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
+import dev.byjtech.erp.common.ApiResponse
 import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addCompany.TextFieldState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class AddUserComponentImpl(
     componentContext: ComponentContext,
+    override val apiClient: ApiClient,
     override val userPermissions: StateFlow<Set<PermissionKey>>,
     override val onFinished: (added: Boolean) -> Unit
 ): AddUserComponent, ComponentContext by componentContext {
@@ -26,6 +32,8 @@ class AddUserComponentImpl(
     override fun onEmailChange(value: String) {
         _email.value = TextFieldState(value = value)
     }
+
+    val coroutineScope = componentContext.coroutineScope()
 
     override fun onSubmitted() {
         val username = username.value.value
@@ -49,7 +57,26 @@ class AddUserComponentImpl(
         }
 
         if (canSubmit) {
-            onFinished(true)
+            val newUser = UserDTO(
+                name = username,
+                email = email
+            )
+
+            coroutineScope.launch {
+                val response = apiClient.usersT.createUser(newUser)
+                when(response){
+                    is ApiResponse.Success -> {
+                        onFinished(true)
+                    }
+                    is ApiResponse.Error -> {
+                        println("error: ${response.data}")
+                        //todo(): saltar un popup o algo explicando que paso para:
+                        //"UNKNOWN_ERROR"
+                        //"NETWORK_ERROR"
+                        //"BAD_REQUEST"
+                    }
+                }
+            }
         } else{
             println("datos incorrectos")
         }

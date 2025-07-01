@@ -6,6 +6,7 @@ import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.rolesMain.RolesMainComponent
@@ -17,6 +18,7 @@ import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.addRole.AddRoleComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.rolePage.RolePageComponent
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.rolePage.RolePageComponentImpl
+import kotlinx.coroutines.launch
 
 class RolesFeatureComponentImpl(
     componentContext: ComponentContext,
@@ -24,6 +26,8 @@ class RolesFeatureComponentImpl(
     override val apiClient: ApiClient,
     override val toHome: () -> Unit
 ): RolesFeatureComponent, ComponentContext by componentContext {
+
+    val coroutineScope = componentContext.coroutineScope()
 
     //navegacion
     @Serializable
@@ -45,7 +49,19 @@ class RolesFeatureComponentImpl(
         RolePageComponentImpl(componentContext, userPermissions,roleId, apiClient, ::navigateTo)
 
     private fun addRole(componentContext: ComponentContext): AddRoleComponent =
-        AddRoleComponentImpl(componentContext, userPermissions, apiClient, ::navigateTo)
+        AddRoleComponentImpl(componentContext, userPermissions, apiClient, ::navigateTo){
+            added ->
+            navigation.pop {
+                if (added && childStack.active.configuration == Config.RolesMain) {
+                    val rolesMain = (childStack.active.instance as? Child.RolesMain)?.component
+                    rolesMain?.let {
+                        coroutineScope.launch {
+                            it.fetchAllRoles()
+                        }
+                    }
+                }
+            }
+        }
 
     private fun childFactory(config: Config, componentContext: ComponentContext): Child {
         return when (config) {

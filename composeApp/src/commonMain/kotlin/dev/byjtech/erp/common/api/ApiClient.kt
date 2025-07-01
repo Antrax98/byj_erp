@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import dev.byjtech.erp.common.ApiResponse
 import dev.byjtech.erp.core.dto.RoleDTO
+import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.request.AssignPermissionRoleRequest
 import dev.byjtech.erp.core.request.AssignRoleRequest
 import dev.byjtech.erp.core.request.CreateCompanyRequest
@@ -133,6 +134,9 @@ class ApiClient(
 
     //roles
     val rolesT = RoleT(clientKtor)
+
+    //users
+    val usersT = UsersT(clientKtor)
 
 
     fun setAuthHeaderProvider(provider: (() -> String?)?) {
@@ -350,4 +354,57 @@ class RoleT(private val client: HttpClient) {
         }
     }
 
+    suspend fun createRole(data: RoleDTO): ApiResponse<Unit, Unit>{
+        return try {
+            val response = client.post("api/core/roles/tenant/create-role") {
+                contentType(ContentType.Application.Json)
+                setBody(data)
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+}
+
+class UsersT(private val client: HttpClient){
+    suspend fun createUser(userDTO: UserDTO):ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.post("api/core/users/tenant/create-user") {
+                contentType(ContentType.Application.Json)
+                setBody(userDTO)
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                    //
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Error){
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
 }

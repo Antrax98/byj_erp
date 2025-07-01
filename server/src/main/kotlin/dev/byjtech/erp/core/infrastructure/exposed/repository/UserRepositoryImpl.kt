@@ -25,12 +25,19 @@ class UserRepositoryImpl(private val db: Database): UserRepository {
     override fun create(user: UserDTO): Boolean {
         return transaction(db) {
             try {
+                val companyAux = user.companyId?.let {
+                    CompanyEntity.findById(UUID.fromString(it))
+                }
+                if (companyAux == null) {
+                    println("Company not found")
+                    return@transaction false
+                }
                 UserEntity.new {
                     name = user.name
                     email = user.email
                     isActive = true
                     pictureUrl = user.pictureUrl
-                    company = user.companyId?.let { CompanyEntity[UUID.fromString(it)] }
+                    company = companyAux
                     createdAt = LocalDateTime.now()
                     updatedAt = LocalDateTime.now()
                 }

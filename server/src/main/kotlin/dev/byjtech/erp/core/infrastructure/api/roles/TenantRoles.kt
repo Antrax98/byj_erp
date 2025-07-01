@@ -1,6 +1,7 @@
 package dev.byjtech.erp.core.infrastructure.api.roles
 
 import dev.byjtech.erp.core.CoreDefinition
+import dev.byjtech.erp.core.domain.model.Role
 import dev.byjtech.erp.core.domain.repository.ModuleRepository
 import dev.byjtech.erp.core.domain.repository.RoleRepository
 import dev.byjtech.erp.core.domain.repository.UserRepository
@@ -132,6 +133,40 @@ fun Route.tenantRoles(authServ: CoreAuthWrapper, roleRepo: RoleRepository, userR
             roleRepo.addPermissions(role.id, request.permissionIds!!.map { UUID.fromString(it) }.toSet())
         }
 
+        call.respond(HttpStatusCode.OK)
+    }
+
+    post("/create-role") {
+        val session = authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Admin.All.key,
+                CoreDefinition.Roles.Create.key
+            )
+        )
+        val role = call.receive<dev.byjtech.erp.core.dto.RoleDTO>()
+        val response: Role?
+        //TODO: validar que no exista un rol con el mismo nombre en la empresa
+        //todo: validar que el nombre no este vacio (porsiacaso)
+        //validacion deveria ser cap sensitive?, -> por ahora si, ("admin" =/= "Admin")
+
+        val exist = roleRepo.findByName(role.name)
+        if (exist != null) {
+            call.respond(HttpStatusCode.BadRequest, message = "ROLE_ALREADY_EXISTS")
+            return@post
+        }
+
+        val auxRole = Role(
+            name = role.name,
+            description = role.description,
+            companyId = session.companyId!!
+        )
+        try {
+            response = roleRepo.create(auxRole)
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, message = "ERROR_CREATING_ROLE")
+            return@post
+        }
         call.respond(HttpStatusCode.OK)
     }
 
