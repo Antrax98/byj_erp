@@ -57,6 +57,7 @@ fun AddUserScreen(component: AddUserComponent){
                     isError = userName.error != null,
                     supportingText = { userName.error?.let { Text(it, color = MaterialTheme.colorScheme.error) } }
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = email.value,
                     onValueChange = { component.onEmailChange(it) },

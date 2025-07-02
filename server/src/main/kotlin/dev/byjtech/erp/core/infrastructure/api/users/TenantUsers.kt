@@ -196,17 +196,24 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
         if (newUser.companyId == null) {
             val userCompanyid = userRepo.find(session.userId)?.companyId
             if (userCompanyid == null) {
-                call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Company id not found", code = "COMPANY_ID_NOT_FOUND"))
+                call.respond(HttpStatusCode.BadRequest, "COMPANY_ID_NOT_FOUND")
                 return@post
             } else {
                 newUser = newUser.copy(companyId = userCompanyid.toString())
             }
         }
+        //TODO: validar que el email no exista en la base de datos
+        val exist = userRepo.findByEmail(newUser.email)
+        if (exist != null) {
+            call.respond(HttpStatusCode.BadRequest, "USER_EMAIL_ALREADY_EXISTS")
+            return@post
+        }
+
         val response = userRepo.create(newUser)
         if (response) {
-            call.respond(HttpStatusCode.OK, ApiResponse.Success(Unit))
+            call.respond(HttpStatusCode.OK)
         } else {
-            call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Failed to create user", code = "FAILED_TO_CREATE_USER"))
+            call.respond(HttpStatusCode.BadRequest, "FAILED_TO_CREATE_USER")
         }
     }
 

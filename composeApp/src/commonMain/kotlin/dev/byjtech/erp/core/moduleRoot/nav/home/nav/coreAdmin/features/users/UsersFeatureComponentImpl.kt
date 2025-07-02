@@ -127,6 +127,7 @@ class UsersFeatureComponentImpl(
     private fun addUserComponent(componentContext: ComponentContext): AddUserComponent =
         AddUserComponentImpl(
             componentContext,
+            apiClient,
             userPermissions
         ){
             added ->
