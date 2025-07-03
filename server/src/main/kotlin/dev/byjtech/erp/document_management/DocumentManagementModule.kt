@@ -1,5 +1,4 @@
 package dev.byjtech.erp.modules.document_management
-
 import dev.byjtech.erp.config.ModuleInitializer
 import dev.byjtech.erp.modules.document_management.domain.documentManagementDomainModule
 import dev.byjtech.erp.modules.document_management.application.documentManagementApplicationModule
