@@ -9,6 +9,7 @@ import io.github.cdimascio.dotenv.dotenv
 import dev.byjtech.erp.shared.infrastructure.database.CreateDatabase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import dev.byjtech.erp.modules.document_management.DocumentManagementDefinition
 
 val dotenv = dotenv {
     ignoreIfMissing = false
