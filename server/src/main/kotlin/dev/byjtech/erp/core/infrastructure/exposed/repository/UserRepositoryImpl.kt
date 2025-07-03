@@ -1,5 +1,6 @@
 package dev.byjtech.erp.core.infrastructure.exposed.repository
 
+import dev.byjtech.erp.common.PermissionWithKey
 import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.domain.model.User
 import dev.byjtech.erp.core.domain.repository.UserRepository
@@ -189,4 +190,5 @@ class UserRepositoryImpl(private val db: Database): UserRepository {
             return@transaction permissions.map { it.toModel() }.toSet()
         }
     }
+
 }

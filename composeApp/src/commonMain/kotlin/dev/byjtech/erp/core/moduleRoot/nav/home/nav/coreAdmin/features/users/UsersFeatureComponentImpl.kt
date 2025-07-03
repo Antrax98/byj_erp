@@ -59,7 +59,7 @@ class UsersFeatureComponentImpl(
         @Serializable
         data class UserPage(val userId: String) : Config()
         @Serializable
-        data class AssignRole(val userId: String, val assignableRoles: Set<RoleDTO>) : Config()
+        data class AssignRole(val userId: String, val actUserRoles: Set<RoleDTO>) : Config()
         @Serializable
         data class AssignSpecialPermission(val userId: String, val assignablePermissions: Set<PermissionKey>) : Config()
         @Serializable
@@ -85,12 +85,13 @@ class UsersFeatureComponentImpl(
     private fun userPageComponent(componentContext: ComponentContext, userId: String): UserPageComponent =
         UserPageComponentImpl(componentContext, userPermissions, userId, apiClient, ::navigateTo)
 
-    private fun assignRoleComponent(componentContext: ComponentContext, userId: String, assignableRoles: Set<RoleDTO>): AssignRoleComponent =
+    private fun assignRoleComponent(componentContext: ComponentContext, userId: String, actUserRoles: Set<RoleDTO>): AssignRoleComponent =
         AssignRoleComponentImpl(
             componentContext,
+            apiClient,
             userPermissions,
             userId,
-            assignableRoles
+            actUserRoles
         ){
             assigned ->
             navigation.pop {
@@ -113,7 +114,7 @@ class UsersFeatureComponentImpl(
             assignablePermissions
         ) { assigned ->
             navigation.pop {
-                if (assigned && childStack.active.configuration == Config.UserPage) {
+                if (assigned && childStack.active.configuration is Config.UserPage) {
                     val userPage =
                         (childStack.active.instance as? UsersFeatureComponent.Child.UserPage)?.component
                     userPage?.let {
@@ -133,7 +134,7 @@ class UsersFeatureComponentImpl(
         ){
             added ->
             navigation.pop {
-                if (added && childStack.active.configuration == Config.UsersMain) {
+                if (added && childStack.active.configuration is Config.UsersMain) {
                     val usersMain = (childStack.active.instance as? UsersFeatureComponent.Child.UsersMain)?.component
                     usersMain?.let {
                         coroutineScope.launch {
@@ -157,7 +158,7 @@ class UsersFeatureComponentImpl(
                 assignRoleComponent(
                     componentContext.childContext("assignRole"),
                     userId = config.userId,
-                    assignableRoles = config.assignableRoles
+                    actUserRoles = config.actUserRoles
                 )
             )
             is Config.AssignSpecialPermission -> UsersFeatureComponent.Child.AssignSpecialPermission(

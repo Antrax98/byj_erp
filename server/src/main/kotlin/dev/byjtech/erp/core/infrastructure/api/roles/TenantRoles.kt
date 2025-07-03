@@ -210,4 +210,57 @@ fun Route.tenantRoles(authServ: CoreAuthWrapper, roleRepo: RoleRepository, userR
         call.respond(HttpStatusCode.OK)
     }
 
+    delete("/delete-user-permission/{userId}/{permissionId}") {
+        val session = authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Admin.All.key,
+                CoreDefinition.Roles.Delete.key
+            )
+        )
+        val userId = call.parameters["userId"]?.let(UUID::fromString)
+        val permissionId = call.parameters["permissionId"]?.let(UUID::fromString)
+        if(userId==null){
+            call.respond(HttpStatusCode.BadRequest, message = "NO_USER_ID")
+            return@delete
+        }
+        if(permissionId==null){
+            call.respond(HttpStatusCode.BadRequest, message = "NO_PERMISSION_ID")
+            return@delete
+        }
+        val response = userRepo.removeSpecialPermission(userId, permissionId)
+        if(response) {
+            call.respond(HttpStatusCode.OK)
+        } else {
+            call.respond(HttpStatusCode.BadRequest, message = "ERROR_REMOVING_PERMISSION")
+        }
+    }
+
+    delete("/delete-user-role/{userId}/{roleId}"){
+        val session = authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Admin.All.key,
+                CoreDefinition.Roles.Delete.key
+            )
+        )
+        val userId = call.parameters["userId"]?.let(UUID::fromString)
+        val roleId = call.parameters["roleId"]?.let(UUID::fromString)
+
+        if(userId==null){
+            call.respond(HttpStatusCode.BadRequest, message = "NO_USER_ID")
+            return@delete
+        }
+        if(roleId==null){
+            call.respond(HttpStatusCode.BadRequest, message = "NO_ROLE_ID")
+            return@delete
+        }
+        val response = userRepo.removeRole(userId, roleId)
+        if(response) {
+            call.respond(HttpStatusCode.OK)
+        } else {
+            call.respond(HttpStatusCode.BadRequest, message = "ERROR_REMOVING_ROLE")
+        }
+    }
+
 }

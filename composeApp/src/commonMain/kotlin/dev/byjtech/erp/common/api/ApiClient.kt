@@ -326,6 +326,7 @@ class RoleT(private val client: HttpClient) {
                 }
             }
         } catch (e: Exception) {
+            println(e)
             ApiResponse.Error(null, "NETWORK_ERROR")
         }
     }
@@ -352,6 +353,7 @@ class RoleT(private val client: HttpClient) {
             }
 
         } catch (e: Exception) {
+            println(e)
             ApiResponse.Error(Unit, "NETWORK_ERROR")
         }
     }
@@ -378,6 +380,7 @@ class RoleT(private val client: HttpClient) {
                 }
             }
         } catch (e: Exception) {
+            println(e)
             ApiResponse.Error(Unit, "NETWORK_ERROR")
         }
     }
@@ -400,13 +403,17 @@ class RoleT(private val client: HttpClient) {
             }
 
         } catch (e: Exception) {
+            println(e)
             ApiResponse.Error(null, "NETWORK_ERROR")
         }
     }
 
     suspend fun deleteRolePermission(roleId: String, permissionId: String): ApiResponse<Unit, Unit> {
         return try {
-            val response = client.delete("api/core/roles/tenant/delete-role-permission/$roleId/$permissionId")
+            val response = client.delete("api/core/roles/tenant/delete-role-permission/$roleId/$permissionId"){
+                expectSuccess = false
+                contentType(ContentType.Application.Json)
+            }
             when (response.status) {
                 HttpStatusCode.OK -> {
                     ApiResponse.Success(Unit)
@@ -420,6 +427,55 @@ class RoleT(private val client: HttpClient) {
                 }
             }
         } catch (e: Exception) {
+            println(e)
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun deleteUserPermission(userId: String, permissionId: String): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.delete("api/core/users/tenant/delete-user-permission/$userId/$permissionId"){
+                expectSuccess = false
+                contentType(ContentType.Application.Json)
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            println(e)
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun deleteUserRole(userId: String, roleId: String): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.delete("api/core/roles/tenant/delete-user-role/$userId/$roleId") {
+                expectSuccess = false
+                contentType(ContentType.Application.Json)
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            println(e)
             ApiResponse.Error(Unit, "NETWORK_ERROR")
         }
     }
@@ -448,6 +504,23 @@ class UsersT(private val client: HttpClient){
                 }
             }
         } catch (e: Error){
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun getUserSpecialPermissionsWithKey(userId: String): ApiResponse<Set<PermissionWithKey>, Unit> {
+        return try {
+            val response = client.get("api/core/users/tenant/user-special-permissions/$userId")
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val permissions = response.body<Set<PermissionWithKey>>()
+                    ApiResponse.Success(permissions)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception){
             ApiResponse.Error(Unit, "NETWORK_ERROR")
         }
     }

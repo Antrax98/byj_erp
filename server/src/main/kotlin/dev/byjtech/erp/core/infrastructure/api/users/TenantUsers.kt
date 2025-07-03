@@ -1,5 +1,6 @@
 package dev.byjtech.erp.core.infrastructure.api.users
 
+import dev.byjtech.erp.common.PermissionWithKey
 import dev.byjtech.erp.shared.ApiResponse
 import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.domain.repository.ModuleRepository
@@ -140,6 +141,8 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
 
 
     }
+
+    //TODO(): borrar
     delete("unassign-special-permission/{userId}/{permissionId}"){
         authServ.authorizeOrThrow(
             call,
@@ -165,6 +168,7 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
         }
     }
 
+    //TODO(): borrar
     delete("/unassign-role/{userId}/{roleId}"){
         authServ.authorizeOrThrow(
             call,
@@ -215,6 +219,25 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
         } else {
             call.respond(HttpStatusCode.BadRequest, "FAILED_TO_CREATE_USER")
         }
+    }
+
+    get("/user-special-permissions/{userId}"){
+        authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Users.View.key,
+                CoreDefinition.Admin.All.key
+            )
+        )
+        val userId = call.parameters["userId"]?: return@get call.respond(HttpStatusCode.BadRequest, "INVALID_USER_ID")
+        val permissions = userRepo.getSpecialPermissionsByUserId(UUID.fromString(userId))
+        if (permissions == null) {
+            call.respond(HttpStatusCode.OK, emptySet<PermissionWithKey>())
+//            call.respond(HttpStatusCode.NotFound, "NO_SPECIAL_PERMISSIONS")
+            return@get
+        }
+        val permissionsWithKey = moduleRepo.getPermissionsWithKeysByPermissionIds(permissions.map { it.id }.toSet())
+        call.respond(HttpStatusCode.OK, permissionsWithKey)
     }
 
 }
