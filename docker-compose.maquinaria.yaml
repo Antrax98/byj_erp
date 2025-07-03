@@ -1,0 +1,17 @@
+services:
+  mysql_maquinaria:
+    image: mysql:8.3
+    container_name: maquinaria-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: machrootpassword
+      MYSQL_DATABASE: maquinaria_db
+      MYSQL_USER: mach_user
+      MYSQL_PASSWORD: mach_password
+    ports:
+      - "3308:3306"
+    volumes:
+      - maquinaria_data:/var/lib/mysql
+
+volumes:
+  maquinaria_data:
