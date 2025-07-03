@@ -11,5 +11,6 @@ interface FeatureComponent {
     val userPermissions: StateFlow<Set<PermissionKey>>
     val apiClient: ApiClient
     val toHome: () -> Unit //ELIMINAR EN UN FUTURO
+    val updateTitle: (newTitle: String) -> Unit
     fun onBack(): Boolean //hace pop a su propia navegacion devolviendo true o si no pudo devuelve false
 }

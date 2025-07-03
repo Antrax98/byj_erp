@@ -59,6 +59,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(component: HomeComponent) {
     val state by component.state.collectAsState()
     val actUser by component.actualUser.collectAsState()
+    val title by component.titleState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -84,7 +85,7 @@ fun HomeScreen(component: HomeComponent) {
                     }
                 },
                 title = { Text(
-                    text="Home",
+                    text=title,
                     textAlign = TextAlign.Center,
 
                 ) },

@@ -76,11 +76,11 @@ fun UsersMainScreen(component: UsersMainComponent) {
                                 UserContainer(user, onClick = {component.navTo(Config.UserPage(user.id))})
                             }
                         }
-                        fakeUsers.forEach { user ->
-                            item {
-                                UserContainer(user)
-                            }
-                        }
+//                        fakeUsers.forEach { user ->
+//                            item {
+//                                UserContainer(user)
+//                            }
+//                        }
                         item {
                             Spacer(modifier = Modifier.height(100.dp))
                         }

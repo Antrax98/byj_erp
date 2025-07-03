@@ -1,6 +1,7 @@
 package dev.byjtech.erp.core.infrastructure.exposed.repository
 
 import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.common.PermissionWithKey
 import dev.byjtech.erp.core.domain.model.Category
 import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.domain.repository.ModuleRepository
@@ -18,6 +19,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
 import dev.byjtech.erp.core.domain.model.Module
+import dev.byjtech.erp.core.infrastructure.exposed.extensions.toDTO
 
 class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
     override fun create(module: Module): Module {
@@ -25,7 +27,9 @@ class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
     }
 
     override fun get(moduleId: UUID): Module? {
-        TODO("Not yet implemented")
+        return transaction(db) {
+            ModuleEntity.findById(moduleId)?.toModel()
+        }
     }
 
     override fun getWithCategories(moduleId: UUID): Module? {
@@ -135,6 +139,101 @@ class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
             }
         }
     }
+
+    override fun getPermissionKeysByModuleId(moduleId: UUID): Set<PermissionKey> {
+        return transaction(db) {
+            val permissionKeys = mutableSetOf<PermissionKey>()
+            val module = ModuleEntity.findById(moduleId)
+            if (module != null) {
+                val categories = CategoryEntity.find { CategoriesTable.moduleId eq moduleId }
+                categories.forEach { category ->
+                    val permissions = PermissionEntity.find { PermissionsTable.categoryId eq category.id }
+                    permissions.forEach { permission ->
+                        permissionKeys.add(
+                            PermissionKey(
+                                module = module.name,
+                                category = category.name,
+                                action = permission.name
+                            )
+                        )
+                    }
+                }
+
+            }
+            return@transaction permissionKeys.toSet()
+        }
+
+    }
+
+    override fun getPermissionsByModuleId(moduleId: UUID): Set<Permission> {
+        return transaction(db) {
+            val permissions = mutableSetOf<Permission>()
+            val module = ModuleEntity.findById(moduleId)
+            if (module != null) {
+                val categories = CategoryEntity.find { CategoriesTable.moduleId eq moduleId }
+                categories.forEach { category ->
+                    val permissionsCategory =
+                        PermissionEntity.find { PermissionsTable.categoryId eq category.id }
+                    permissionsCategory.forEach { permission ->
+                        permissions.add(permission.toModel())
+                    }
+                }
+            }
+            return@transaction permissions.toSet()
+        }
+    }
+
+    override fun getPermissionsWithKeysByModuleIds(moduleIds: Set<UUID>): Set<PermissionWithKey> {
+        return transaction(db) {
+            val result = mutableSetOf<PermissionWithKey>()
+            val modules = ModuleEntity.find { ModulesTable.id inList moduleIds.toList() }.associateBy { it.id.value }
+            if (modules.isEmpty()) return@transaction emptySet()
+            val categories = CategoryEntity.find { CategoriesTable.moduleId inList moduleIds.toList() }
+            categories.forEach { category ->
+                val module = modules[category.module.id.value] ?: return@forEach
+                val permissions = PermissionEntity.find { PermissionsTable.categoryId eq category.id }
+                permissions.forEach { permission ->
+                    result.add(
+                        PermissionWithKey(
+                            permission = permission.toDTO(),
+                            key = PermissionKey(
+                                module = module.name,
+                                category = category.name,
+                                action = permission.name
+                            )
+                        )
+                    )
+                }
+            }
+            result
+        }
+    }
+
+    //esto deveria ser un Service, pero hacerlo aqui genera menos consultas a la base de datos
+    override fun getPermissionsWithKeysByPermissionIds(permissionIds: Set<UUID>): Set<PermissionWithKey> {
+        return transaction(db) {
+            val result = mutableSetOf<PermissionWithKey>()
+            val permissions = PermissionEntity.find { PermissionsTable.id inList permissionIds.toList() }
+            for (permission in permissions) {
+                val category = permission.category
+                val module = category.module
+                val key = PermissionKey(
+                    module = module.name,
+                    category = category.name,
+                    action = permission.name
+                )
+                result.add(
+                    PermissionWithKey(
+                        permission = permission.toDTO(),
+                        key = key
+                    )
+                )
+            }
+            return@transaction result
+        }
+    }
+
+
 
     override fun findByName(name: String): Module? {
         return transaction(db) {

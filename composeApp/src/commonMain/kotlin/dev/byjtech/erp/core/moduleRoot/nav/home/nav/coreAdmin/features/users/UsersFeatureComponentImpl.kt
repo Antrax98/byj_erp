@@ -32,7 +32,8 @@ class UsersFeatureComponentImpl(
     val componentContext: ComponentContext,
     override val userPermissions: StateFlow<Set<PermissionKey>>,
     override val apiClient: ApiClient,
-    override val toHome: () -> Unit
+    override val toHome: () -> Unit,
+    override val updateTitle: (newTitle: String) -> Unit
 ) : UsersFeatureComponent, ComponentContext by componentContext {
 
 

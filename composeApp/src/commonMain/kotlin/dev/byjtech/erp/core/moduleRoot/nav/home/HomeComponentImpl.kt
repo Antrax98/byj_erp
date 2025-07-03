@@ -16,6 +16,7 @@ import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.common.session.SessionManager
 import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.featuresList.FeatureListComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.RolesFeatureComponentImpl
 import kotlinx.coroutines.flow.*
 import kotlin.system.exitProcess
 
@@ -44,6 +45,13 @@ class HomeComponentImpl(
 
     private val _isOnMainPage = MutableStateFlow(true)
     override val isOnMainPage: StateFlow<Boolean> = _isOnMainPage.asStateFlow()
+
+    private val _titleState = MutableStateFlow<String>("Home")
+    override val titleState: StateFlow<String> = _titleState.asStateFlow()
+
+    private fun updateTitle(newTitle: String) {
+        _titleState.value = newTitle
+    }
 
     override suspend fun onLogout() {
         _state.update { it.copy(isLoading = true) }
@@ -79,14 +87,23 @@ class HomeComponentImpl(
                 apiClient = api,
                 toHome = ::toHome,
                 navTo = ::navigateTo,
-                buttonsMap = moduleManager.buttonMap(sessionManager.userPermissions.value, sessionManager.allowedModules.value)
+                buttonsMap = moduleManager.buttonMap(sessionManager.userPermissions.value, sessionManager.allowedModules.value),
+                updateTitle = ::updateTitle
             )
             //aqui poner mas featreComponents indispensables
+            ComponentConfig("core", "roles") -> RolesFeatureComponentImpl(
+                componentContext.childContext("roles"),
+                userPermissions = sessionManager.userPermissions,
+                apiClient = api,
+                toHome = ::toHome,
+                sessionManagerRef=sessionManager,
+                updateTitle = ::updateTitle
+            )
 
             else -> {
                 val factory = childMap[config.module]?.get(config.feature)
                     ?: throw IllegalArgumentException("Invalid config: $config")
-                factory.create(componentContext.childContext(config.toString()), sessionManager.userPermissions, api, ::toHome)
+                factory.create(componentContext.childContext(config.toString()), sessionManager.userPermissions, api, ::toHome, ::updateTitle)
             }
         }
     }
@@ -110,6 +127,7 @@ class HomeComponentImpl(
     }
     private fun toHome() {
         println("navegando a home (featureList)")
+        updateTitle("Home")
         _state.update { it.copy(isOnListPage = true) }
         navigation.replaceCurrent(ComponentConfig("core", "home"))
     }

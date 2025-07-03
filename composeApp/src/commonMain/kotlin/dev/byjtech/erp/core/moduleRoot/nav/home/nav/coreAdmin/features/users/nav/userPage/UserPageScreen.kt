@@ -56,19 +56,6 @@ fun UserPageScreen(component: UserPageComponent) {
 
     val userPermissions by component.userPermissions.collectAsState()
 
-    val coroutineScope = rememberCoroutineScope()
-
-//    coroutineScope.launch {
-//        component.fetchUser()
-//        component.fetchUserSpecialPermissions()
-//        component.fetchUserRoles()
-//    }
-//    LaunchedEffect(component) {
-//        component.fetchUser()
-//        component.fetchUserSpecialPermissions()
-//        component.fetchUserRoles()
-//    }
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -349,38 +336,6 @@ fun InfoRow(label: String, value: String) {
         )
     }
 }
-
-
-//no sirve por que no se puede usar un lazyColumn en otro lazyColumn
-//@Composable
-//fun RolesList(roles: List<RoleDTO>) {
-//    if (roles.isEmpty()) {
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(16.dp),
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text(
-//                text = "El usuario no tiene roles asignados.",
-//                style = MaterialTheme.typography.bodyMedium,
-//                color = Color.Gray
-//            )
-//        }
-//    } else {
-//        LazyColumn(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(top = 8.dp),
-//            contentPadding = PaddingValues(bottom = 16.dp)
-//        ) {
-//            items(roles) { role ->
-//                RoleCard(role)
-//            }
-//        }
-//    }
-//}
-
 
 
 

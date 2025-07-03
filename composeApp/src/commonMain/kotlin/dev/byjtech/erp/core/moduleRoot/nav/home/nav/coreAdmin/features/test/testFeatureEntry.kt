@@ -16,13 +16,14 @@ val testFeatureEntry: FeatureEntry = FeatureEntry(
     requiredAnyPermissions = setOf(
         CoreDefinition.Admin.All.key
     ),
-    factory = { context, userPermissions, apiClient, toHome ->
+    factory = { context, userPermissions, apiClient, toHome, updateTitle ->
         TestFeatureComponentImpl(
             componentContext = context,
             userPermissions = userPermissions,
             apiClient = apiClient,
             toHome = toHome,
             usersTenantApi = apiClient.ktorfit.createUsersTenantApi(), //solo para testear si funciona este enfoque
+            updateTitle = updateTitle
         )
     },
     screen = { component -> TestFeatureScreen(component as TestFeatureComponent) },

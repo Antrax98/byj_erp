@@ -1,6 +1,7 @@
 package dev.byjtech.erp.core.domain.repository
 
 import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.common.PermissionWithKey
 import dev.byjtech.erp.core.domain.model.Category
 import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.dto.CategoryDTO //TODO() crear un DTO especifico para crear categorys???
@@ -25,6 +26,10 @@ interface ModuleRepository {
     fun findPermissionsByPermissionKeySet(permissionKeySet: Set<PermissionKey>): Set<Permission>
     fun getPermissionKeysByPermissionIdSet(permissionIdSet: Set<UUID>): Set<PermissionKey>
     fun getPermissionKeyById(permissionId: UUID): PermissionKey?
+    fun getPermissionKeysByModuleId(moduleId: UUID): Set<PermissionKey>
+    fun getPermissionsByModuleId(moduleId: UUID): Set<Permission>
+    fun getPermissionsWithKeysByModuleIds(moduleIds: Set<UUID>): Set<PermissionWithKey>
+    fun getPermissionsWithKeysByPermissionIds(permissionIds: Set<UUID>): Set<PermissionWithKey>
     fun findByName(name: String): Module?
     //TODo() si faltan mas se agregan nomas
 }

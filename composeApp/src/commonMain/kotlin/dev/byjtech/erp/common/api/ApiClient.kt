@@ -32,6 +32,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import dev.byjtech.erp.common.ApiResponse
+import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.common.PermissionWithKey
 import dev.byjtech.erp.core.dto.RoleDTO
 import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.request.AssignPermissionRoleRequest
@@ -308,13 +310,13 @@ class RoleT(private val client: HttpClient) {
         }
     }
 
-    suspend fun getPermissionsByRoleId(roleId: String): ApiResponse<RolePermisisonKeysResponse, Unit?> {
+    suspend fun getPermissionsByRoleId(roleId: String): ApiResponse<Set<PermissionWithKey>, Unit?> {
         return try {
             val response = client.get("api/core/roles/tenant/role-permissions/$roleId")
             when (response.status) {
                 HttpStatusCode.OK -> {
-                    val permissions = response.body<RolePermisisonKeysResponse>()
-                    ApiResponse.Success(permissions)
+                    val data = response.body<RolePermisisonKeysResponse>()
+                    ApiResponse.Success(data.permissions)
                 }
                 HttpStatusCode.BadRequest -> {
                     ApiResponse.Error(null, "NO_ROLE_ID")
@@ -371,6 +373,48 @@ class RoleT(private val client: HttpClient) {
                     ApiResponse.Error(Unit, errorMessage)
                 }
 
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun getModulesPermissionKeys(moduleIds: Set<String>): ApiResponse<Set<PermissionWithKey>, Unit?> {
+        return try {
+            val response = client.post("api/core/roles/tenant/modules-permissionkeys") {
+                contentType(ContentType.Application.Json)
+                setBody(moduleIds)
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val permissions = response.body<Set<PermissionWithKey>>()
+                    ApiResponse.Success(permissions)
+                }
+                else -> {
+                    ApiResponse.Error(null, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+
+        } catch (e: Exception) {
+            ApiResponse.Error(null, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun deleteRolePermission(roleId: String, permissionId: String): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.delete("api/core/roles/tenant/delete-role-permission/$roleId/$permissionId")
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
                 else -> {
                     ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
                 }

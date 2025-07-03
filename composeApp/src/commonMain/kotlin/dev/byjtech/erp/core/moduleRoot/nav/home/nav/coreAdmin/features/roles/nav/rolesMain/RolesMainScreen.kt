@@ -1,13 +1,19 @@
 package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.rolesMain
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.common.UnderConstructionScreen
 import dev.byjtech.erp.common.tools.containsAnyOf
@@ -40,14 +47,14 @@ import kotlinx.datetime.toKotlinLocalDateTime
 import java.time.LocalDateTime
 
 @Composable
-fun RolesMainScreen(component: RolesMainComponent){
+fun RolesMainScreen(component: RolesMainComponent) {
     val isLoading by component.isLoading.collectAsState()
     val rolesSet by component.rolesState.collectAsState()
     val userPermissions by component.userPermissions.collectAsState()
 
     Scaffold(
         floatingActionButton = {
-            if(userPermissions.containsAnyOf(setOf(CoreDefinition.Users.Create.key))){
+            if (userPermissions.containsAnyOf(setOf(CoreDefinition.Users.Create.key))) {
                 FloatingActionButton(
                     onClick = { component.navTo(Config.AddRole) },
                     shape = RoundedCornerShape(16.dp)
@@ -56,85 +63,133 @@ fun RolesMainScreen(component: RolesMainComponent){
                 }
             }
         }
-    ) {
-        if(isLoading){
-            UnderConstructionScreen("Cargando roles...")
-            CircularProgressIndicator()
-        }else{
-            if(rolesSet != null){
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top
-                ) {
-                    rolesSet?.forEach { role ->
-                        item {
-                            RoleContainer(role, onClick = /*{ component.navToRolePage(role.id) }*/{component.navTo(
-                                Config.RolePage(role.id))})
-                        }
-                    }
-                    if(rolesSet!!.isEmpty()){
-                        item {
-                            Text(text = "No hay roles en la empresa")
-                        }
-                        testRoles.forEach { role ->
-                            item {
-                                RoleContainer(role, onClick = {println("Clicked on role ${role.name}")})
-                            }
-                        }
-                    }
-                    item {
-                        Spacer(modifier = Modifier.size(100.dp))
-
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when {
+                isLoading -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Cargando roles...")
                     }
                 }
-            } else {
-                UnderConstructionScreen("No hay roles cargados")
+
+                rolesSet == null -> {
+                    UnderConstructionScreen("No se pudieron cargar los roles")
+                }
+
+                rolesSet!!.isEmpty() -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(top = 32.dp)
+                    ) {
+                        item {
+                            Text(
+                                text = "No hay roles en la empresa",
+                                style = MaterialTheme.typography.bodyMedium,
+                                //modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                        }
+//                        testRoles.forEach { role ->
+//                            item {
+//                                RoleContainer(role) {
+//                                    println("Clicked on test role ${role.name}")
+//                                }
+//                            }
+//                        }
+                        item {
+                            Spacer(modifier = Modifier.height(100.dp))
+                        }
+                    }
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(vertical = 8.dp)
+                    ) {
+                        rolesSet!!.forEach { role ->
+                            item {
+                                RoleContainer(role) {
+                                    component.navTo(Config.RolePage(role.id))
+                                }
+                            }
+                        }
+                        item {
+                            Spacer(modifier = Modifier.height(100.dp))
+                        }
+                    }
+                }
             }
         }
     }
-
-
 }
 
 @Composable
-fun RoleContainer(role: RoleDTO, onClick: () -> Unit = {}){
+fun RoleContainer(role: RoleDTO, onClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 8.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
-        Row {
-            Icon(
-                imageVector = Icons.Default.Task,
-                contentDescription = "Role Icon",
+        Row(
+            modifier = Modifier
+                .clickable { onClick() }
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
                 modifier = Modifier
-                    .size(75.dp)
+                    .size(42.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                    .padding(10.dp),
-                tint = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = role.name,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(16.dp)
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(
-                onClick = onClick,
-                modifier = Modifier.align(Alignment.CenterVertically)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowRight,
-                    contentDescription = "To Role info",
+                    imageVector = Icons.Default.Task,
+                    contentDescription = "Role Icon",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp)
                 )
             }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = role.name,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                if (role.description.isNotBlank()) {
+                    Text(
+                        text = role.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                        maxLines = 1
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowRight,
+                contentDescription = "Ver más",
+                tint = Color.Gray
+            )
         }
     }
 }
+
 
 val testRoles = setOf(
     RoleDTO(
