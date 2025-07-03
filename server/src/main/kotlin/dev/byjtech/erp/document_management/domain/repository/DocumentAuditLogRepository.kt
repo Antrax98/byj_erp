@@ -1,4 +1,8 @@
-package dev.byjtech.erp.document_management.domain.repository
+package dev.byjtech.erp.modules.document_management.domain.repository
 
-class DocumentAuditLogRepository {
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentAuditLog
+
+interface DocumentAuditLogRepository {
+    fun findByDocumentId(documentId: Int): List<DocumentAuditLog>
+    fun save(log: DocumentAuditLog): DocumentAuditLog
 }

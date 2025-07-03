@@ -1,25 +1,21 @@
-package dev.byjtech.erp.modules.document_management.domain.model
-
+package shared.src.commonMain.kotlin.dev.byjtech.erp.modules.document_management.dto
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
-import java.util.UUID
 
-data class Document(
-    val id: Int,
+data class DocumentDTO(
+    val id: String,
     val documentType: String,
     val documentNumber: String,
     val issueDate: LocalDate,
     val dueDate: LocalDate?,
+    val status: String,
     val currency: String,
     val netAmount: Double,
     val taxAmount: Double,
     val totalAmount: Double,
     val fileUrl: String,
-    val createdBy: UUID,
+    val createdBy: String,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
-    val active: Boolean,
-    val status: DocumentStatus,
-    // val companyId: UUID?,
-    // val categoryId: Int?
+    val active: Boolean
 )

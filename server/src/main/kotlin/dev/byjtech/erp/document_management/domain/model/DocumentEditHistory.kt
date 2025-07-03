@@ -1,4 +1,14 @@
-package dev.byjtech.erp.document_management.domain.model
+package dev.byjtech.erp.modules.document_management.domain.model
 
-class DocumentEditHistory {
-}
+import kotlinx.datetime.LocalDateTime
+import java.util.UUID
+
+data class DocumentEditHistory(
+    val id: Int,
+    // val documentId: Int,
+    val fieldName: String,
+    val oldValue: String?,
+    val newValue: String?,
+    // val userId: UUID,
+    val createdAt: LocalDateTime
+)

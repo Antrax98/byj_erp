@@ -1,6 +1,6 @@
 package dev.byjtech.erp.modules.document_management.infrastructure.exposed.tables
 
-//import dev.byjtech.erp.modules.document_management.infrastructure.exposed.columns.DocumentStatusColumnType  (HACERRR)
+import dev.byjtech.erp.modules.document_management.infrastructure.exposed.columns.DocumentStatusColumnType
 import dev.byjtech.erp.core.infrastructure.exposed.tables.*
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.date
@@ -14,7 +14,7 @@ object DocumentsTable : IntIdTable("documents") {
     //val categoryId = reference("category_id", CategoriesTable).nullable() // categoria opcional
     val issueDate = date("issue_date") // fecha de emision
     val dueDate = date("due_date").nullable() // fecha de vencimiento
-    //val status = registerColumn("status", DocumentStatusColumnType()) // estado del documento
+    val status = registerColumn<DocumentStatus>("status", DocumentStatusColumnType())// estado del documento
     val currency = text("currency") // moneda usada
     val netAmount = decimal("net_amount", 20, 2) // valor sin impuestos el 20 son los digitos en total y 2 son los decimales
     val taxAmount = decimal("tax_amount", 20, 2) // valor del impuesto
