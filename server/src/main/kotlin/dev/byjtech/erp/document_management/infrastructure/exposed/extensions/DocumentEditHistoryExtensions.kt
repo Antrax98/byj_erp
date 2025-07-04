@@ -1,8 +1,8 @@
 package dev.byjtech.erp.modules.document_management.infrastructure.exposed.extensions
 
-import dev.byjtech.erp.modules.document_management.domain.model.DocumentEditHistory
-import dev.byjtech.erp.modules.document_management.dto.DocumentEditHistoryDTO
-import dev.byjtech.erp.modules.document_management.infrastructure.exposed.entities.DocumentEditHistoryEntity
+import dev.byjtech.erp.document_management.domain.model.DocumentEditHistory
+import dev.byjtech.erp.document_management.dto.DocumentEditHistoryDTO
+import dev.byjtech.erp.document_management.infrastructure.exposed.entities.DocumentEditHistoryEntity
 import dev.byjtech.erp.utils.datetime.toKotlinx
 import kotlinx.datetime.toKotlinLocalDateTime
 

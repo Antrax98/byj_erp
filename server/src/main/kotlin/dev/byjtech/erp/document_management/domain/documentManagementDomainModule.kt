@@ -1,4 +1,4 @@
-package dev.byjtech.erp.modules.document_management.domain
+package dev.byjtech.erp.document_management.domain
 
 import org.koin.dsl.module
 

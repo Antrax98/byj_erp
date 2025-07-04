@@ -1,8 +1,8 @@
 package dev.byjtech.erp.modules.document_management.infrastructure.exposed.extensions
 
-import dev.byjtech.erp.modules.document_management.domain.model.DocumentAuditLog
-import dev.byjtech.erp.modules.document_management.dto.DocumentAuditLogDTO
-import dev.byjtech.erp.modules.document_management.infrastructure.exposed.entities.DocumentAuditLogEntity
+import dev.byjtech.erp.document_management.domain.model.DocumentAuditLog
+import dev.byjtech.erp.document_management.dto.DocumentAuditLogDTO
+import dev.byjtech.erp.document_management.infrastructure.exposed.entities.DocumentAuditLogEntity
 import dev.byjtech.erp.utils.datetime.toKotlinx
 import kotlinx.datetime.toKotlinLocalDateTime
 

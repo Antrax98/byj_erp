@@ -21,6 +21,6 @@ data class Document(
     val updatedAt: LocalDateTime,
     val active: Boolean,
     val status: DocumentStatus,
-    // val companyId: UUID?,
-    // val categoryId: Int?
+    val companyId: UUID?,
+    val categoryId: Int?
 )

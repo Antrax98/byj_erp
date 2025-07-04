@@ -1,15 +1,15 @@
-package dev.byjtech.erp.modules.document_management
+package dev.byjtech.erp.document_management
 import dev.byjtech.erp.config.ModuleInitializer
-import dev.byjtech.erp.modules.document_management.domain.documentManagementDomainModule
-import dev.byjtech.erp.modules.document_management.application.documentManagementApplicationModule
-import dev.byjtech.erp.modules.document_management.infrastructure.documentManagementInfrastructureModule
+import dev.byjtech.erp.document_management.domain.documentManagementDomainModule
+import dev.byjtech.erp.document_management.application.documentManagementApplicationModule
+import dev.byjtech.erp.document_management.infrastructure.documentManagementInfrastructureModule
 import dev.byjtech.erp.document_management.infrastructure.api.DocumentManagementRoutesInstaller
-import dev.byjtech.erp.modules.document_management.infrastructure.exposed.DocumentManagementTables
+import dev.byjtech.erp.document_management.infrastructure.exposed.DocumentManagementTables
 import io.github.cdimascio.dotenv.dotenv
 import dev.byjtech.erp.shared.infrastructure.database.CreateDatabase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import dev.byjtech.erp.modules.document_management.DocumentManagementDefinition
+import dev.byjtech.erp.document_management.DocumentManagementDefinition
 
 val dotenv = dotenv {
     ignoreIfMissing = false
