@@ -32,7 +32,7 @@ val documentManagementModule = module {
     )
 }
 
-    single<ModuleInitializer> {
+    single<ModuleInitializer>(named("documentManagementInit")){
         DocumentManagementInitializer(
             definition = DocumentManagementDefinition,
             database = get(named("documentManagementDatabase")),

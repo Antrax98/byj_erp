@@ -1,13 +1,14 @@
 package dev.byjtech.erp.modules.document_management.infrastructure.repository
 
-import dev.byjtech.erp.modules.document_management.domain.model.Document
-import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
-import dev.byjtech.erp.modules.document_management.domain.repository.DocumentRepository
-import dev.byjtech.erp.modules.document_management.infrastructure.exposed.tables.DocumentsTable
+import dev.byjtech.erp.document_management.domain.model.Document
+import dev.byjtech.erp.document_management.domain.model.DocumentStatus
+import dev.byjtech.erp.document_management.domain.repository.DocumentRepository
+import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentsTable
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toJavaLocalDateTime
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
@@ -66,11 +67,10 @@ class DocumentRepositoryImpl : DocumentRepository {
         findById(document.id)!!
     }
 
-    override fun delete(id: Int) = transaction {
+    override fun delete(id: Int): Unit = transaction {
         DocumentsTable.deleteWhere { DocumentsTable.id eq id }
     }
 
-    // 🔄 Mapeo de Row a Modelo de Dominio
     private fun ResultRow.toDomain(): Document = Document(
         id = this[DocumentsTable.id].value,
         documentType = this[DocumentsTable.documentType],

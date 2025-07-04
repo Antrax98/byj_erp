@@ -1,11 +1,11 @@
-package dev.byjtech.erp.modules.document_management.infrastructure.exposed.tables
+package dev.byjtech.erp.document_management.infrastructure.exposed.tables
 
-import dev.byjtech.erp.modules.document_management.infrastructure.exposed.columns.DocumentStatusColumnType
+import dev.byjtech.erp.document_management.infrastructure.exposed.columns.DocumentStatusColumnType
 import dev.byjtech.erp.core.infrastructure.exposed.tables.*
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.javatime.datetime
-import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
+import dev.byjtech.erp.document_management.domain.model.DocumentStatus
 //ver user otra base de datos (colocar id)
 object DocumentsTable : IntIdTable("documents") {
     val documentType = text("document_type") // tipo de documento

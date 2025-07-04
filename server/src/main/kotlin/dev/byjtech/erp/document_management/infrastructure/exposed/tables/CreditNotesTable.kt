@@ -1,9 +1,9 @@
-package dev.byjtech.erp.modules.document_management.infrastructure.exposed.tables
+package dev.byjtech.erp.document_management.infrastructure.exposed.tables
 
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.datetime
 import dev.byjtech.erp.core.infrastructure.exposed.tables.UsersTable
-import dev.byjtech.erp.modules.document_management.infrastructure.exposed.tables.DocumentsTable
+import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentsTable
 
 object CreditNotesTable : IntIdTable("credit_notes") {
     //val invoiceId = reference("invoice_id", DocumentsTable) // ID de la factura que se va a anulada

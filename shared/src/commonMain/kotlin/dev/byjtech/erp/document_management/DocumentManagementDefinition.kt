@@ -1,8 +1,8 @@
-package dev.byjtech.erp.modules.document_management
+package dev.byjtech.erp.document_management
 
 import dev.byjtech.erp.common.*
 
-object DocumentManagementDefinition : ModuleDefinition {
+public object DocumentManagementDefinition : ModuleDefinition {
     override val name = "document_management"
     override val displayName = "Gestión de Documentos"
     override val description = "Módulo de gestión de documentos, auditoría y edición"

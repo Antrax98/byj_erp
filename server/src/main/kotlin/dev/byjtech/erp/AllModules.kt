@@ -2,9 +2,11 @@ package dev.byjtech.erp
 
 import dev.byjtech.erp.core.coreModule
 import dev.byjtech.erp.modules.moduleTest.testModule
+import dev.byjtech.erp.modules.document_management.documentManagementModule
 
 val allModules = setOf(
     coreModule,
+    documentManagementModule,
     //testModule,
     //TODO(): aqui agregar los modulos koin de cada moduloERP
     //hrModule,

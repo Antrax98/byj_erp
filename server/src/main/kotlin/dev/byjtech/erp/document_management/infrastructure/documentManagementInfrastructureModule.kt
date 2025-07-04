@@ -1,8 +1,7 @@
-package dev.byjtech.erp.modules.document_management.infrastructure
-
-import dev.byjtech.erp.modules.document_management.domain.repository.*
-import dev.byjtech.erp.modules.document_management.infrastructure.repository.*
-import dev.byjtech.erp.modules.document_management.infrastructure.api.DocumentManagementRoutesInstaller
+package dev.byjtech.erp.document_management.infrastructure
+import dev.byjtech.erp.document_management.domain.repository.*
+import dev.byjtech.erp.document_management.infrastructure.exposed.repository.*
+import dev.byjtech.erp.document_management.infrastructure.api.DocumentManagementRoutesInstaller
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 

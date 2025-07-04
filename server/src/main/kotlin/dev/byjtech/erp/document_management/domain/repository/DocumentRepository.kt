@@ -1,6 +1,5 @@
-package dev.byjtech.erp.modules.document_management.domain.repository
-
-import dev.byjtech.erp.modules.document_management.domain.model.Document
+package dev.byjtech.erp.document_management.domain.repository
+import dev.byjtech.erp.document_management.domain.model.Document
 
 interface DocumentRepository {
     fun findById(id: Int): Document?

@@ -1,8 +1,8 @@
-package dev.byjtech.erp.modules.document_management.infrastructure.exposed.entities
+package dev.byjtech.erp.document_management.infrastructure.exposed.entities
 
 import dev.byjtech.erp.core.infrastructure.exposed.entities.UserEntity
-import dev.byjtech.erp.modules.document_management.domain.model.Document
-import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
+import dev.byjtech.erp.document_management.domain.model.Document
+import dev.byjtech.erp.document_management.domain.model.DocumentStatus
 import dev.byjtech.erp.modules.document_management.infrastructure.exposed.tables.DocumentsTable
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.datetime.toKotlinLocalDateTime

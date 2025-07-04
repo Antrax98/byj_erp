@@ -1,4 +1,5 @@
-package dev.byjtech.erp.modules.document_management.domain.model
+package dev.byjtech.erp.document_management.domain.model
+
 
 import kotlinx.datetime.LocalDateTime
 import java.util.UUID

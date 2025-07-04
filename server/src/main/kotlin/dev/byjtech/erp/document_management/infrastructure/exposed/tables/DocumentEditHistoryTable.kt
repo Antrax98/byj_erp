@@ -1,4 +1,4 @@
-package dev.byjtech.erp.modules.document_management.infrastructure.exposed.tables
+package dev.byjtech.erp.document_management.infrastructure.exposed.tables
 
 import dev.byjtech.erp.core.infrastructure.exposed.tables.UsersTable
 import org.jetbrains.exposed.dao.id.IntIdTable  //CAMBIARRR AL HACER FETCH

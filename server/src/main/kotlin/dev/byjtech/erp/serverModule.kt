@@ -12,6 +12,7 @@ val serverModule = module {
     single<Set<ModuleInitializer>>(named("allInit")) {
         setOf(
             get(named("coreInit")),
+            get(named("documentManagementInit")),
             //get(named("testInit"))
         )
     }

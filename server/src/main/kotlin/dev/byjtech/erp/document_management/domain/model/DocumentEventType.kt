@@ -1,5 +1,6 @@
-package dev.byjtech.erp.modules.document_management.domain.model
-    enum class DocumentEventType {
+package dev.byjtech.erp.document_management.domain.model
+
+enum class DocumentEventType {
         REACTIVATED,  // Documento reactivado después de estar inactivo
         DEACTIVATED,  // El documento fue desactivado (no se elimina)
         VOIDED;        // Documento anulado (por ejemplo, con nota de crédito)

@@ -1,8 +1,8 @@
-package dev.byjtech.erp.modules.document_management.infrastructure.repository
+package dev.byjtech.erp.document_management.infrastructure.exposed.repository
 
-import dev.byjtech.erp.modules.document_management.domain.model.DocumentEditHistory
-import dev.byjtech.erp.modules.document_management.domain.repository.DocumentEditHistoryRepository
-import dev.byjtech.erp.modules.document_management.infrastructure.exposed.tables.DocumentEditHistoryTable
+import dev.byjtech.erp.document_management.domain.model.DocumentEditHistory
+import dev.byjtech.erp.document_management.domain.repository.DocumentEditHistoryRepository
+import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentEditHistoryTable
 import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.datetime.toJavaLocalDateTime
 import org.jetbrains.exposed.sql.*

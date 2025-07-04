@@ -1,9 +1,7 @@
-package dev.byjtech.erp.modules.document_management
-
+package dev.byjtech.erp.document_management
+import dev.byjtech.erp.shared.routing.ModuleRoutesInstaller
 import dev.byjtech.erp.common.ModuleDefinition
 import dev.byjtech.erp.config.ModuleInitializer
-import dev.byjtech.erp.modules.document_management.infrastructure.exposed.DocumentManagementTables
-import dev.byjtech.erp.modules.document_management.infrastructure.api.DocumentManagementRoutesInstaller
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Table
 

@@ -1,10 +1,10 @@
-package dev.byjtech.erp.modules.document_management.infrastructure.exposed.tables
+package dev.byjtech.erp.document_management.infrastructure.exposed.tables
 
 import dev.byjtech.erp.core.infrastructure.exposed.tables.UsersTable
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.datetime
-import dev.byjtech.erp.modules.document_management.domain.model.DocumentEventType
-import dev.byjtech.erp.modules.document_management.infrastructure.exposed.columns.DocumentEventTypeColumnType
+import dev.byjtech.erp.document_management.domain.model.DocumentEventType
+import dev.byjtech.erp.document_management.infrastructure.exposed.columns.DocumentEventTypeColumnType
 
 object DocumentAuditLogTable : IntIdTable("document_audit_log") {
     //val documentId = reference("document_id", DocumentsTable) // ID del documento afectado
