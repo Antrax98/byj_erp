@@ -31,6 +31,8 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         val insertedId = DocumentsTable.insertAndGetId { row ->
             row[documentType] = document.documentType
             row[documentNumber] = document.documentNumber
+            row[companyId] = document.companyId!!
+            row[categoryId] = document.categoryId
             row[issueDate] = document.issueDate.toJavaLocalDate()
             row[dueDate] = document.dueDate?.toJavaLocalDate()
             row[status] = document.status
@@ -52,6 +54,8 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         DocumentsTable.update({ DocumentsTable.id eq document.id }) { row ->
             row[documentType] = document.documentType
             row[documentNumber] = document.documentNumber
+            row[companyId] = document.companyId!!
+            row[categoryId] = document.categoryId
             row[issueDate] = document.issueDate.toJavaLocalDate()
             row[dueDate] = document.dueDate?.toJavaLocalDate()
             row[status] = document.status
@@ -88,7 +92,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         createdAt = this[DocumentsTable.createdAt].toKotlinLocalDateTime(),
         updatedAt = this[DocumentsTable.updatedAt].toKotlinLocalDateTime(),
         active = this[DocumentsTable.active],
-        companyId = null, // TODO: Add company reference when needed
-        categoryId = null // TODO: Add category reference when needed
+        companyId = this[DocumentsTable.companyId].value,
+        categoryId = this[DocumentsTable.categoryId]?.value
     )
 }

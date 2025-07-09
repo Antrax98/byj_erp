@@ -1,6 +1,8 @@
 package dev.byjtech.erp.document_management.infrastructure.exposed.entities
 
 import dev.byjtech.erp.core.infrastructure.exposed.entities.UserEntity
+import dev.byjtech.erp.core.infrastructure.exposed.entities.CompanyEntity
+import dev.byjtech.erp.core.infrastructure.exposed.entities.CategoryEntity
 import dev.byjtech.erp.document_management.domain.model.Document
 import dev.byjtech.erp.document_management.domain.model.DocumentStatus
 import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentsTable
@@ -18,6 +20,8 @@ class DocumentEntity(id: EntityID<UUID>) : UUIDEntity(id) {
 
     var documentType by DocumentsTable.documentType
     var documentNumber by DocumentsTable.documentNumber
+    var companyId by CompanyEntity referencedOn DocumentsTable.companyId
+    var categoryId by CategoryEntity optionalReferencedOn DocumentsTable.categoryId
     var issueDate by DocumentsTable.issueDate
     var dueDate by DocumentsTable.dueDate
     var status by DocumentsTable.status
@@ -47,7 +51,7 @@ class DocumentEntity(id: EntityID<UUID>) : UUIDEntity(id) {
         createdAt = createdAt.toKotlinLocalDateTime(),
         updatedAt = updatedAt.toKotlinLocalDateTime(),
         active = active,
-        companyId = null, // TODO: Add company reference when needed
-        categoryId = null // TODO: Add category reference when needed
+        companyId = companyId.id.value,
+        categoryId = categoryId?.id?.value
     )
 }

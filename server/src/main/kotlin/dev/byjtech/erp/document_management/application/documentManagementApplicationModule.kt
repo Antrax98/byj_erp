@@ -6,7 +6,7 @@ import dev.byjtech.erp.document_management.application.service.DocumentAuditLogS
 import org.koin.dsl.module
 
 val documentManagementApplicationModule = module {
-    single { DocumentService() }
+    single { DocumentService(get()) }
     single { DocumentEditHistoryService() }
     single { DocumentAuditLogService() }
 }

@@ -2,7 +2,9 @@ package dev.byjtech.erp.document_management.dto
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class DocumentDTO(
     val id: String,
     val documentType: String,
@@ -18,5 +20,7 @@ data class DocumentDTO(
     val createdBy: String,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
-    val active: Boolean
+    val active: Boolean,
+    val companyId: String?,
+    val categoryId: String?
 )
