@@ -95,7 +95,7 @@ class UsersFeatureComponentImpl(
         ){
             assigned ->
             navigation.pop {
-                if (assigned && childStack.active.configuration == Config.UserPage) {
+                if (assigned && childStack.active.configuration is Config.UserPage) {
                     val userPage = (childStack.active.instance as? UsersFeatureComponent.Child.UserPage)?.component
                     userPage?.let {
                         coroutineScope.launch {

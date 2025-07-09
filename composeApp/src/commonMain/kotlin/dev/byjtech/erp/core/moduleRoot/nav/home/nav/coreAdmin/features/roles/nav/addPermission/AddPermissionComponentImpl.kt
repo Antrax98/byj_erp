@@ -59,6 +59,7 @@ class AddPermissionComponentImpl(
         coroutineScope.launch {
             val moduleIdsSet = actModules.map { it.id }.toSet()
             val response = apiClient.rolesT.getModulesPermissionKeys(moduleIdsSet)
+            println(response)
             if (response is dev.byjtech.erp.common.ApiResponse.Success) {
 //                _possiblePermissions.value = response.data.groupBy { it.module }
 //                    .mapValues { (_, categoryList) ->
@@ -69,6 +70,7 @@ class AddPermissionComponentImpl(
 //                            }
 //                    }
                 _possiblePermissions.value = response.data.groupBy { it.key.module }.mapValues { (_, list) -> list.toSet() }
+                println(_possiblePermissions.value)
             }
             _isLoading.value = false
         }
