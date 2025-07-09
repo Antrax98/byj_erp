@@ -1,4 +1,5 @@
 package dev.byjtech.erp.document_management
+
 import dev.byjtech.erp.config.ModuleInitializer
 import dev.byjtech.erp.document_management.domain.documentManagementDomainModule
 import dev.byjtech.erp.document_management.application.documentManagementApplicationModule
@@ -9,7 +10,6 @@ import io.github.cdimascio.dotenv.dotenv
 import dev.byjtech.erp.shared.infrastructure.database.CreateDatabase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import dev.byjtech.erp.document_management.DocumentManagementDefinition
 
 val dotenv = dotenv {
     ignoreIfMissing = false
@@ -40,4 +40,5 @@ val documentManagementModule = module {
             tables = DocumentManagementTables.all
         )
     }
+
 }

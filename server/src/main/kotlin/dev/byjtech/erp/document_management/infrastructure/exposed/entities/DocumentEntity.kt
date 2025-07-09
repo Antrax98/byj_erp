@@ -3,17 +3,18 @@ package dev.byjtech.erp.document_management.infrastructure.exposed.entities
 import dev.byjtech.erp.core.infrastructure.exposed.entities.UserEntity
 import dev.byjtech.erp.document_management.domain.model.Document
 import dev.byjtech.erp.document_management.domain.model.DocumentStatus
-import dev.byjtech.erp.modules.document_management.infrastructure.exposed.tables.DocumentsTable
+import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentsTable
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toJavaLocalDateTime
-import org.jetbrains.exposed.dao.IntEntity
-import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import java.util.UUID
 
-class DocumentEntity(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<DocumentEntity>(DocumentsTable)
+class DocumentEntity(id: EntityID<UUID>) : UUIDEntity(id) {
+    companion object : UUIDEntityClass<DocumentEntity>(DocumentsTable)
 
     var documentType by DocumentsTable.documentType
     var documentNumber by DocumentsTable.documentNumber
@@ -45,6 +46,8 @@ class DocumentEntity(id: EntityID<Int>) : IntEntity(id) {
         createdBy = createdBy.id.value,
         createdAt = createdAt.toKotlinLocalDateTime(),
         updatedAt = updatedAt.toKotlinLocalDateTime(),
-        active = active
+        active = active,
+        companyId = null, // TODO: Add company reference when needed
+        categoryId = null // TODO: Add category reference when needed
     )
 }

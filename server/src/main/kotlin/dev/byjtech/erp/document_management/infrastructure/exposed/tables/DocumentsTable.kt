@@ -2,14 +2,14 @@ package dev.byjtech.erp.document_management.infrastructure.exposed.tables
 
 import dev.byjtech.erp.document_management.infrastructure.exposed.columns.DocumentStatusColumnType
 import dev.byjtech.erp.core.infrastructure.exposed.tables.*
-import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.javatime.datetime
 import dev.byjtech.erp.document_management.domain.model.DocumentStatus
-//ver user otra base de datos (colocar id)
-object DocumentsTable : IntIdTable("documents") {
-    val documentType = text("document_type") // tipo de documento
-    val documentNumber = text("document_number") // numero del documento
+
+object DocumentsTable : UUIDTable("document") {
+    val documentType = varchar("document_type", 255) // tipo de documento
+    val documentNumber = varchar("document_number", 255) // numero del documento
     //val companyId = reference("company_id", CompaniesTable) // empresa asociada
     //val categoryId = reference("category_id", CategoriesTable).nullable() // categoria opcional
     val issueDate = date("issue_date") // fecha de emision

@@ -6,7 +6,7 @@ import kotlinx.datetime.LocalDateTime
 import java.util.UUID
 
 data class Document(
-    val id: Int,
+    val id: UUID,
     val documentType: String,
     val documentNumber: String,
     val issueDate: LocalDate,
@@ -22,5 +22,5 @@ data class Document(
     val active: Boolean,
     val status: DocumentStatus,
     val companyId: UUID?,
-    val categoryId: Int?
+    val categoryId: UUID?
 )

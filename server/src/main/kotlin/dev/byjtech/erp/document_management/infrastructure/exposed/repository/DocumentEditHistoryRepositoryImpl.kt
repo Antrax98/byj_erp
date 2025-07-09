@@ -1,41 +1,32 @@
 package dev.byjtech.erp.document_management.infrastructure.exposed.repository
 
+import dev.byjtech.erp.core.infrastructure.exposed.entities.UserEntity
 import dev.byjtech.erp.document_management.domain.model.DocumentEditHistory
 import dev.byjtech.erp.document_management.domain.repository.DocumentEditHistoryRepository
+import dev.byjtech.erp.document_management.infrastructure.exposed.entities.DocumentEditHistoryEntity
+import dev.byjtech.erp.document_management.infrastructure.exposed.entities.DocumentEntity
 import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentEditHistoryTable
-import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.datetime.toJavaLocalDateTime
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
 
-class DocumentEditHistoryRepositoryImpl : DocumentEditHistoryRepository {
+class DocumentEditHistoryRepositoryImpl(private val database: Database) : DocumentEditHistoryRepository {
 
-    override fun findByDocumentId(documentId: Int): List<DocumentEditHistory> = transaction {
-        DocumentEditHistoryTable
-            .select { DocumentEditHistoryTable.documentId eq documentId }
+    override fun findByDocumentId(documentId: UUID): List<DocumentEditHistory> = transaction(database) {
+        DocumentEditHistoryEntity.find { DocumentEditHistoryTable.documentId eq documentId }
             .map { it.toDomain() }
     }
 
-    override fun save(history: DocumentEditHistory): DocumentEditHistory = transaction {
-        DocumentEditHistoryTable.insert {
-            it[documentId] = history.documentId
-            it[fieldName] = history.fieldName
-            it[oldValue] = history.oldValue
-            it[newValue] = history.newValue
-            it[userId] = history.userId
-            it[createdAt] = history.createdAt.toJavaLocalDateTime()
+    override fun save(history: DocumentEditHistory): DocumentEditHistory = transaction(database) {
+        val entity = DocumentEditHistoryEntity.new {
+            document = DocumentEntity[history.documentId]
+            fieldName = history.fieldName
+            oldValue = history.oldValue
+            newValue = history.newValue
+            user = history.userId
+            createdAt = history.createdAt.toJavaLocalDateTime()
         }
-        history
+        entity.toDomain()
     }
-
-    private fun ResultRow.toDomain(): DocumentEditHistory = DocumentEditHistory(
-        id = this[DocumentEditHistoryTable.id].value,
-        documentId = this[DocumentEditHistoryTable.documentId].value,
-        fieldName = this[DocumentEditHistoryTable.fieldName],
-        oldValue = this[DocumentEditHistoryTable.oldValue],
-        newValue = this[DocumentEditHistoryTable.newValue],
-        userId = this[DocumentEditHistoryTable.userId].value,
-        createdAt = this[DocumentEditHistoryTable.createdAt].toKotlinLocalDateTime()
-    )
 }

@@ -7,6 +7,7 @@ object CoreTables {
     val all = setOf<Table>(
         UsersTable,
         CompaniesTable,
+        BillingsTable,
         ModulesTable,
         SubscriptionsTable,
         CategoriesTable,

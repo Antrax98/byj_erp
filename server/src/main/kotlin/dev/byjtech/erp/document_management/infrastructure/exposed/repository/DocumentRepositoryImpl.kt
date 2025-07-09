@@ -1,4 +1,4 @@
-package dev.byjtech.erp.modules.document_management.infrastructure.repository
+package dev.byjtech.erp.document_management.infrastructure.exposed.repository
 
 import dev.byjtech.erp.document_management.domain.model.Document
 import dev.byjtech.erp.document_management.domain.model.DocumentStatus
@@ -11,22 +11,23 @@ import kotlinx.datetime.toJavaLocalDateTime
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.Database
 import java.util.UUID
 
-class DocumentRepositoryImpl : DocumentRepository {
+class DocumentRepositoryImpl(private val database: Database) : DocumentRepository {
 
-    override fun findById(id: Int): Document? = transaction {
-        DocumentsTable.select { DocumentsTable.id eq id }
+    override fun findById(id: UUID): Document? = transaction(database) {
+        DocumentsTable.select(DocumentsTable.id eq id)
             .map { it.toDomain() }
             .singleOrNull()
     }
 
-    override fun findAll(): List<Document> = transaction {
+    override fun findAll(): List<Document> = transaction(database) {
         DocumentsTable.selectAll()
             .map { it.toDomain() }
     }
 
-    override fun save(document: Document): Document = transaction {
+    override fun save(document: Document): Document = transaction(database) {
         val insertedId = DocumentsTable.insertAndGetId { row ->
             row[documentType] = document.documentType
             row[documentNumber] = document.documentNumber
@@ -38,7 +39,7 @@ class DocumentRepositoryImpl : DocumentRepository {
             row[taxAmount] = document.taxAmount.toBigDecimal()
             row[totalAmount] = document.totalAmount.toBigDecimal()
             row[fileUrl] = document.fileUrl
-            row[createdBy] = UUID.fromString(document.createdBy.toString())
+            row[createdBy] = document.createdBy
             row[createdAt] = document.createdAt.toJavaLocalDateTime()
             row[updatedAt] = document.updatedAt.toJavaLocalDateTime()
             row[active] = document.active
@@ -47,7 +48,7 @@ class DocumentRepositoryImpl : DocumentRepository {
         findById(insertedId)!!
     }
 
-    override fun update(document: Document): Document = transaction {
+    override fun update(document: Document): Document = transaction(database) {
         DocumentsTable.update({ DocumentsTable.id eq document.id }) { row ->
             row[documentType] = document.documentType
             row[documentNumber] = document.documentNumber
@@ -59,7 +60,7 @@ class DocumentRepositoryImpl : DocumentRepository {
             row[taxAmount] = document.taxAmount.toBigDecimal()
             row[totalAmount] = document.totalAmount.toBigDecimal()
             row[fileUrl] = document.fileUrl
-            row[createdBy] = UUID.fromString(document.createdBy.toString())
+            row[createdBy] = document.createdBy
             row[createdAt] = document.createdAt.toJavaLocalDateTime()
             row[updatedAt] = document.updatedAt.toJavaLocalDateTime()
             row[active] = document.active
@@ -67,7 +68,7 @@ class DocumentRepositoryImpl : DocumentRepository {
         findById(document.id)!!
     }
 
-    override fun delete(id: Int): Unit = transaction {
+    override fun delete(id: UUID): Unit = transaction(database) {
         DocumentsTable.deleteWhere { DocumentsTable.id eq id }
     }
 
@@ -86,6 +87,8 @@ class DocumentRepositoryImpl : DocumentRepository {
         createdBy = this[DocumentsTable.createdBy].value,
         createdAt = this[DocumentsTable.createdAt].toKotlinLocalDateTime(),
         updatedAt = this[DocumentsTable.updatedAt].toKotlinLocalDateTime(),
-        active = this[DocumentsTable.active]
+        active = this[DocumentsTable.active],
+        companyId = null, // TODO: Add company reference when needed
+        categoryId = null // TODO: Add category reference when needed
     )
 }

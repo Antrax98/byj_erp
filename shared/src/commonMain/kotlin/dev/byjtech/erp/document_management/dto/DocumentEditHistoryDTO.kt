@@ -1,4 +1,5 @@
-package shared.src.commonMain.kotlin.dev.byjtech.erp.modules.document_management.dto
+package dev.byjtech.erp.document_management.dto
+
 import kotlinx.datetime.LocalDateTime
 
 data class DocumentEditHistoryDTO(

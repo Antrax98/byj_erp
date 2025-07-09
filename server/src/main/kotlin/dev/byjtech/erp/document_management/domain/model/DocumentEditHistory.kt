@@ -5,8 +5,8 @@ import kotlinx.datetime.LocalDateTime
 import java.util.UUID
 
 data class DocumentEditHistory(
-    val id: Int,
-    val documentId: Int,
+    val id: UUID,
+    val documentId: UUID,
     val fieldName: String,
     val oldValue: String?,
     val newValue: String?,

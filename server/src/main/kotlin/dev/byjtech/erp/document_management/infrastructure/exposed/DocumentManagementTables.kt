@@ -6,7 +6,6 @@ import org.jetbrains.exposed.sql.Table
 object DocumentManagementTables {
     val all = setOf<Table>(
         DocumentsTable,
-        CreditNotesTable,
         DocumentEditHistoryTable,
         DocumentAuditLogTable
     )

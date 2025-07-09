@@ -1,8 +1,10 @@
 package dev.byjtech.erp.document_management.infrastructure.exposed.repository
 
+import dev.byjtech.erp.core.infrastructure.exposed.entities.UserEntity
 import dev.byjtech.erp.document_management.domain.model.DocumentAuditLog
 import dev.byjtech.erp.document_management.domain.repository.DocumentAuditLogRepository
 import dev.byjtech.erp.document_management.infrastructure.exposed.entities.DocumentAuditLogEntity
+import dev.byjtech.erp.document_management.infrastructure.exposed.entities.DocumentEntity
 import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentAuditLogTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -13,20 +15,20 @@ class DocumentAuditLogRepositoryImpl(
     private val db: Database
 ) : DocumentAuditLogRepository {
 
-    override fun create(auditLog: DocumentAuditLog): DocumentAuditLog = transaction(db) {
+    override fun create(log: DocumentAuditLog): DocumentAuditLog = transaction(db) {
         val entity = DocumentAuditLogEntity.new {
-            document = auditLog.documentId
-            eventType = auditLog.eventType
-            description = auditLog.description
-            user = auditLog.userId
-            createdAt = auditLog.createdAt.toJavaLocalDateTime()
+            document = DocumentEntity[log.documentId]
+            eventType = log.eventType
+            description = log.description
+            user = log.userId
+            createdAt = log.createdAt.toJavaLocalDateTime()
         }
-        entity.toModel()
+        entity.toDomain()
     }
 
     override fun findByDocumentId(documentId: UUID): List<DocumentAuditLog> = transaction(db) {
-        DocumentAuditLogEntity.find { DocumentAuditLogTable.documentId eg documentId }
-            .map { it.toModel() }
+        DocumentAuditLogEntity.find { DocumentAuditLogTable.documentId eq documentId }
+            .map { it.toDomain() }
     }
 
     override fun deleteById(id: UUID): Boolean = transaction(db) {
