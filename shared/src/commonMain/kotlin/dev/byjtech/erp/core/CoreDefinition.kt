@@ -121,5 +121,5 @@ object CoreDefinition : ModuleDefinition {
         val All = permission("all", "Does everything company level")
     }
 
-    override val categories = setOf(Users, Admin)
+    override val categories = setOf(Users, Roles, Companies, Subscriptions, Admin)
 }

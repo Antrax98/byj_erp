@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AssignSpecialPermissionRequest(
     val userId: String,
-    val permissionId: String?,
-    val permissionKey: PermissionKey?
+    val permissionId: String? = null,
+    val permissionKey: PermissionKey? = null
 )

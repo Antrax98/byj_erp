@@ -38,6 +38,7 @@ import dev.byjtech.erp.core.dto.RoleDTO
 import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.request.AssignPermissionRoleRequest
 import dev.byjtech.erp.core.request.AssignRoleRequest
+import dev.byjtech.erp.core.request.AssignSpecialPermissionRequest
 import dev.byjtech.erp.core.request.CreateCompanyRequest
 import dev.byjtech.erp.core.response.ErrorList
 import dev.byjtech.erp.core.response.RolePermisisonKeysResponse
@@ -434,7 +435,8 @@ class RoleT(private val client: HttpClient) {
 
     suspend fun deleteUserPermission(userId: String, permissionId: String): ApiResponse<Unit, Unit> {
         return try {
-            val response = client.delete("api/core/users/tenant/delete-user-permission/$userId/$permissionId"){
+            //TODO: mover ruta a users
+            val response = client.delete("api/core/roles/tenant/delete-user-permission/$userId/$permissionId"){
                 expectSuccess = false
                 contentType(ContentType.Application.Json)
             }
@@ -521,6 +523,31 @@ class UsersT(private val client: HttpClient){
                 }
             }
         } catch (e: Exception){
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun assignSpecialPermission(userId: String, permissionKey: PermissionKey): ApiResponse<Unit, Unit> {
+        val data = AssignSpecialPermissionRequest(userId = userId, permissionId = null, permissionKey =  permissionKey)
+        return try {
+            val response = client.post("api/core/users/tenant/assign-special-permission") {
+                contentType(ContentType.Application.Json)
+                setBody(data)
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
             ApiResponse.Error(Unit, "NETWORK_ERROR")
         }
     }

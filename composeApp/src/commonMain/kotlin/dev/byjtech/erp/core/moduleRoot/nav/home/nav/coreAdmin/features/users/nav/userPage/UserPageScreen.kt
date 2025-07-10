@@ -157,7 +157,7 @@ fun UserPageScreen(component: UserPageComponent) {
                         )
                         if (userPermissions.containsAnyOf(CoreDefinition.Roles.Assign.key)) {
                             Button(
-                                onClick = { component.navTo(Config.AssignSpecialPermission(userId = component.userId, assignablePermissions = emptySet())) }
+                                onClick = { component.navTo(Config.AssignSpecialPermission(userId = component.userId)) }
                             ){
                                 Icon(
                                     imageVector = Icons.Default.Add,
@@ -180,7 +180,7 @@ fun UserPageScreen(component: UserPageComponent) {
                         } else {
                             val canUnassignPermission = userPermissions.containsAnyOf(CoreDefinition.Roles.Unassign.key)
                             userSpecialPermissions!!.forEach { perm ->
-                                PermissionKeyCard(perm, canUnassignPermission)
+                                PermissionKeyCard(perm, canUnassignPermission,{component.deleteSpecialPermission(perm.permission.id)})
                             }
                         }
                     } else {

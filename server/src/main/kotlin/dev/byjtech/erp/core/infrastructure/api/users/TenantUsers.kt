@@ -121,7 +121,7 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
                 if (permission != null){
                     permissionId = permission.id
                 } else {
-                    call.respond(HttpStatusCode.BadRequest, ApiResponse.Error( "Permission not found", code = "PERMISSION_NOT_FOUND"))
+                    call.respond(HttpStatusCode.BadRequest, "PERMISSION_NOT_FOUND")
                     return@post
                 }
             }
@@ -129,14 +129,14 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
             if (permissionId != null){
                 val response = userRepo.addSpecialPermission(UUID.fromString(assignSpecialPermissionData.userId), permissionId)
                 if (response) {
-                    call.respond(HttpStatusCode.OK, ApiResponse.Success(Unit))
+                    call.respond(HttpStatusCode.OK)
                 } else {
-                    call.respond(HttpStatusCode.BadRequest, ApiResponse.Error("Special permission not assigned", code = "PERMISSION_NOT_ASSIGNED"))
+                    call.respond(HttpStatusCode.BadRequest, "PERMISSION_NOT_ASSIGNED")
                 }
             }
 
         } else {
-            call.respond(HttpStatusCode.BadRequest, ApiResponse.Error( "No Permission ID or Permission Key provided", code = "NO_PERMISSION_PROVIDED"))
+            call.respond(HttpStatusCode.BadRequest, "NO_PERMISSION_PROVIDED")
         }
 
 

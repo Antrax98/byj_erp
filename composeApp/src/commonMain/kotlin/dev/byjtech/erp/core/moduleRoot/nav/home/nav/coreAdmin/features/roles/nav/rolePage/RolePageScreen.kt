@@ -49,148 +49,6 @@ import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaLocalDateTime
 
-//@Composable
-//fun RolePageScreen(component: RolePageComponent) {
-//    val role by component.roleInfo.collectAsState()
-//    val permissions by component.rolePermissions.collectAsState()
-//    val isLoading by component.isLoading.collectAsState()
-//
-//    LazyColumn(
-//        modifier = Modifier.fillMaxSize(),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        contentPadding = PaddingValues(16.dp)
-//    ) {
-//        // Detalles del rol
-//        item {
-//            Card(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(16.dp),
-//                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-//                shape = RoundedCornerShape(12.dp)
-//            ) {
-//                Column(modifier = Modifier.padding(16.dp)) {
-//                    if (role != null) {
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(vertical = 4.dp),
-//                            verticalAlignment = Alignment.CenterVertically
-//                        ) {
-//                            Text(
-//                                text = "Nombre:",
-//                                style = MaterialTheme.typography.bodyLarge,
-//                                modifier = Modifier.width(100.dp)
-//                            )
-//                            Text(
-//                                text = role!!.name,
-//                                style = MaterialTheme.typography.bodyMedium
-//                            )
-//                        }
-//
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(vertical = 4.dp),
-//                            verticalAlignment = Alignment.CenterVertically
-//                        ) {
-//                            Text(
-//                                text = "Descripción:",
-//                                style = MaterialTheme.typography.bodyLarge,
-//                                modifier = Modifier.width(100.dp)
-//                            )
-//                            Text(
-//                                text = role!!.description,
-//                                style = MaterialTheme.typography.bodyMedium
-//                            )
-//                        }
-//
-//                        role!!.createdAt?.let {
-//                            Row(
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .padding(vertical = 4.dp),
-//                                verticalAlignment = Alignment.CenterVertically
-//                            ) {
-//                                Text(
-//                                    text = "Creado:",
-//                                    style = MaterialTheme.typography.bodyLarge,
-//                                    modifier = Modifier.width(100.dp)
-//                                )
-//                                Text(
-//                                    text = it.toJavaLocalDateTime().toString(),
-//                                    style = MaterialTheme.typography.bodySmall,
-//                                    color = Color.Gray
-//                                )
-//                            }
-//                        }
-//
-//                        role!!.updatedAt?.let {
-//                            Row(
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .padding(vertical = 4.dp),
-//                                verticalAlignment = Alignment.CenterVertically
-//                            ) {
-//                                Text(
-//                                    text = "Actualizado:",
-//                                    style = MaterialTheme.typography.bodyLarge,
-//                                    modifier = Modifier.width(100.dp)
-//                                )
-//                                Text(
-//                                    text = it.toJavaLocalDateTime().toString(),
-//                                    style = MaterialTheme.typography.bodySmall,
-//                                    color = Color.Gray
-//                                )
-//                            }
-//                        }
-//                    } else {
-//                        CircularProgressIndicator()
-//                    }
-//                }
-//            }
-//
-//        }
-//
-//        // Permisos del rol
-//        item {
-//            Card(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(16.dp),
-//                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-//                shape = RoundedCornerShape(12.dp)
-//            ) {
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(16.dp),
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Text("Permisos")
-//                    IconButton(onClick = {
-//                        println("Clicked on add permission")
-//                        component.navTo(RolesFeatureComponentImpl.Config.AddPermission(component.roleId))
-//                    }){
-//                        Icon(imageVector = Icons.Default.Add, contentDescription = "add permission")
-//                    }
-//
-//                }
-//                if(isLoading){
-//                    CircularProgressIndicator()
-//                } else{
-//                    permissions.forEach { permission ->
-//                        PermissionCard(permission.key) {
-//                            component.deletePermission(permission.permission.id)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
-
 @Composable
 fun RolePageScreen(component: RolePageComponent) {
     val role by component.roleInfo.collectAsState()
@@ -215,9 +73,9 @@ fun RolePageScreen(component: RolePageComponent) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp),
+                    .padding(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -276,7 +134,7 @@ fun RoleInfoCard(role: RoleDTO) {
     ) {
         Column(
             modifier = Modifier
-                .padding(24.dp)
+                .padding(16.dp)
                 .fillMaxWidth()
         ) {
             Text(
