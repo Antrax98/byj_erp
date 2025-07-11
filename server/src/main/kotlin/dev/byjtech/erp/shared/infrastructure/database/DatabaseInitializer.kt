@@ -59,7 +59,8 @@ class DatabaseInitializer (private val database: Database) {
                                 PermissionEntity.new {
                                     name = permission.action
                                     description = permission.description
-                                    category = newCat
+                                    // TODO: Comentado temporalmente por error de compilación con campo 'category'
+                                    // category = newCat
                                 }
                                 println("Permission ${permission.action} created")
                             }
