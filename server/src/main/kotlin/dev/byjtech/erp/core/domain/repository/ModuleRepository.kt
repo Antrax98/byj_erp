@@ -13,14 +13,11 @@ interface ModuleRepository {
     fun get(moduleId: UUID): Module? //solo el module
     fun getWithCategories(moduleId: UUID): Module? //con categories
     fun getWithCategoriesAndPermissions(moduleId: UUID): Module? //con categories y permissions
-    fun getCategoryById(categoryId: UUID): Category?
     fun getPermissionById(permissionId: UUID): Permission?
     fun delete(moduleId: UUID)
     fun getCategoryByPermissionId(permissionId: UUID): Category?
-    fun getByCategoryId(categoryId: UUID): Module?
     fun getByPermissionId(permissionId: UUID): Module?
     fun addCategory(moduleId: UUID, newCategory: CategoryDTO): Category
-    fun addPermissionToCategory(categoryId: UUID, newPermission: PermissionDTO): Permission
     fun findPermissionByPermissionKey(permissionKey: PermissionKey): Permission?
     fun findPermissionsByPermissionKeySet(permissionKeySet: Set<PermissionKey>): Set<Permission>
     fun getPermissionKeysByPermissionIdSet(permissionIdSet: Set<UUID>): Set<PermissionKey>

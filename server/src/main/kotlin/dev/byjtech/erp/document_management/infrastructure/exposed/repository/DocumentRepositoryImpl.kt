@@ -32,7 +32,6 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
             row[documentType] = document.documentType
             row[documentNumber] = document.documentNumber
             row[companyId] = document.companyId!!
-            row[categoryId] = document.categoryId
             row[issueDate] = document.issueDate.toJavaLocalDate()
             row[dueDate] = document.dueDate?.toJavaLocalDate()
             row[status] = document.status
@@ -55,7 +54,6 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
             row[documentType] = document.documentType
             row[documentNumber] = document.documentNumber
             row[companyId] = document.companyId!!
-            row[categoryId] = document.categoryId
             row[issueDate] = document.issueDate.toJavaLocalDate()
             row[dueDate] = document.dueDate?.toJavaLocalDate()
             row[status] = document.status
@@ -92,7 +90,6 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         createdAt = this[DocumentsTable.createdAt].toKotlinLocalDateTime(),
         updatedAt = this[DocumentsTable.updatedAt].toKotlinLocalDateTime(),
         active = this[DocumentsTable.active],
-        companyId = this[DocumentsTable.companyId].value,
-        categoryId = this[DocumentsTable.categoryId]?.value
+        companyId = this[DocumentsTable.companyId].value
     )
 }

@@ -36,10 +36,6 @@ class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
         TODO("Not yet implemented")
     }
 
-    override fun getCategoryById(categoryId: UUID): Category? {
-        TODO("Not yet implemented")
-    }
-
     override fun getPermissionById(permissionId: UUID): Permission? {
         TODO("Not yet implemented")
     }
@@ -52,22 +48,11 @@ class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
         TODO("Not yet implemented")
     }
 
-    override fun getByCategoryId(categoryId: UUID): Module? {
-        TODO("Not yet implemented")
-    }
-
     override fun getByPermissionId(permissionId: UUID): Module? {
         TODO("Not yet implemented")
     }
 
     override fun addCategory(moduleId: UUID, newCategory: CategoryDTO): Category {
-        TODO("Not yet implemented")
-    }
-
-    override fun addPermissionToCategory(
-        categoryId: UUID,
-        newPermission: PermissionDTO
-    ): Permission {
         TODO("Not yet implemented")
     }
 
@@ -77,7 +62,7 @@ class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
             if(module != null) {
                 val category = CategoryEntity.find { (CategoriesTable.name eq permissionKey.category) and (CategoriesTable.moduleId eq module.id) }.firstOrNull()
                 if(category != null) {
-                    val permission = PermissionEntity.find { (PermissionsTable.name eq permissionKey.action) and (PermissionsTable.categoryId eq category.id) }.firstOrNull()
+                    val permission = PermissionEntity.find { PermissionsTable.name eq permissionKey.action }.firstOrNull()
                     if(permission != null) {
                         return@transaction permission.toModel()
                     } else {

@@ -8,8 +8,7 @@ fun PermissionEntity.toDTO(): PermissionDTO {
     return PermissionDTO(
         id = this.id.value.toString(),
         name = this.name,
-        description = this.description,
-        categoryId = this.category.id.value.toString() // Relación con Category
+        description = this.description
     )
 }
 

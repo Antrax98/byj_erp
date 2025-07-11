@@ -25,8 +25,7 @@ fun Document.toDTO(): DocumentDTO {
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         active = this.active,
-        companyId = this.companyId?.toString(),
-        categoryId = this.categoryId?.toString()
+        companyId = this.companyId?.toString()
     )
 }
 

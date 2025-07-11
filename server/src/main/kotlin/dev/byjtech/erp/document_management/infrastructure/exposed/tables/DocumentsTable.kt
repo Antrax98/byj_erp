@@ -11,7 +11,6 @@ object DocumentsTable : UUIDTable("document") {
     val documentType = varchar("document_type", 255) // tipo de documento
     val documentNumber = varchar("document_number", 255) // numero del documento
     val companyId = reference("company_id", CompaniesTable) // empresa asociada
-    val categoryId = reference("category_id", CategoriesTable).nullable() // categoria opcional
     val issueDate = date("issue_date") // fecha de emision
     val dueDate = date("due_date").nullable() // fecha de vencimiento
     val status = registerColumn<DocumentStatus>("status", DocumentStatusColumnType())// estado del documento

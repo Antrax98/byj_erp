@@ -21,7 +21,6 @@ class DocumentEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     var documentType by DocumentsTable.documentType
     var documentNumber by DocumentsTable.documentNumber
     var companyId by CompanyEntity referencedOn DocumentsTable.companyId
-    var categoryId by CategoryEntity optionalReferencedOn DocumentsTable.categoryId
     var issueDate by DocumentsTable.issueDate
     var dueDate by DocumentsTable.dueDate
     var status by DocumentsTable.status
@@ -51,7 +50,6 @@ class DocumentEntity(id: EntityID<UUID>) : UUIDEntity(id) {
         createdAt = createdAt.toKotlinLocalDateTime(),
         updatedAt = updatedAt.toKotlinLocalDateTime(),
         active = active,
-        companyId = companyId.id.value,
-        categoryId = categoryId?.id?.value
+        companyId = companyId.id.value
     )
 }

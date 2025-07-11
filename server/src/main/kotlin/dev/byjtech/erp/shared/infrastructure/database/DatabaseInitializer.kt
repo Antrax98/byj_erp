@@ -137,8 +137,6 @@ class DatabaseInitializer (private val database: Database) {
             //el codigo siguiente se asegura de darle el permiso all al rol admin del core especificamente
             //al momento de subscribir modulos a las compañias, se le asignara el permiso all al rol admin del modulo, (manualmente o automatico)
             val coreModule = ModuleEntity.find(ModulesTable.name eq "core").firstOrNull()
-//            val adminPermission = PermissionEntity.find((PermissionsTable.name eq "all")and (PermissionsTable.categoryId eq CategoryEntity.find((CategoriesTable.name eq "admin")and (CategoriesTable.moduleId eq coreModule?.id?.value)).firstOrNull()?.id?.value)).firstOrNull()
-//                ?: throw Exception("No se encontro el permiso all para admin en modulo core")
             //Obtener el módulo core
             val moduleId = coreModule?.id?.value
             if (moduleId == null) throw Exception("coreModule es null")
@@ -149,11 +147,11 @@ class DatabaseInitializer (private val database: Database) {
                 .firstOrNull()
             if (adminCategory == null) throw Exception("No se encontró la categoría 'admin' en el módulo core")
 
-            //Buscar el permiso "all" dentro de esa categoría
+            //Buscar el permiso "all" 
             val adminPermission = PermissionEntity
-                .find((PermissionsTable.name eq "all") and (PermissionsTable.categoryId eq adminCategory.id.value))
+                .find(PermissionsTable.name eq "all")
                 .firstOrNull()
-            if (adminPermission == null) throw Exception("No se encontró el permiso 'all' para la categoría 'admin' en el módulo core")
+            if (adminPermission == null) throw Exception("No se encontró el permiso 'all'")
 
 //            RolePermissionEntity.new(UUID.randomUUID()) {
 //                role = adminRole

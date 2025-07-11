@@ -22,7 +22,6 @@ fun DocumentEntity.toModel(): Document {
         createdAt = this.createdAt.toKotlinLocalDateTime(),
         updatedAt = this.updatedAt.toKotlinLocalDateTime(),
         active = this.active,
-        companyId = this.companyId.id.value,
-        categoryId = this.categoryId?.id?.value
+        companyId = this.companyId.id.value
     )
 }

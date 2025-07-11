@@ -21,6 +21,5 @@ data class DocumentDTO(
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
     val active: Boolean,
-    val companyId: String?,
-    val categoryId: String?
+    val companyId: String?
 )
