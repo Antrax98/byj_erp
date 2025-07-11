@@ -21,7 +21,7 @@ val documentManagementInfrastructureModule = module {
     // Controladores de rutas
     single<DocumentRoutesInstaller> {
         DocumentRoutesInstaller(
-            documentRepo = get(),
+            documentService = get(),
             authWrapper = get()
         )
     }

@@ -53,3 +53,25 @@ fun DocumentAuditLog.toDTO(): DocumentAuditLogDTO {
         createdAt = this.createdAt
     )
 }
+
+// Extensión para convertir DocumentDTO a Document (modelo de dominio)
+fun DocumentDTO.toDomain(): dev.byjtech.erp.document_management.domain.model.Document {
+    return dev.byjtech.erp.document_management.domain.model.Document(
+        id = java.util.UUID.fromString(this.id),
+        documentType = this.documentType,
+        documentNumber = this.documentNumber,
+        issueDate = this.issueDate,
+        dueDate = this.dueDate,
+        status = dev.byjtech.erp.document_management.domain.model.DocumentStatus.valueOf(this.status),
+        currency = this.currency,
+        netAmount = this.netAmount,
+        taxAmount = this.taxAmount,
+        totalAmount = this.totalAmount,
+        fileUrl = this.fileUrl,
+        createdBy = java.util.UUID.fromString(this.createdBy),
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
+        active = this.active,
+        companyId = this.companyId?.let { java.util.UUID.fromString(it) }
+    )
+}
