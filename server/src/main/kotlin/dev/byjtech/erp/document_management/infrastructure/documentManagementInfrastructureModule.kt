@@ -1,5 +1,6 @@
 package dev.byjtech.erp.document_management.infrastructure
 import dev.byjtech.erp.document_management.domain.repository.*
+import dev.byjtech.erp.document_management.infrastructure.auth.DocumentManagementAuthWrapper
 import dev.byjtech.erp.document_management.infrastructure.exposed.repository.*
 import dev.byjtech.erp.document_management.infrastructure.api.DocumentManagementRoutesInstaller
 import dev.byjtech.erp.document_management.infrastructure.api.controllers.DocumentRoutesInstaller
@@ -12,10 +13,16 @@ val documentManagementInfrastructureModule = module {
     single<DocumentEditHistoryRepository> { DocumentEditHistoryRepositoryImpl(get(named("documentManagementDatabase"))) }
     single<DocumentAuditLogRepository> { DocumentAuditLogRepositoryImpl(get(named("documentManagementDatabase"))) }
 
+    // Auth wrapper para el módulo
+    single<DocumentManagementAuthWrapper> {
+        DocumentManagementAuthWrapper(get())
+    }
+
     // Controladores de rutas
     single<DocumentRoutesInstaller> {
         DocumentRoutesInstaller(
-            documentRepo = get()
+            documentRepo = get(),
+            authWrapper = get()
         )
     }
 

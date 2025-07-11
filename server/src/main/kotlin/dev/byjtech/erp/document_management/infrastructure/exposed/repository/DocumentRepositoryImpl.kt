@@ -27,6 +27,11 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
             .map { it.toDomain() }
     }
 
+    override fun findByCompanyId(companyId: UUID): List<Document> = transaction(database) {
+        DocumentsTable.select(DocumentsTable.companyId eq companyId)
+            .map { it.toDomain() }
+    }
+
     override fun save(document: Document): Document = transaction(database) {
         val insertedId = DocumentsTable.insertAndGetId { row ->
             row[documentType] = document.documentType

@@ -6,6 +6,7 @@ import java.util.UUID
 interface DocumentRepository {
     fun findById(id: UUID): Document?
     fun findAll(): List<Document>
+    fun findByCompanyId(companyId: UUID): List<Document>
     fun save(document: Document): Document
     fun update(document: Document): Document
     fun delete(id: UUID)
