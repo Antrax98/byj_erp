@@ -10,6 +10,12 @@ class DocumentService(
     private val documentRepository: DocumentRepository
 ) {
     
+    // Método para SuperAdmins: obtener TODOS los documentos sin filtro por compañía
+    fun getAllDocuments(): List<DocumentDTO> {
+        val documents = documentRepository.findAll()
+        return documents.map { it.toDTO() }
+    }
+    
     fun getAllDocumentsByCompany(companyId: UUID): List<DocumentDTO> {
         val documents = documentRepository.findByCompanyId(companyId)
         return documents.map { it.toDTO() }

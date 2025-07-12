@@ -33,7 +33,26 @@ fun Route.documentsRoutes(
 ) {
     
     get("/all") {
-        // 1. Validar sesión y autorización
+        // 1. Primero verificar si es SuperAdmin (no necesita permisos específicos ni compañía)
+        val isSuperAdmin = try {
+            authWrapper.authorizeOrThrow(call, requiredSuperAdmin = true)
+            true
+        } catch (e: Exception) {
+            false
+        }
+        
+        if (isSuperAdmin) {
+            // SuperAdmin: acceso completo a todos los documentos
+            try {
+                val documentsDTO = documentService.getAllDocuments()
+                call.respond(HttpStatusCode.OK, documentsDTO)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Error retrieving documents: ${e.message}")
+            }
+            return@get
+        }
+        
+        // 2. Para usuarios normales: validar sesión y permisos específicos
         val session = authWrapper.authorizeOrThrow(
             call,
             requiredAnyPermissions = setOf(
@@ -41,13 +60,13 @@ fun Route.documentsRoutes(
             )
         )
         
-        // 2. Verificar contexto de empresa
+        // 3. Verificar contexto de empresa para usuarios normales
         if (session.companyId == null) {
             call.respond(HttpStatusCode.BadRequest, "User has no company")
             return@get
         }
         
-        // 3. Usar service para obtener documentos (con lógica de negocio)
+        // 4. Usar service para obtener documentos por compañía
         try {
             val documentsDTO = documentService.getAllDocumentsByCompany(session.companyId)
             call.respond(HttpStatusCode.OK, documentsDTO)
