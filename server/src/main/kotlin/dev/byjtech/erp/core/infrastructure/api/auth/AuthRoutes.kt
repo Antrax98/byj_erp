@@ -67,6 +67,67 @@ fun Route.googleAuthRoutes(
     moduleRepo: ModuleRepository,
     auth: CoreAuthWrapper
 ) {
+    // ANAYS ajuste este endpoint permite generar tokens Bearer válidos para testing en Postman
+    get("/generate-admin-token") {
+        try {
+            // Buscar el usuario admin de prueba
+            val adminUser = userRepo.findByEmail("usuariotesttesttester@gmail.com")
+            if (adminUser == null) {
+                call.respond(HttpStatusCode.NotFound, "Admin user not found")
+                return@get
+            }
+
+            // Limpiar sesiones previas del postman para evitar duplicados
+            // Esto asegura que solo haya una sesión activa por dispositivo
+            try {
+                // Buscar y eliminar sesiones existentes con el mismo device_id
+                val existingSessions = sessionRepo.findByUserId(adminUser.id).filter { it.deviceId == "postman-test-v2" }
+                existingSessions.forEach { sessionRepo.delete(it.id) }
+            } catch (e: Exception) {
+                logger.warn("No se pudieron limpiar las sesiones previas: ${e.message}")
+            }
+
+            // Crear una nueva sesión para el admin
+            // IMPORTANTE: Este UUID se usa tanto para la BD como para el token
+            val newSessionId = UUID.randomUUID()
+            val expiresAt = Instant.now().plusSeconds(7 * 24 * 60 * 60) // 7 días
+            
+            // Crear el objeto Session con el mismo ID que se usará en el token
+            val session = Session(
+                id = newSessionId,
+                userId = adminUser.id,
+                deviceId = "postman-test-v2",
+                accessTokens = "test-token",
+                refreshToken = "test-refresh",
+                platform = "postman",
+                userAgent = "Postman Test Agent",
+                isValid = true,
+                createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                expiresAt = java.time.LocalDateTime.ofInstant(expiresAt, ZoneId.systemDefault()).toKotlinx()
+            )
+            
+            // Guardar sesión en BD - ahora usa el ID correcto gracias al fix en SessionRepositoryImpl
+            sessionRepo.create(session)
+            
+            // Crear el AppSession token con el MISMO sessionId que se guardó en BD
+            val appSession = AppSession(newSessionId.toString(), expiresAt.toEpochMilli())
+            val token = appSession.toEncoded()
+            
+            call.respond(mapOf(
+                "token" to token,
+                "sessionId" to newSessionId.toString(),
+                "userId" to adminUser.id.toString(),
+                "userEmail" to adminUser.email,
+                "expiresAt" to expiresAt.toString(),
+                "note" to "Use this token in Authorization header as: Authentication: Bearer $token"
+            ))
+            
+        } catch (e: Exception) {
+            logger.error("Error generating admin token", e)
+            call.respond(HttpStatusCode.InternalServerError, "Error generating token: ${e.message}")
+        }
+    }
 
     //todo lo que ver con roles y user sacarlo de aqui a su propios rutes
     get("/userRoles/{userId}"){
@@ -346,6 +407,58 @@ fun Route.googleAuthRoutes(
                 logger.error("principal or stateEncoded is null")
                 call.respondText("Authentication failed.", status = HttpStatusCode.Unauthorized, contentType = ContentType.Text.Plain)
             }
+        }
+    }
+
+    // ENDPOINT DUPLICADO - ELIMINAR
+    // Este endpoint está duplicado arriba con mejor implementación
+    // TODO: Eliminar todo este bloque de código duplicado
+    /*
+    get("/generate-admin-token") {
+        try {
+            // Buscar el usuario admin de prueba
+            val adminUser = userRepo.findByEmail("usuariotesttesttester@gmail.com")
+            if (adminUser == null) {
+                call.respond(HttpStatusCode.NotFound, "Admin user not found")
+                return@get
+            }
+
+            // Crear una nueva sesión para el admin
+            val newSessionId = UUID.randomUUID()
+            val expiresAt = Instant.now().plusSeconds(7 * 24 * 60 * 60) // 7 días
+            
+            val session = Session(
+                id = newSessionId,
+                userId = adminUser.id,
+                deviceId = "postman-test",
+                accessTokens = "test-token",
+                refreshToken = "test-refresh",
+                platform = "postman",
+                userAgent = "Postman Test Agent",
+                isValid = true,
+                createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                expiresAt = LocalDateTime.ofInstant(expiresAt, ZoneId.systemDefault()).toKotlinx()
+            )
+            
+            sessionRepo.create(session)
+            
+            // Crear el AppSession token
+            val appSession = AppSession(newSessionId.toString(), expiresAt.toEpochMilli())
+            val token = appSession.toEncoded()
+            
+            call.respond(mapOf(
+                "token" to token,
+                "sessionId" to newSessionId.toString(),
+                "userId" to adminUser.id.toString(),
+                "userEmail" to adminUser.email,
+                "expiresAt" to expiresAt.toString(),
+                "note" to "Use this token in Authorization header as: Authentication: Bearer $token"
+            ))
+            
+        } catch (e: Exception) {
+            logger.error("Error generating admin token", e)
+            call.respond(HttpStatusCode.InternalServerError, "Error generating token: ${e.message}")
         }
     }
 

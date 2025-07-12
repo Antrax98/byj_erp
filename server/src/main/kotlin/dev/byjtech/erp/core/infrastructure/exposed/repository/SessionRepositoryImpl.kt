@@ -15,7 +15,9 @@ import java.util.UUID
 class SessionRepositoryImpl(private val db: Database): SessionRepository {
     override fun create(session: Session): Session {
         return transaction(db) {
-            val sessionEntity = SessionEntity.new(UUID.randomUUID()) {
+            // FIX: Usar el ID de la sesión que viene en el parámetro en lugar de generar uno aleatorio
+            // Esto soluciona el problema donde el token contenía un sessionId diferente al guardado en BD
+            val sessionEntity = SessionEntity.new(session.id) {
                 this.user = UserEntity[session.userId]
                 this.deviceId = session.deviceId
                 this.platform = session.platform
