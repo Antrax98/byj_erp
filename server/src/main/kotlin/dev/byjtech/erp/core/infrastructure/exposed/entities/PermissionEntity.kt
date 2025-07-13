@@ -13,4 +13,5 @@ class PermissionEntity(id: EntityID<UUID>) : UUIDEntity(id) {
 
     var name by PermissionsTable.name
     var description by PermissionsTable.description
+    var category by CategoryEntity referencedOn PermissionsTable.categoryId
 }

@@ -10,4 +10,3 @@ data class CategoryDTO(
     val description: String,
     val moduleId: String? // este es nullable
 )
-
