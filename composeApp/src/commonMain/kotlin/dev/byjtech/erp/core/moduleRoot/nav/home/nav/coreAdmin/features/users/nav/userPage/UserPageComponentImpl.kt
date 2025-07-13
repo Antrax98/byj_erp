@@ -3,6 +3,7 @@ package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.na
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.common.PermissionWithKey
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.dto.RoleDTO
@@ -11,6 +12,7 @@ import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.Use
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +32,9 @@ class UserPageComponentImpl(
         )
     override val optionalPermissions: Set<PermissionKey> =
         setOf(
-            CoreDefinition.Users.Update.key
+            CoreDefinition.Users.Update.key,
+            CoreDefinition.Roles.Delete.key,
+            CoreDefinition.Roles.Assign.key
         )
 
     private val coroutineScope = componentContext.coroutineScope()
@@ -38,30 +42,71 @@ class UserPageComponentImpl(
     private val _userInfo = MutableStateFlow<UserDTO?>(null)
     override val userInfo: StateFlow<UserDTO?> = _userInfo.asStateFlow()
 
-    override suspend fun fetchUser() {
-        val userResponse = apiClient.usersTenantApi.getUser(userId)
-        if (userResponse != null) {
-            _userInfo.value = userResponse
+    override fun fetchUser() {
+        coroutineScope.launch {
+            val userResponse = apiClient.usersTenantApi.getUser(userId)
+            if (userResponse != null) {
+                _userInfo.value = userResponse
+            }
         }
-
     }
 
-    private val _userSpecialPermissions = MutableStateFlow<List<PermissionKey>?>(null)
-    override val userSpecialPermissions: StateFlow<List<PermissionKey>?> = _userSpecialPermissions.asStateFlow()
+    private val _userSpecialPermissions = MutableStateFlow<List<PermissionWithKey>?>(null)
+    override val userSpecialPermissions: StateFlow<List<PermissionWithKey>?> = _userSpecialPermissions.asStateFlow()
 
-    override suspend fun fetchUserSpecialPermissions() {
+    override fun fetchUserSpecialPermissions() {
         println("Fetching user special permissions for user ID: $userId")
-        val userSpecialPermissionsResponse = apiClient.coreAuth.getSpecialPermissionsByUserId(userId)
-        _userSpecialPermissions.value = userSpecialPermissionsResponse.permissionKeys
+        coroutineScope.launch {
+            val response = apiClient.usersT.getUserSpecialPermissionsWithKey(userId)
+            when (response) {
+                is dev.byjtech.erp.common.ApiResponse.Success -> {
+                    _userSpecialPermissions.value = response.data.toList()
+                }
+                is dev.byjtech.erp.common.ApiResponse.Error -> {
+                    _userSpecialPermissions.value = null
+                }
+            }
+        }
     }
 
     private val _userRoles = MutableStateFlow<List<RoleDTO>?>(null)
     override val userRoles: StateFlow<List<RoleDTO>?> = _userRoles.asStateFlow()
 
-    override suspend fun fetchUserRoles() {
+    override fun fetchUserRoles() {
         println("Fetching user roles for user ID: $userId")
-        val userRolesResponse = apiClient.coreAuth.userRoles(userId)
-        _userRoles.value = userRolesResponse.roles
+        coroutineScope.launch {
+            val userRolesResponse = apiClient.coreAuth.userRoles(userId)
+            _userRoles.value = userRolesResponse.roles
+        }
+    }
+
+    override fun deleteSpecialPermission(permissionId: String) {
+        coroutineScope.launch {
+            val response = apiClient.rolesT.deleteUserPermission(userId, permissionId)
+            when (response) {
+                is dev.byjtech.erp.common.ApiResponse.Success -> {
+                    fetchUserSpecialPermissions()
+                }
+                is dev.byjtech.erp.common.ApiResponse.Error -> {
+                    // Handle error
+                }
+            }
+        }
+    }
+
+    override fun deleteRole(roleId: String) {
+        coroutineScope.launch {
+            println("Deleting role with ID: $roleId")
+            val response = apiClient.rolesT.deleteUserRole(userId, roleId)
+            when (response) {
+                is dev.byjtech.erp.common.ApiResponse.Success -> {
+                    fetchUserRoles()
+                }
+                is dev.byjtech.erp.common.ApiResponse.Error -> {
+                    // Handle error
+                }
+            }
+        }
     }
 
     init {

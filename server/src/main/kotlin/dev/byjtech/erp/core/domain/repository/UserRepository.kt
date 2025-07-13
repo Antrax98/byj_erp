@@ -1,5 +1,6 @@
 package dev.byjtech.erp.core.domain.repository
 
+import dev.byjtech.erp.common.PermissionWithKey
 import dev.byjtech.erp.core.domain.model.Permission
 import dev.byjtech.erp.core.domain.model.User
 import dev.byjtech.erp.core.dto.UserDTO

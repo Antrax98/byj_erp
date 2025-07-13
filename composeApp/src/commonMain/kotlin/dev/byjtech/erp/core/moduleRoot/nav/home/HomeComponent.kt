@@ -19,6 +19,7 @@ interface HomeComponent {
     val moduleManager: ModuleManager
     val actualUser: StateFlow<UserDTO?>
     val isOnMainPage: StateFlow<Boolean>
+    val titleState: StateFlow<String>
     fun onBack()
     suspend fun onLogout()
     suspend fun onTestClick()

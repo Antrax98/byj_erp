@@ -25,13 +25,13 @@ class RolePageComponentImpl(
     private val _roleInfo = MutableStateFlow<RoleDTO?>(null)
     override val roleInfo: StateFlow<RoleDTO?> = _roleInfo
 
-    private val _rolePermissions = MutableStateFlow<List<PermissionWithKey>?>(null)
-    override val rolePermissions: StateFlow<List<PermissionWithKey>?> = _rolePermissions
+    private val _rolePermissions = MutableStateFlow<Set<PermissionWithKey>>(emptySet())
+    override val rolePermissions: StateFlow<Set<PermissionWithKey>> = _rolePermissions
 
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading
 
-    override suspend fun fetchRole() {
+    override fun fetchRole() {
         coroutineScope.launch {
             val roleResponse = apiClient.rolesT.getRoleById(roleId)
             if (roleResponse is ApiResponse.Success) {
@@ -41,15 +41,35 @@ class RolePageComponentImpl(
             }
         }
     }
-    override suspend fun fetchRolePermissions() {
-        TODO("Not yet implemented")
+    override fun fetchRolePermissions() {
+        coroutineScope.launch {
+            val permissionsResponse = apiClient.rolesT.getPermissionsByRoleId(roleId)
+            if (permissionsResponse is ApiResponse.Success) {
+                _rolePermissions.value = permissionsResponse.data
+                println("Role permissions: ${permissionsResponse.data}")
+            } else if (permissionsResponse is ApiResponse.Error) {
+                _rolePermissions.value = emptySet()
+                println("Error fetching role permissions: ${permissionsResponse.code}")
+            }
+        }
+    }
+
+    override fun deletePermission(permissionId: String) {
+        coroutineScope.launch {
+            val response = apiClient.rolesT.deleteRolePermission(roleId, permissionId)
+            if (response is ApiResponse.Success) {
+                fetchRolePermissions()
+            } else if (response is ApiResponse.Error) {
+                println("Error deleting role permission: ${response.code}")
+            }
+        }
     }
 
     init {
         coroutineScope.launch {
             _isLoading.value = true
             fetchRole()
-            //fetchRolePermissions()
+            fetchRolePermissions()
             _isLoading.value = false
         }
     }

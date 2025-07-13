@@ -15,12 +15,14 @@ val UsersFeatureEntry: FeatureEntry = FeatureEntry(
         CoreDefinition.Admin.All.key,
         CoreDefinition.Users.View.key,
     ),
-    factory = { context, userPermissions, apiClient, toHome ->
+    factory = { context, userPermissions, apiClient, toHome, updateTitle ->
         UsersFeatureComponentImpl(
             componentContext = context,
             userPermissions = userPermissions,
             apiClient = apiClient,
-            toHome = toHome
+            toHome = toHome,
+            updateTitle = updateTitle,
+            sessionManagerRef = null
         )
     },
     screen = { component -> UsersFeatureScreen(component as UsersFeatureComponent) },

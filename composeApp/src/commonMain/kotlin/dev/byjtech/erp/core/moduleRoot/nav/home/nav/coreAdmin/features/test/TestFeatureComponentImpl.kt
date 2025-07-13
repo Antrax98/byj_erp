@@ -13,7 +13,8 @@ class TestFeatureComponentImpl(
     override val userPermissions: StateFlow<Set<PermissionKey>>,
     override val usersTenantApi: UsersTenantApi,
     override val apiClient: ApiClient, //ojala no usar este de ser posible
-    override val toHome: () -> Unit
+    override val toHome: () -> Unit,
+    override val updateTitle: (newTitle: String) -> Unit
 ): TestFeatureComponent, ComponentContext by componentContext {
 
     //si el feature tiene navegacion nesteada, no usar state en si mismo, solo en sus hijos????

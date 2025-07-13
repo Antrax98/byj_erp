@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,10 +31,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.common.PermissionWithKey
 import dev.byjtech.erp.common.tools.containsAnyOf
 import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.dto.RoleDTO
@@ -55,19 +61,6 @@ fun UserPageScreen(component: UserPageComponent) {
     val userRoles by component.userRoles.collectAsState()
 
     val userPermissions by component.userPermissions.collectAsState()
-
-    val coroutineScope = rememberCoroutineScope()
-
-//    coroutineScope.launch {
-//        component.fetchUser()
-//        component.fetchUserSpecialPermissions()
-//        component.fetchUserRoles()
-//    }
-//    LaunchedEffect(component) {
-//        component.fetchUser()
-//        component.fetchUserSpecialPermissions()
-//        component.fetchUserRoles()
-//    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -106,7 +99,7 @@ fun UserPageScreen(component: UserPageComponent) {
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                         Button(
-                            onClick = { component.navTo(Config.AssignRole(userId = component.userId, assignableRoles = emptySet())) }
+                            onClick = { component.navTo(Config.AssignRole(userId = component.userId, actUserRoles = userRoles?.toSet()?: emptySet())) }
                         ){
                             Icon(
                                 imageVector = Icons.Default.Add,
@@ -128,7 +121,9 @@ fun UserPageScreen(component: UserPageComponent) {
                         } else {
                             val canUnassignRole = userPermissions.containsAnyOf(CoreDefinition.Roles.Unassign.key)
                             userRoles!!.forEach { role ->
-                                RoleCard(role, canUnassignRole)
+                                RoleCard(role, canUnassignRole){
+                                    component.deleteRole(role.id)
+                                }
                             }
                         }
                     } else {
@@ -162,7 +157,7 @@ fun UserPageScreen(component: UserPageComponent) {
                         )
                         if (userPermissions.containsAnyOf(CoreDefinition.Roles.Assign.key)) {
                             Button(
-                                onClick = { component.navTo(Config.AssignSpecialPermission(userId = component.userId, assignablePermissions = emptySet())) }
+                                onClick = { component.navTo(Config.AssignSpecialPermission(userId = component.userId)) }
                             ){
                                 Icon(
                                     imageVector = Icons.Default.Add,
@@ -185,7 +180,7 @@ fun UserPageScreen(component: UserPageComponent) {
                         } else {
                             val canUnassignPermission = userPermissions.containsAnyOf(CoreDefinition.Roles.Unassign.key)
                             userSpecialPermissions!!.forEach { perm ->
-                                PermissionKeyCard(perm, canUnassignPermission)
+                                PermissionKeyCard(perm, canUnassignPermission,{component.deleteSpecialPermission(perm.permission.id)})
                             }
                         }
                     } else {
@@ -201,7 +196,9 @@ fun UserPageScreen(component: UserPageComponent) {
 }
 
 @Composable
-fun PermissionKeyCard(permissionKey: PermissionKey, canUnassignPermission: Boolean) {
+fun PermissionKeyCard(permissionWithKey: PermissionWithKey, canUnassignPermission: Boolean, onActionClick: () -> Unit = {}) {
+    var showDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 6.dp)
@@ -225,25 +222,25 @@ fun PermissionKeyCard(permissionKey: PermissionKey, canUnassignPermission: Boole
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Módulo: ${permissionKey.module}",
+                    text = "Módulo: ${permissionWithKey.key.module}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "Categoría: ${permissionKey.category}",
+                    text = "Categoría: ${permissionWithKey.key.category}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "Acción: ${permissionKey.action}",
+                    text = "Acción: ${permissionWithKey.key.action}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
             }
             if (canUnassignPermission) {
-                IconButton(onClick = {}) {
+                IconButton(onClick = { showDialog=true }, enabled = canUnassignPermission) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Unassign Special Permission"
@@ -251,8 +248,28 @@ fun PermissionKeyCard(permissionKey: PermissionKey, canUnassignPermission: Boole
                 }
             }
 
-
         }
+    }
+    if (showDialog){
+        AlertDialog(
+            onDismissRequest = { showDialog=false },
+            title = { Text(text = "Eliminar permiso especial") },
+            text = { Text(text = "¿Estás seguro de que deseas eliminar este permiso especial?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                    onActionClick()
+                }) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+
     }
 }
 
@@ -351,41 +368,11 @@ fun InfoRow(label: String, value: String) {
 }
 
 
-//no sirve por que no se puede usar un lazyColumn en otro lazyColumn
-//@Composable
-//fun RolesList(roles: List<RoleDTO>) {
-//    if (roles.isEmpty()) {
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(16.dp),
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text(
-//                text = "El usuario no tiene roles asignados.",
-//                style = MaterialTheme.typography.bodyMedium,
-//                color = Color.Gray
-//            )
-//        }
-//    } else {
-//        LazyColumn(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(top = 8.dp),
-//            contentPadding = PaddingValues(bottom = 16.dp)
-//        ) {
-//            items(roles) { role ->
-//                RoleCard(role)
-//            }
-//        }
-//    }
-//}
-
-
-
 
 @Composable
 fun RoleCard(role: RoleDTO, canUnassignRole: Boolean, onActionClick: () -> Unit = {}) {
+    var showDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -425,15 +412,37 @@ fun RoleCard(role: RoleDTO, canUnassignRole: Boolean, onActionClick: () -> Unit 
             }
 
             if (canUnassignRole) {
-                IconButton(onClick = onActionClick) {
+                IconButton(onClick = {showDialog = true}) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "More Options"
+                        contentDescription = "Delete user role"
                     )
                 }
             }
         }
     }
+    if (showDialog){
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Eliminar rol del usuario") },
+            text = { Text(text = "¿Estás seguro de que deseas eliminar este rol?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                    onActionClick()
+                }) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+
+    }
+
 }
 
 

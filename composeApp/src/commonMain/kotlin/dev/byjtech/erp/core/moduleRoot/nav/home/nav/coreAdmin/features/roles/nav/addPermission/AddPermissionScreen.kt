@@ -1,4 +1,4 @@
-package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.assignSpecialPermission
+package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.addPermission
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -32,13 +31,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.PermissionWithKey
-import dev.byjtech.erp.common.UnderConstructionScreen
 
 @Composable
-fun AssignSpecialPermissionScreen(component: AssignSpecialPermissionComponent) {
+fun AddPermissionScreen(component: AddPermissionComponent) {
     val possiblePermissions by component.possiblePermissions.collectAsState()
+    val isLoading by component.isLoading.collectAsState()
 
     //estados de las expanciones
     val expandedModules = remember { mutableStateMapOf<String, Boolean>() }
@@ -56,6 +54,7 @@ fun AssignSpecialPermissionScreen(component: AssignSpecialPermissionComponent) {
             }
         }
     }
+
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -123,7 +122,7 @@ fun AssignSpecialPermissionScreen(component: AssignSpecialPermissionComponent) {
 
                                 if (isCategoryExpanded) {
                                     permissionList.forEach { permissionWithKey ->
-                                        dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.addPermission.PermissionCard(
+                                        PermissionCard(
                                             permission = permissionWithKey,
                                             onClick = {
                                                 component.addPermission(permissionWithKey.key)

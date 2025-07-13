@@ -15,7 +15,8 @@ class FeatureListComponentImpl(
     override val userPermissions: StateFlow<Set<PermissionKey>>,
     override val buttonsMap: Map<String, Map<String, ButtonMetadata>>,
     override val toHome: () -> Unit,
-    override val navTo: (ComponentConfig) -> Unit
+    override val navTo: (ComponentConfig) -> Unit,
+    override val updateTitle: (String) -> Unit
 ): FeatureListComponent, ComponentContext by componentContext {
 
     private val _state = MutableStateFlow(FeatureListState())

@@ -1,6 +1,8 @@
 package dev.byjtech.erp.core.infrastructure.api.roles
 
+import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.core.CoreDefinition
+import dev.byjtech.erp.core.domain.model.Module
 import dev.byjtech.erp.core.domain.model.Role
 import dev.byjtech.erp.core.domain.repository.ModuleRepository
 import dev.byjtech.erp.core.domain.repository.RoleRepository
@@ -95,9 +97,9 @@ fun Route.tenantRoles(authServ: CoreAuthWrapper, roleRepo: RoleRepository, userR
             return@get
         }
         val permissions = roleRepo.getPermissionsByRoleId(UUID.fromString(roleId))
-        val permissionKeys = permissions.mapNotNull { moduleRepo.getPermissionKeyById(it.id) }
-
-        call.respond(HttpStatusCode.OK, RolePermisisonKeysResponse(permissions = permissionKeys.toSet()))
+        //val permissionKeys = permissions.mapNotNull { moduleRepo.getPermissionKeyById(it.id) }
+        val permissionsWithKey = moduleRepo.getPermissionsWithKeysByPermissionIds(permissions.map { it.id }.toSet())
+        call.respond(HttpStatusCode.OK, RolePermisisonKeysResponse(permissions = permissionsWithKey))
 
 
     }
@@ -168,6 +170,97 @@ fun Route.tenantRoles(authServ: CoreAuthWrapper, roleRepo: RoleRepository, userR
             return@post
         }
         call.respond(HttpStatusCode.OK)
+    }
+
+    post("/modules-permissionkeys"){
+        val session = authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Admin.All.key,
+                CoreDefinition.Roles.View.key
+            )
+        )
+        //set de UUIDs de modulos
+        val request = call.receive<Set<String>>()
+        val uuids = request.map { UUID.fromString(it) }.toSet()
+
+        val response = moduleRepo.getPermissionsWithKeysByModuleIds(uuids)
+        call.respond(HttpStatusCode.OK, response)
+    }
+
+    delete("/delete-role-permission/{roleId}/{permissionId}") {
+        val session = authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Admin.All.key,
+                CoreDefinition.Roles.Delete.key
+            )
+        )
+        val roleId = call.parameters["roleId"]?.let(UUID::fromString)
+        val permissionId = call.parameters["permissionId"]?.let(UUID::fromString)
+        if(roleId==null){
+            call.respond(HttpStatusCode.BadRequest, message = "NO_ROLE_ID")
+            return@delete
+        }
+        if(permissionId==null){
+            call.respond(HttpStatusCode.BadRequest, message = "NO_PERMISSION_ID")
+            return@delete
+        }
+        roleRepo.removePermission(roleId, permissionId)
+        call.respond(HttpStatusCode.OK)
+    }
+
+    delete("/delete-user-permission/{userId}/{permissionId}") {
+        val session = authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Admin.All.key,
+                CoreDefinition.Roles.Delete.key
+            )
+        )
+        val userId = call.parameters["userId"]?.let(UUID::fromString)
+        val permissionId = call.parameters["permissionId"]?.let(UUID::fromString)
+        if(userId==null){
+            call.respond(HttpStatusCode.BadRequest, message = "NO_USER_ID")
+            return@delete
+        }
+        if(permissionId==null){
+            call.respond(HttpStatusCode.BadRequest, message = "NO_PERMISSION_ID")
+            return@delete
+        }
+        val response = userRepo.removeSpecialPermission(userId, permissionId)
+        if(response) {
+            call.respond(HttpStatusCode.OK)
+        } else {
+            call.respond(HttpStatusCode.BadRequest, message = "ERROR_REMOVING_PERMISSION")
+        }
+    }
+
+    delete("/delete-user-role/{userId}/{roleId}"){
+        val session = authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Admin.All.key,
+                CoreDefinition.Roles.Delete.key
+            )
+        )
+        val userId = call.parameters["userId"]?.let(UUID::fromString)
+        val roleId = call.parameters["roleId"]?.let(UUID::fromString)
+
+        if(userId==null){
+            call.respond(HttpStatusCode.BadRequest, message = "NO_USER_ID")
+            return@delete
+        }
+        if(roleId==null){
+            call.respond(HttpStatusCode.BadRequest, message = "NO_ROLE_ID")
+            return@delete
+        }
+        val response = userRepo.removeRole(userId, roleId)
+        if(response) {
+            call.respond(HttpStatusCode.OK)
+        } else {
+            call.respond(HttpStatusCode.BadRequest, message = "ERROR_REMOVING_ROLE")
+        }
     }
 
 }

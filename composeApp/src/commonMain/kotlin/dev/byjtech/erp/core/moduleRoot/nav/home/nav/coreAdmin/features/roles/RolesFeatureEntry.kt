@@ -13,12 +13,14 @@ val RolesFeatureEntry: FeatureEntry = FeatureEntry(
     requiredAnyPermissions = setOf(
         CoreDefinition.Admin.All.key
     ),
-    factory = { context, userPermissions, apiClient, toHome ->
+    factory = { context, userPermissions, apiClient, toHome, updateTitle ->
         RolesFeatureComponentImpl(
             componentContext = context,
             userPermissions = userPermissions,
             apiClient = apiClient,
-            toHome = toHome
+            toHome = toHome,
+            sessionManagerRef = null, //no se usa este factory por esta situacion solamente
+            updateTitle = updateTitle
         )
     },
     screen = { component -> RolesFeatureScreen(component as RolesFeatureComponent) },
