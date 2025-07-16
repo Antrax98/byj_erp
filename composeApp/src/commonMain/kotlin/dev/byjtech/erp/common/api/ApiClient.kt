@@ -13,6 +13,7 @@ import dev.byjtech.erp.core.api.CoreApi
 import dev.byjtech.erp.core.api.CoreAuth
 import dev.byjtech.erp.core.api.users.UsersSuperAdminApi
 import dev.byjtech.erp.core.api.users.UsersTenantApi
+import dev.byjtech.erp.modules.document_management.api.DocumentManagementClient
 import dev.byjtech.erp.core.dto.ModuleDTO
 import dev.byjtech.erp.core.dto.PermissionDTO
 import dev.byjtech.erp.core.session.AppSession
@@ -118,17 +119,20 @@ class ApiClient(
         }
     }
 
-    //!!!NO USAR KTORFIT!!!!
+    //!!!NO USAR KTORFIT PARA NUEVOS MÓDULOS!!!!
     val ktorfit = Ktorfit.Builder()
         .httpClient(clientKtor)
         .build()
 
-    //core
+    //core - mantener estos para compatibilidad
     val coreAuth = ktorfit.create<CoreAuth>() //importante no moverlo
     val coreApi = ktorfit.create<CoreApi>() //importante no moverlo
 
-    //TODO() QUITAR TODOS LOS KTORFIT y usar ktorClient directamente
-    //core-users
+    //document_management - SIN KTORFIT (como pidió el jefe)
+    val documentManagement = DocumentManagementClient(clientKtor)
+
+    //TODO() MIGRAR GRADUALMENTE LOS MÓDULOS CORE A KTOR PURO
+    //core-users - mantener para compatibilidad
     val usersSuperAdminApi = ktorfit.create<UsersSuperAdminApi>()
     val usersTenantApi = ktorfit.create<UsersTenantApi>()
 

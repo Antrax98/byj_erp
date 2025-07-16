@@ -1,0 +1,15 @@
+package dev.byjtech.erp.document_management.features.documents.nav.editDocument
+
+import com.arkivanov.decompose.ComponentContext
+import dev.byjtech.erp.common.PermissionKey
+import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.document_management.features.documents.DocumentsFeatureComponentImpl
+import kotlinx.coroutines.flow.StateFlow
+
+class EditDocumentComponentImpl(
+    override val componentContext: ComponentContext,
+    override val userPermissions: StateFlow<Set<PermissionKey>>,
+    override val apiClient: ApiClient,
+    override val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit,
+    override val documentId: String
+) : EditDocumentComponent

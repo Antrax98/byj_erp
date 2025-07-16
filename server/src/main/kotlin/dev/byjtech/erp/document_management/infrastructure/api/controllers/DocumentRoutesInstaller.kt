@@ -6,6 +6,9 @@ import dev.byjtech.erp.document_management.application.service.DocumentService
 import dev.byjtech.erp.document_management.infrastructure.auth.DocumentManagementAuthWrapper
 import dev.byjtech.erp.document_management.infrastructure.exposed.extensions.toDTO
 import dev.byjtech.erp.document_management.infrastructure.exposed.extensions.toDomain
+import dev.byjtech.erp.document_management.infrastructure.exposed.extensions.applyUpdate
+import dev.byjtech.erp.document_management.request.CreateDocumentRequest
+import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
 import dev.byjtech.erp.shared.routing.RoutesInstaller
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
@@ -200,7 +203,7 @@ fun Route.documentsRoutes(
             
             // Convertimos el DTO de vuelta a Domain para aplicar cambios
             val existingDocument = existingDocumentDTO.toDomain()
-            val updatedDocument = updateRequest.applyTo(existingDocument)
+            val updatedDocument = existingDocument.applyUpdate(updateRequest)
             
             val documentDTO = documentService.updateDocument(documentId, updatedDocument, session.companyId)
             if (documentDTO != null) {
@@ -257,73 +260,5 @@ fun Route.documentsRoutes(
         } catch (e: Exception) {
             call.respond(HttpStatusCode.InternalServerError, "Error deleting document: ${e.message}")
         }
-    }
-}
-
-// DTOs para requests
-@Serializable
-data class CreateDocumentRequest(
-    val documentType: String,
-    val documentNumber: String,
-    val issueDate: String, // formato YYYY-MM-DD
-    val dueDate: String?, // formato YYYY-MM-DD opcional
-    val status: String,
-    val currency: String,
-    val netAmount: Double,
-    val taxAmount: Double,
-    val totalAmount: Double,
-    val fileUrl: String?
-) {
-    fun toDomain(companyId: UUID, userId: UUID): dev.byjtech.erp.document_management.domain.model.Document {
-        return dev.byjtech.erp.document_management.domain.model.Document(
-            id = UUID.randomUUID(),
-            documentType = this.documentType,
-            documentNumber = this.documentNumber,
-            companyId = companyId,
-            issueDate = kotlinx.datetime.LocalDate.parse(this.issueDate),
-            dueDate = this.dueDate?.let { kotlinx.datetime.LocalDate.parse(it) },
-            status = dev.byjtech.erp.document_management.domain.model.DocumentStatus.valueOf(this.status),
-            currency = this.currency,
-            netAmount = this.netAmount,
-            taxAmount = this.taxAmount,
-            totalAmount = this.totalAmount,
-            fileUrl = this.fileUrl ?: "",
-            createdBy = userId,
-            createdAt = kotlinx.datetime.Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()),
-            updatedAt = kotlinx.datetime.Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()),
-            active = true
-        )
-    }
-}
-
-@Serializable
-data class UpdateDocumentRequest(
-    val documentType: String?,
-    val documentNumber: String?,
-    val issueDate: String?, // formato YYYY-MM-DD
-    val dueDate: String?, // formato YYYY-MM-DD opcional
-    val status: String?,
-    val currency: String?,
-    val netAmount: Double?,
-    val taxAmount: Double?,
-    val totalAmount: Double?,
-    val fileUrl: String?
-) {
-    fun applyTo(
-        existingDocument: dev.byjtech.erp.document_management.domain.model.Document
-    ): dev.byjtech.erp.document_management.domain.model.Document {
-        return existingDocument.copy(
-            documentType = this.documentType ?: existingDocument.documentType,
-            documentNumber = this.documentNumber ?: existingDocument.documentNumber,
-            issueDate = this.issueDate?.let { kotlinx.datetime.LocalDate.parse(it) } ?: existingDocument.issueDate,
-            dueDate = if (this.dueDate != null) kotlinx.datetime.LocalDate.parse(this.dueDate) else existingDocument.dueDate,
-            status = this.status?.let { dev.byjtech.erp.document_management.domain.model.DocumentStatus.valueOf(it) } ?: existingDocument.status,
-            currency = this.currency ?: existingDocument.currency,
-            netAmount = this.netAmount ?: existingDocument.netAmount,
-            taxAmount = this.taxAmount ?: existingDocument.taxAmount,
-            totalAmount = this.totalAmount ?: existingDocument.totalAmount,
-            fileUrl = this.fileUrl ?: existingDocument.fileUrl,
-            updatedAt = kotlinx.datetime.Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-        )
     }
 }
