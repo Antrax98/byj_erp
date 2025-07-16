@@ -78,11 +78,14 @@ class DatabaseInitializer (private val database: Database) {
     }
 
     //esto esta hecho para que solo cree una compañia, si ya existe al menos una no hace nada
+    //y especificamente solo para tests
     fun firstDataInitialization(){
         transaction(database) {
 
             val admins = setOf(
                 "usuariotesttesttester@gmail.com",
+                "minepoker.lol@gmail.com",
+                "anaysmr21@gmail.com"
             )
 
             admins.forEach { auxemail ->
@@ -124,17 +127,8 @@ class DatabaseInitializer (private val database: Database) {
                 company = newcompany
             }
 
-            //roles
-            //cada vez que se crea una compañia se crea un rol admin (y se añade un user al que se le asigna)
-            //hacer que la palabra admin sea un nombre reservado para que no se puedan crear mas roles admin (o modificarlo?)
-//            val adminRole = RoleEntity.new(UUID.randomUUID()) {
-//                name = "admin"
-//                description = "admin role"
-//                company = newcompany
-//            }
 
-            //asignar permisos a roles
-            //todos los modulos deverian tener una categoria admin con un permiso "all", para entrar a tod.o lo relacionado con el modulo
+            //asignar permisos
             //el codigo siguiente se asegura de darle el permiso all al rol admin del core especificamente
             //al momento de subscribir modulos a las compañias, se le asignara el permiso all al rol admin del modulo, (manualmente o automatico)
             val coreModule = ModuleEntity.find(ModulesTable.name eq "core").firstOrNull()
@@ -154,16 +148,6 @@ class DatabaseInitializer (private val database: Database) {
                 .firstOrNull()
             if (adminPermission == null) throw Exception("No se encontró el permiso 'all'")
 
-//            RolePermissionEntity.new(UUID.randomUUID()) {
-//                role = adminRole
-//                permission = adminPermission
-//            }
-
-            //asignar role
-//            UserRoleEntity.new(UUID.randomUUID()) {
-//                user = newUser1
-//                role = adminRole
-//            }
 
             //asignar permiso especial
             UserPermissionEntity.new {
