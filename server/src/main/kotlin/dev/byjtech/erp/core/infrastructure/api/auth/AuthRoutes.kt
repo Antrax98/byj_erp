@@ -282,6 +282,55 @@ fun Route.googleAuthRoutes(
 
     }
 
+    // Ruta manual para iniciar el proceso de OAuth con Google
+    get("/login") {
+        try {
+            // Usar la misma instancia de dotenv configurada en AuthConfig
+            val dotenv = dev.byjtech.erp.config.dotenv
+            
+            // Obtener parámetros de la query string o crear valores por defecto
+            val platform = call.request.queryParameters["platform"] ?: "desktop"
+            val deviceId = call.request.queryParameters["deviceId"] ?: UUID.randomUUID().toString()
+            
+            // Crear el state JSON
+            val stateMap = mapOf(
+                "platform" to platform,
+                "deviceId" to deviceId
+            )
+            val stateJson = Json.encodeToString(stateMap)
+            val state = Base64.getUrlEncoder().encodeToString(stateJson.toByteArray())
+            
+            val clientId = dotenv.get("GOOGLE_CLIENT_ID") ?: throw IllegalStateException("GOOGLE_CLIENT_ID not configured")
+            val redirectUri = dotenv.get("OAUTH_REDIRECT_URI") ?: throw IllegalStateException("OAUTH_REDIRECT_URI not configured")
+            
+            // Definir los scopes requeridos
+            val scopes = listOf(
+                "openid",
+                "https://www.googleapis.com/auth/userinfo.email",
+                "https://www.googleapis.com/auth/userinfo.profile"
+            ).joinToString("+")
+            
+            // Construir la URL de autorización de Google
+            val authUrl = "https://accounts.google.com/o/oauth2/auth" +
+                "?client_id=$clientId" +
+                "&redirect_uri=$redirectUri" +
+                "&scope=$scopes" +
+                "&response_type=code" +
+                "&access_type=offline" +
+                "&prompt=select_account" +
+                "&state=$state"
+            
+            logger.debug("Redirecting to Google OAuth: $authUrl")
+            
+            // Redirigir al usuario a la URL de autorización de Google
+            call.respondRedirect(authUrl)
+            
+        } catch (e: Exception) {
+            logger.error("Error in /auth/login", e)
+            call.respond(HttpStatusCode.InternalServerError, "Authentication error: ${e.message}")
+        }
+    }
+
     //TODO: quitar todos los logger.debug()
     authenticate("google-oauth") {
         get("/login") {
@@ -299,12 +348,12 @@ fun Route.googleAuthRoutes(
             logger.debug("Entering /callback")
             val principal: OAuthAccessTokenResponse.OAuth2? = call.principal()
             logger.info("principal = $principal")
-            val stateEncoded = stateCache.getIfPresent(call.request.queryParameters["state"]?:"")
-            stateCache.invalidate(call.request.queryParameters["state"]?:"")
+            // Use the state parameter directly from Google OAuth callback
+            val stateEncoded = call.request.queryParameters["state"] ?: ""
             logger.debug("stateEncoded: {}", stateEncoded)
             val redirect = call.request.queryParameters["redirect"]
             logger.debug("Entering /callback. state encoded: {}, redirect: {}", stateEncoded, redirect)
-            if (principal != null && stateEncoded != null) {
+            if (principal != null && stateEncoded.isNotBlank()) {
 
                 // se decodifica el state enviado por el frontend
                 val stateJson = String(Base64.getUrlDecoder().decode(stateEncoded))

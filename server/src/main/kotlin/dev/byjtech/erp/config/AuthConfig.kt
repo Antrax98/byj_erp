@@ -20,12 +20,25 @@ import java.util.UUID
 val logger: Logger = LoggerFactory.getLogger("AuthConfig")
 
 val dotenv = dotenv {
+    directory = "../"  // Buscar en el directorio padre (raíz del proyecto)
     ignoreIfMissing = false
+}
+
+//debug
+fun logEnvironmentVariables() {
+    logger.debug("=== ENVIRONMENT VARIABLES DEBUG ===")
+    logger.debug("GOOGLE_CLIENT_ID: ${dotenv.get("GOOGLE_CLIENT_ID")}")
+    logger.debug("GOOGLE_CLIENT_SECRET: ${dotenv.get("GOOGLE_CLIENT_SECRET")}")
+    logger.debug("OAUTH_REDIRECT_URI: ${dotenv.get("OAUTH_REDIRECT_URI")}")
+    logger.debug("===================================")
 }
 
 //TODO: esto se ve bien, no se si hay que mejorarlo todavia
 
 fun Application.configureOAuth(httpClient: HttpClient, stateCache: Cache<String, String>) {
+
+    // Log environment variables at startup
+    logEnvironmentVariables()
 
     install(Authentication) {
         oauth("google-oauth") {
