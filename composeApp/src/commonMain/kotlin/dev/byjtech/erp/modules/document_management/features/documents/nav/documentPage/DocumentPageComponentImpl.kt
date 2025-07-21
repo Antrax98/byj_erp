@@ -12,4 +12,9 @@ class DocumentPageComponentImpl(
     override val apiClient: ApiClient,
     override val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit,
     override val documentId: String
-) : DocumentPageComponent
+) : DocumentPageComponent {
+
+    override fun onEditDocument(documentId: String) {
+        navTo(DocumentsFeatureComponentImpl.Config.EditDocument(documentId))
+    }
+}

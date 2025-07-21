@@ -12,4 +12,6 @@ interface DocumentPageComponent {
     val apiClient: ApiClient
     val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit
     val documentId: String
+    
+    fun onEditDocument(documentId: String)
 }

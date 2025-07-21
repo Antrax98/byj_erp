@@ -63,6 +63,20 @@ class DocumentManagementClient(private val client: HttpClient) {
         }
     }
     
+    suspend fun changeDocumentStatus(
+        documentId: String,
+        newStatus: String
+    ): DocumentDTO? {
+        return try {
+            client.patch(urlString = "api/document_management/documents/$documentId/status") {
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("newStatus" to newStatus))
+            }.body()
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
     // Audit logs endpoints
     suspend fun getDocumentAuditLogs(documentId: String): List<DocumentAuditLogDTO> {
         return try {

@@ -9,8 +9,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.document_management.dto.DocumentDTO
+import dev.byjtech.erp.document_management.utils.getStatusDisplayName
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,7 +124,7 @@ fun DocumentCard(
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "Estado: ${document.status}",
+                text = "Estado: ${getStatusDisplayName(document.status)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

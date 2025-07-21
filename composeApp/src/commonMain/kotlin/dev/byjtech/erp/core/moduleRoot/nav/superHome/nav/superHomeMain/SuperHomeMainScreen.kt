@@ -49,6 +49,12 @@ fun SuperHomeMainScreen(component: SuperHomeMainComponent) {
                 }
             }
 
+            item {
+                NavigationCard("Gestión Documentos", "Administrar documentos del sistema") {
+                    component.navTo(Config.DocumentsFeature)
+                }
+            }
+
             items((1..3).toList()) { i ->
                 NavigationCard("Test $i", "Boton de prueba $i") {
                     println("Test $i pressed")

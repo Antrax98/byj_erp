@@ -49,6 +49,7 @@ import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addCompany.AddCompanySc
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companies.CompaniesScreen
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companyPage.CompanyPageScreen
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.superHomeMain.SuperHomeMainScreen
+import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -104,6 +105,9 @@ fun SuperHomeScreen(component: SuperHomeComponent) {
                     }
                     is SuperHomeComponent.Child.CompanyPage -> {
                         CompanyPageScreen(child.component)
+                    }
+                    is SuperHomeComponent.Child.DocumentsFeature -> {
+                        DocumentsFeatureScreen(child.component)
                     }
                 }
             }

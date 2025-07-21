@@ -76,8 +76,16 @@ class DocumentService(
             throw IllegalArgumentException("Tax amount cannot be negative")
         }
         
-        if (document.totalAmount != document.netAmount + document.taxAmount) {
-            throw IllegalArgumentException("Total amount must equal net amount plus tax amount")
+        // Redondear los valores a 2 decimales antes de comparar para evitar problemas de precisión
+        val roundedNetAmount = kotlin.math.round(document.netAmount * 100) / 100
+        val roundedTaxAmount = kotlin.math.round(document.taxAmount * 100) / 100
+        val roundedTotalAmount = kotlin.math.round(document.totalAmount * 100) / 100
+        val expectedTotal = kotlin.math.round((roundedNetAmount + roundedTaxAmount) * 100) / 100
+        
+        if (roundedTotalAmount != expectedTotal) {
+            throw IllegalArgumentException(
+                "Total amount ($roundedTotalAmount) must equal net amount ($roundedNetAmount) plus tax amount ($roundedTaxAmount). Expected: $expectedTotal"
+            )
         }
         
         if (document.documentNumber.isBlank()) {
