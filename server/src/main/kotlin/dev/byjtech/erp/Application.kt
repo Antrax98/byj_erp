@@ -31,7 +31,10 @@ val dotenv = dotenv{
 }
 
 fun main() {
-    embeddedServer(Netty, port = dotenv["SERVER_PORT"].toInt(), host = "0.0.0.0", module = Application::module)
+    embeddedServer(Netty,
+        port = System.getenv("PORT").toInt(),//dotenv["SERVER_PORT"].toInt(),
+        host = "0.0.0.0",
+        module = Application::module)
         .start(wait = true)
 }
 

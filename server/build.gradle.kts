@@ -56,3 +56,7 @@ tasks.withType<JavaCompile>().configureEach {
     sourceCompatibility = "21"
     targetCompatibility = "21"
 }
+
+tasks {
+    create("stage").dependsOn("installDist")
+}
