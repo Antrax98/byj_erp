@@ -42,6 +42,7 @@ import dev.byjtech.erp.core.request.AssignSpecialPermissionRequest
 import dev.byjtech.erp.core.request.CreateCompanyRequest
 import dev.byjtech.erp.core.response.ErrorList
 import dev.byjtech.erp.core.response.RolePermisisonKeysResponse
+import dev.byjtech.erp.core.response.SubscriptionsModResponse
 import io.ktor.client.utils.EmptyContent.contentType
 import java.util.UUID
 
@@ -141,6 +142,9 @@ class ApiClient(
     //users
     val usersT = UsersT(clientKtor)
 
+    //subscriptions
+    val subscriptionsSA = SubscriptionsSA(clientKtor)
+
 
     fun setAuthHeaderProvider(provider: (() -> String?)?) {
         this.authHeaderProvider = provider
@@ -203,7 +207,7 @@ sealed class ApiEvent {
 class InvalidSessionException(message: String) : Exception(message)
 
 class CompanySA(private val client: HttpClient) {
-    //TODO(): usar ApiResponse en los que no lo usen
+
     suspend fun getAllCompanies(): Set<CompanyDTO> {
         return try {
             client.get("api/core/companies/super-admin/all-companies").body()
@@ -211,7 +215,7 @@ class CompanySA(private val client: HttpClient) {
             emptySet()
         }
     }
-
+    //TODO(): usar ApiResponse en los que no lo usen
     suspend fun createCompany(data: CreateCompanyRequest): ApiResponse<Unit,ErrorList?> {
         return try {
             val response = client.post("api/core/companies/super-admin/create-company") {
@@ -539,6 +543,97 @@ class UsersT(private val client: HttpClient){
                 HttpStatusCode.OK -> {
                     ApiResponse.Success(Unit)
                 }
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+}
+
+class SubscriptionsSA(private val client: HttpClient) {
+    suspend fun getCompanySubscriptions(companyId: String): ApiResponse<Set<SubscriptionsModResponse>, Unit> {
+        return try{
+            val response = client.get("api/core/subscriptions/super-admin/company-subscriptions/$companyId"){
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val data = response.body<Set<SubscriptionsModResponse>>()
+                    ApiResponse.Success(data)
+                }
+                //"NO_COMPANY_ID"
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception){
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun getAllModules(): ApiResponse<Set<ModuleDTO>,Unit> {
+        return try {
+            val response = client.get("api/core/subscriptions/super-admin/possible-modules"){
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val data = response.body<Set<ModuleDTO>>()
+                    ApiResponse.Success(data)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun createSubscription(companyId: String, moduleId: String): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.post("api/core/subscriptions/super-admin/assign-module-to-company/$companyId/$moduleId"){
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK ->
+                    ApiResponse.Success(Unit)
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun changeSubscriptionAccess(subscriptionId: String, isAccessible: Boolean): ApiResponse<Unit, Unit>{
+        return try {
+            val response = client.patch("api/core/subscriptions/super-admin/update-access-status/$subscriptionId/$isAccessible"){
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK ->
+                    ApiResponse.Success(Unit)
                 HttpStatusCode.BadRequest -> {
                     val errorMessage = response.bodyAsText()
                     ApiResponse.Error(Unit, errorMessage)

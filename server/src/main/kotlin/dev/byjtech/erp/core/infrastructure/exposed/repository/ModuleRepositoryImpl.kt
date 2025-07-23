@@ -32,6 +32,18 @@ class ModuleRepositoryImpl(private val db: Database): ModuleRepository {
         }
     }
 
+    override fun getAll(): List<Module> {
+        return transaction(db) {
+            val modules = ModuleEntity.all()
+            val modulesList = mutableListOf<Module>()
+            for (module in modules) {
+                modulesList.add(module.toModel())
+            }
+            return@transaction modulesList
+
+        }
+    }
+
     override fun getWithCategories(moduleId: UUID): Module? {
         TODO("Not yet implemented")
     }

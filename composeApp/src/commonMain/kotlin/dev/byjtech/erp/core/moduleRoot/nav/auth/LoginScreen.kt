@@ -18,6 +18,9 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,37 +28,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @Composable
-//fun LoginScreen(component: LoginComponent) {
-//    val coroutineScope = rememberCoroutineScope()
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(16.dp),
-//        verticalArrangement = Arrangement.Center,
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        Text("Bienvenido a ERPApp!", modifier = Modifier.padding(bottom = 16.dp))
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-//        Button(onClick = {
-//            coroutineScope.launch {
-//                try {
-//                    println("Clicked Login button")
-//                    component.onLoginClicked()
-//                } catch (e: Exception){
-//                    println("Error: $e")
-//                }
-//            }
-//        }) {
-//            Text("Google Log In")
-//        }
-//    }
-//}
 fun LoginScreen(component: LoginComponent) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -65,55 +43,69 @@ fun LoginScreen(component: LoginComponent) {
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-        Column(
+        Card(
             modifier = Modifier
-                .padding(32.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(24.dp)
+                .fillMaxWidth()
+                .widthIn(max = 360.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(8.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Icon(
-                imageVector = Icons.Filled.Business,
-                contentDescription = "App Logo",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(80.dp)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Bienvenido a ERPApp!",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        try {
-                            component.onLoginClicked()
-                        } catch (e: Exception) {
-                            println("Error en login: $e")
-                        }
-                    }
-                },
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = 200.dp, min = 50.dp)
-                    .height(50.dp),
-                shape = RoundedCornerShape(12.dp)
+                    .padding(horizontal = 32.dp, vertical = 40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Google Icon",
-                    modifier = Modifier.size(24.dp)
+                    imageVector = Icons.Filled.Business,
+                    contentDescription = "App Logo",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(96.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Iniciar sesión con Google")
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Bienvenido a ERPApp!",
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(36.dp))
+
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            try {
+                                component.onLoginClicked()
+                            } catch (e: Exception) {
+                                println("Error en login: $e")
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Google Icon",
+                        modifier = Modifier.size(28.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Iniciar sesión con Google",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
         }
     }
 }
+

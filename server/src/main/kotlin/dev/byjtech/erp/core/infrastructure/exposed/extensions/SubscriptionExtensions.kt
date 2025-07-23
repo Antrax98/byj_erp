@@ -46,3 +46,13 @@ fun SubscriptionEntity.toModel(
         updatedAt = this.updatedAt?.toKotlinx(),
     )
 }
+
+fun Subscription.toDTO(): SubscriptionDTO {
+    return SubscriptionDTO(
+        id = this.id.toString(),
+        companyId = this.company.id.toString(),
+        moduleId = this.module.id.toString(),
+        isActive = this.isActive,
+        isAccessible = this.isAccessible
+    )
+}

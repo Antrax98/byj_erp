@@ -13,7 +13,6 @@ class UserService(
         var updatedUser = user
 
         if (updatedUser.name == null) updatedUser = updatedUser.rename(googleUserInfo.name)
-        if (updatedUser.googleId == null) updatedUser = updatedUser.changeGoogleId(googleUserInfo.sub)
         if (updatedUser.pictureUrl == null) updatedUser = updatedUser.changePictureUrl(googleUserInfo.picture)
 
         updatedUser = updatedUser.copy(updatedAt = LocalDateTime.now().toKotlinx())

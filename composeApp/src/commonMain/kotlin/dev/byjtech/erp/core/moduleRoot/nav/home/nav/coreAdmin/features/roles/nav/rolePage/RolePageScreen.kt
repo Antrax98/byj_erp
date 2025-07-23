@@ -18,12 +18,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +49,13 @@ import dev.byjtech.erp.core.dto.RoleDTO
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.RolesFeatureComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.userPage.InfoRow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
+import kotlinx.datetime.toLocalDateTime
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun RolePageScreen(component: RolePageComponent) {
@@ -96,6 +104,8 @@ fun RolePageScreen(component: RolePageComponent) {
                             )
                         }
                     }
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                     if (isLoading) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -152,16 +162,29 @@ fun RoleInfoCard(role: RoleDTO) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            InfoRow("ID", role.id)
-            InfoRow("Company ID", role.companyId)
+//            InfoRow("ID", role.id)
+//            InfoRow("Company ID", role.companyId)
 
-            role.createdAt?.let {
-                InfoRow("Creado el", it.toString())
-            }
+//            role.createdAt?.let {
+////                InfoRow("Creado el", it.toString())
+//                InfoRow("Creado el", role.createdAt?.toString() ?: "2025-04-16 10:00")
+//            }
+            InfoRowDate(
+                "Creado el",
+                role.createdAt?.toJavaLocalDateTime()
+                    ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime()
+            )
 
-            role.updatedAt?.let {
-                InfoRow("Actualizado el", it.toString())
-            }
+
+//            role.updatedAt?.let {
+////                InfoRow("Actualizado el", it.toString())
+//                InfoRow("Actualizado el", role.updatedAt?.toString() ?: "2025-07-10 15:30")
+//            }
+            InfoRowDate(
+                "Actualizado el",
+                role.updatedAt?.toJavaLocalDateTime()
+                    ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime()
+            )
         }
     }
 }
@@ -348,6 +371,40 @@ fun PermissionCard(
                     Text("Cancelar")
                 }
             }
+        )
+    }
+}
+
+
+
+@Composable
+fun InfoRowDate(label: String, dateTime: LocalDateTime) {
+    val formatter = DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy, HH:mm", Locale("es", "ES"))
+    val formattedDate = dateTime.format(formatter)
+
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "$label: ",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = formattedDate,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
         )
     }
 }

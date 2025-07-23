@@ -46,6 +46,7 @@ import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addCompany.AddCompanyScreen
+import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addSubscription.AddSubscriptionScreen
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companies.CompaniesScreen
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companyPage.CompanyPageScreen
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.superHomeMain.SuperHomeMainScreen
@@ -64,7 +65,7 @@ fun SuperHomeScreen(component: SuperHomeComponent) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("SuperHome") },
+                title = { Text("Añadir modulo") },
                 navigationIcon = {
                     if (isOnMainPage) {
                         IconButton(onClick = { /* Espacio reservado */ }, enabled = false) {
@@ -104,6 +105,9 @@ fun SuperHomeScreen(component: SuperHomeComponent) {
                     }
                     is SuperHomeComponent.Child.CompanyPage -> {
                         CompanyPageScreen(child.component)
+                    }
+                    is SuperHomeComponent.Child.AddSubscription -> {
+                        AddSubscriptionScreen(child.component)
                     }
                 }
             }

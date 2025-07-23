@@ -24,6 +24,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 import dev.byjtech.erp.core.infrastructure.api.companies.CompanyRoutesInstaller
+import dev.byjtech.erp.core.infrastructure.api.subscriptions.SubscriptionRoutesInstaller
 import org.jetbrains.exposed.sql.Database
 import org.koin.core.qualifier.named
 
@@ -96,7 +97,8 @@ val infrastructureModule = module {
                 //AuthRoutesInstaller(), //TODO: justamente separar esta de las demas rutas, los otros si van aqui
                 UserRoutesInstaller(get(), get(), get(), get()),
                 CompanyRoutesInstaller(get(), get(), get(), get(), get()),
-                RoleRoutesInstaller(get(), get(), get(), get())
+                RoleRoutesInstaller(get(), get(), get(), get()),
+                SubscriptionRoutesInstaller(get(), get(), get(), get())
             )
         )
     }

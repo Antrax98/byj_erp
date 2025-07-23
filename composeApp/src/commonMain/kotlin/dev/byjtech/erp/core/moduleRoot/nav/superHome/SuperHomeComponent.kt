@@ -3,6 +3,7 @@ package dev.byjtech.erp.core.moduleRoot.nav.superHome
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addCompany.AddCompanyComponent
+import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addSubscription.AddSubscriptionComponent
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companies.CompaniesComponent
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companyPage.CompanyPageComponent
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.superHomeMain.SuperHomeMainComponent
@@ -21,5 +22,6 @@ interface SuperHomeComponent {
         class Main(val component: SuperHomeMainComponent) : Child()
         class AddCompany(val component: AddCompanyComponent) : Child()
         class CompanyPage(val component: CompanyPageComponent) : Child()
+        class AddSubscription(val component: AddSubscriptionComponent) : Child()
     }
 }

@@ -94,4 +94,5 @@ fun Route.superAdminCompanies(authServ: CoreAuthWrapper, companyRepo: CompanyRep
         call.respond(HttpStatusCode.OK)
     }
 
+
 }

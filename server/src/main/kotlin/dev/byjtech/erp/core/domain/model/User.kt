@@ -10,7 +10,6 @@ data class User (
     val id: UUID = UUID.randomUUID(),
     val name: String? = null,
     val email: String,
-    val googleId: String? = null,
     val pictureUrl: String? = null,
     val isActive: Boolean = true,
     var createdAt: LocalDateTime? = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
@@ -21,7 +20,6 @@ data class User (
 ) {
     fun rename(newName: String) = copy(name = newName)
     fun changeEmail(newEmail: String) = copy(email = newEmail)
-    fun changeGoogleId(newGoogleId: String) = copy(googleId = newGoogleId)
     fun changePictureUrl(newPictureUrl: String?) = copy(pictureUrl = newPictureUrl)
     fun changeActive(newIsActive: Boolean) = copy(isActive = newIsActive)
 }

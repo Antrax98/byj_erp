@@ -27,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +53,14 @@ import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.dto.RoleDTO
 import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.UsersFeatureComponentImpl.Config
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toJavaLocalDateTime
+import kotlinx.datetime.toKotlinLocalDateTime
+import kotlinx.datetime.toLocalDateTime
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun UserPageScreen(component: UserPageComponent) {
@@ -98,18 +107,19 @@ fun UserPageScreen(component: UserPageComponent) {
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        Button(
+                        IconButton(
                             onClick = { component.navTo(Config.AssignRole(userId = component.userId, actUserRoles = userRoles?.toSet()?: emptySet())) }
                         ){
                             Icon(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = "Add role to user",
-                                modifier = Modifier.size(20.dp),
-                                tint = Color.White
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
 
                     }
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                     if (userRoles != null) {
                         if (userRoles!!.isEmpty()) {
@@ -156,19 +166,19 @@ fun UserPageScreen(component: UserPageComponent) {
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                         if (userPermissions.containsAnyOf(CoreDefinition.Roles.Assign.key)) {
-                            Button(
+                            IconButton(
                                 onClick = { component.navTo(Config.AssignSpecialPermission(userId = component.userId)) }
                             ){
                                 Icon(
                                     imageVector = Icons.Default.Add,
                                     contentDescription = "Add special permission to user",
-                                    modifier = Modifier.size(20.dp),
-                                    tint = Color.White
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
                     }
 
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                     if (userSpecialPermissions != null) {
                         if (userSpecialPermissions!!.isEmpty()) {
@@ -325,16 +335,24 @@ fun UserDetailsScreen(user: UserDTO) {
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Info adicional
-                InfoRow("Google ID", user.googleId ?: "No vinculado")
                 InfoRow("Activo", if (user.isActive) "Sí" else "No")
 
                 user.createdAt?.let {
-                    InfoRow("Creado el", it.toString())
+                    InfoRowDate("Creado el", it.toJavaLocalDateTime())
                 }
 
-                user.updatedAt?.let {
-                    InfoRow("Actualizado el", it.toString())
-                }
+//                user.updatedAt?.let {
+//                    InfoRowDate("Actualizado el", it.toJavaLocalDateTime())
+//                }
+                InfoRowDate(
+                    "Actualizado el",
+                    user.updatedAt?.toJavaLocalDateTime()
+                        ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime()
+                )
+
+
+
+
             }
         }
     }
@@ -444,5 +462,38 @@ fun RoleCard(role: RoleDTO, canUnassignRole: Boolean, onActionClick: () -> Unit 
     }
 
 }
+
+@Composable
+fun InfoRowDate(label: String, dateTime: LocalDateTime) {
+    val formatter = DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy, HH:mm", Locale("es", "ES"))
+    val formattedDate = dateTime.format(formatter)
+
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "$label: ",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = formattedDate,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+    }
+}
+
 
 

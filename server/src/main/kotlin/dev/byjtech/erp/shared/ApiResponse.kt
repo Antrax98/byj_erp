@@ -2,7 +2,7 @@ package dev.byjtech.erp.shared
 
 import kotlinx.serialization.Serializable
 
-//NO USAR
+//¡¡¡¡¡¡¡¡¡¡¡NO USAR!!!!!!!!!!!!
 @Serializable
 sealed class ApiResponse<out T> {
     @Serializable
