@@ -50,7 +50,7 @@ import java.util.UUID
 class ApiClient(
     engine: HttpClientEngine,
     val baseUrl: String,
-    val basePort: Int,
+    val basePort: Int?,
     settings: Settings,
     private val dispatcher: CoroutineDispatcher,
     //var onNavigationRequired: (SessionNavigationTarget) -> Unit
@@ -83,9 +83,10 @@ class ApiClient(
         install(authorizationPlugin { settings.getStringOrNull(sessionKey) })
         defaultRequest {
             url {
-                protocol = URLProtocol.HTTP
+                protocol = if (baseUrl.startsWith("https")) URLProtocol.HTTPS else URLProtocol.HTTP
+
                 host = baseUrl
-                port = basePort
+                basePort?.let { port = it }
             }
             // Añadir el appSession en el header de todas las peticiones
 //            settings.getStringOrNull(sessionKey)?.let {

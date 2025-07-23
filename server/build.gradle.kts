@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlinSerialization)
     application
+    //id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "dev.byjtech.erp"
@@ -58,5 +59,19 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 tasks {
-    create("stage").dependsOn("installDist")
+    create("stage").dependsOn("shadowJar")
+
+    withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+        archiveBaseName.set("server")
+        archiveClassifier.set("all")
+        archiveVersion.set("")
+        manifest {
+            attributes["Main-Class"] = "dev.byjtech.erp.ApplicationKt"
+        }
+    }
+
+    build {
+        dependsOn(shadowJar)
+    }
 }
+

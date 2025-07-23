@@ -1,1 +1,1 @@
-web: ./build/install/server/bin/server
+web: java -jar build/libs/server-all.jar
