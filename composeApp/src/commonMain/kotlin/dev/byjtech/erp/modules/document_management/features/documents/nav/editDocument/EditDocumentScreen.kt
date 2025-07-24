@@ -6,7 +6,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.document_management.dto.DocumentDTO
 import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
 import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponentImpl
+import dev.byjtech.erp.common.ui.DatePickerField
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
@@ -95,7 +95,10 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
     LaunchedEffect(state.netAmount, state.taxAmount) {
         val net = state.netAmount.toDoubleOrNull() ?: 0.0
         val tax = state.taxAmount.toDoubleOrNull() ?: 0.0
-        state = state.copy(totalAmount = (net + tax).toString())
+        val total = net + tax
+        // Redondear a 2 decimales para evitar problemas de precisión
+        val roundedTotal = kotlin.math.round(total * 100) / 100
+        state = state.copy(totalAmount = String.format("%.2f", roundedTotal))
     }
 
     Scaffold(
@@ -198,44 +201,23 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                     )
 
                     // Fecha de emisión
-                    OutlinedTextField(
-                        value = state.issueDate?.toString() ?: "",
-                        onValueChange = { 
-                            try {
-                                state = state.copy(issueDate = LocalDate.parse(it))
-                            } catch (e: Exception) {
-                                // Manejar error de fecha inválida
-                            }
-                        },
-                        label = { Text("Fecha de Emisión") },
+                    DatePickerField(
+                        value = state.issueDate,
+                        onValueChange = { state = state.copy(issueDate = it) },
+                        label = "Fecha de Emisión",
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("YYYY-MM-DD") },
-                        trailingIcon = {
-                            Icon(Icons.Default.CalendarToday, contentDescription = "Seleccionar fecha")
-                        },
-                        isError = state.issueDate == null && state.error != null
+                        isError = state.issueDate == null && state.error != null,
+                        supportingText = if (state.issueDate == null && state.error != null) {
+                            { Text("La fecha de emisión es obligatoria", color = MaterialTheme.colorScheme.error) }
+                        } else null
                     )
 
                     // Fecha de vencimiento
-                    OutlinedTextField(
-                        value = state.dueDate?.toString() ?: "",
-                        onValueChange = { 
-                            try {
-                                if (it.isBlank()) {
-                                    state = state.copy(dueDate = null)
-                                } else {
-                                    state = state.copy(dueDate = LocalDate.parse(it))
-                                }
-                            } catch (e: Exception) {
-                                // Manejar error de fecha inválida
-                            }
-                        },
-                        label = { Text("Fecha de Vencimiento (Opcional)") },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("YYYY-MM-DD") },
-                        trailingIcon = {
-                            Icon(Icons.Default.CalendarToday, contentDescription = "Seleccionar fecha")
-                        }
+                    DatePickerField(
+                        value = state.dueDate,
+                        onValueChange = { state = state.copy(dueDate = it) },
+                        label = "Fecha de Vencimiento (Opcional)",
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     // Moneda
