@@ -31,10 +31,14 @@ class AddPermissionComponentImpl(
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _isBusy = MutableStateFlow(false)
+    override val isBusy: StateFlow<Boolean> = _isBusy
+
     override val actPermissions: Set<PermissionKey> = userPermissions.value //son los mismos que userPermissions pero no son StateFlow
 
 
     override fun addPermission(permission: PermissionKey) {
+        _isBusy.value = true
         val requestData = AssignPermissionRoleRequest(
             roleId = roleId,
             permissionKeys = setOf(permission)
@@ -50,7 +54,7 @@ class AddPermissionComponentImpl(
                     //TODO(): mostrar error como popup
                 }
             }
-
+            _isBusy.value = false
         }
     }
 

@@ -2,6 +2,7 @@ package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.na
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,145 +36,55 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.byjtech.erp.common.BusyOverlay
 import dev.byjtech.erp.common.UnderConstructionScreen
 import dev.byjtech.erp.core.dto.RoleDTO
 
-//@Composable
-//fun AssignRoleScreen(component: AssignRoleComponent) {
-//    val roles by component.assignableRoles.collectAsState()
-//
-//    LazyColumn(
-//        modifier = Modifier.fillMaxSize(),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        contentPadding = PaddingValues(4.dp)
-//    ) {
-//        item {
-//            Card(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(16.dp),
-//                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-//                shape = RoundedCornerShape(12.dp)
-//            ) {
-//                for (role in roles) {
-//                    RoleCard(role, onClick = { component.assignRole(role.id) })
-//                }
-//            }
-//        }
-//    }
-//}
 
 @Composable
 fun AssignRoleScreen(component: AssignRoleComponent) {
     val roles by component.assignableRoles.collectAsState()
+    val isLoading by component.isLoading.collectAsState()
+    val isBusy by component.isBusy.collectAsState()
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        contentPadding = PaddingValues(vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        for (role in roles) {
-            item{
-                RoleCard(role, onClick = { component.assignRole(role.id) })
+    BusyOverlay(isBusy)
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            for (role in roles) {
+                item {
+                    RoleCard(role, onClick = { component.assignRole(role.id) })
+                }
             }
         }
+
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.Center),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("Cargando roles disponibles...")
+                }
+            }
+        }
+
     }
 }
 
-//@Composable
-//fun RoleCard(role: RoleDTO, onClick: () -> Unit){
-//    Card(
-//        modifier = Modifier
-//            .padding(horizontal = 16.dp, vertical = 6.dp)
-//            .fillMaxWidth(),
-//        shape = RoundedCornerShape(10.dp),
-//        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
-//    ) {
-//        Row(
-//            modifier = Modifier
-//                .padding(12.dp)
-//                .fillMaxWidth(),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Column {
-//                Text(text = role.name)
-//            }
-//            Spacer(modifier = Modifier.weight(1f))
-//            IconButton(
-//                onClick = { onClick() }
-//            ){
-//                Icon(
-//                    imageVector = Icons.Default.Add,
-//                    contentDescription = "Assign Role"
-//                )
-//            }
-//        }
-//    }
-//}
-
-//@Composable
-//fun RoleCard(role: RoleDTO, onClick: () -> Unit) {
-//    Card(
-//        modifier = Modifier.fillMaxWidth(),
-//        shape = RoundedCornerShape(12.dp),
-//        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-//        colors = CardDefaults.cardColors(
-//            containerColor = MaterialTheme.colorScheme.surface
-//        )
-//    ) {
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(16.dp),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            // Ícono decorativo al lado izquierdo
-//            Icon(
-//                imageVector = Icons.Default.Badge,
-//                contentDescription = "Icono de rol",
-//                tint = MaterialTheme.colorScheme.primary,
-//                modifier = Modifier
-//                    .size(32.dp)
-//                    .padding(end = 12.dp)
-//            )
-//
-//            Column(
-//                modifier = Modifier.weight(1f)
-//            ) {
-//                Text(
-//                    text = role.name,
-//                    style = MaterialTheme.typography.titleMedium.copy(
-//                        fontWeight = FontWeight.Bold
-//                    ),
-//                    color = MaterialTheme.colorScheme.primary
-//                )
-//
-//                role.description.let {
-//                    Spacer(modifier = Modifier.height(4.dp))
-//                    Text(
-//                        text = it,
-//                        style = MaterialTheme.typography.bodySmall,
-//                        color = MaterialTheme.colorScheme.onSurfaceVariant
-//                    )
-//                }
-//            }
-//
-//            IconButton(
-//                onClick = onClick,
-//                modifier = Modifier.size(36.dp)
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.PersonAdd,
-//                    contentDescription = "Asignar rol",
-//                    tint = MaterialTheme.colorScheme.primary
-//                )
-//            }
-//        }
-//    }
-//}
 
 @Composable
 fun RoleCard(role: RoleDTO, onClick: () -> Unit = {}) {

@@ -2,6 +2,7 @@ package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.na
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -43,14 +44,13 @@ import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.Use
 
 @Composable
 fun UsersMainScreen(component: UsersMainComponent) {
-
     val state by component.state.collectAsState()
     val usersList by component.usersList.collectAsState()
     val userPermissions by component.userPermissions.collectAsState()
 
-    Scaffold (
+    Scaffold(
         floatingActionButton = {
-            if(userPermissions.containsAnyOf(setOf(CoreDefinition.Users.Create.key))){
+            if (userPermissions.containsAnyOf(setOf(CoreDefinition.Users.Create.key))) {
                 FloatingActionButton(
                     onClick = { component.navTo(Config.AddUser) },
                     shape = RoundedCornerShape(16.dp)
@@ -59,39 +59,38 @@ fun UsersMainScreen(component: UsersMainComponent) {
                 }
             }
         }
-
-    ){
-        Column(
-            modifier = Modifier.fillMaxSize().padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
+    ) { padding ->
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
         ) {
-            if(state.isLoading){
-                CircularProgressIndicator()
-            }else{
-                if(usersList != null){
-                    LazyColumn {
-                        usersList?.let { list ->
-                            items(list) { user ->
-                                UserContainer(user, onClick = {component.navTo(Config.UserPage(user.id))})
-                            }
-                        }
-                        fakeUsers.forEach { user ->
-                            item {
-                                UserContainer(user)
-                            }
-                        }
-//                        item {
-//                            Spacer(modifier = Modifier.height(100.dp))
-//                        }
-
+            if (usersList != null) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(usersList!!) { user ->
+                        UserContainer(user, onClick = { component.navTo(Config.UserPage(user.id)) })
                     }
+                }
+            }
+
+            if (state.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             }
         }
     }
-
 }
+
 
 //TODO: hacerlo mas generico para poder usarlo en todas las demas listas
 @Composable

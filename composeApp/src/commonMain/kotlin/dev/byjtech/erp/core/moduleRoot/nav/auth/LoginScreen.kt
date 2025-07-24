@@ -99,7 +99,7 @@ fun LoginScreen(component: LoginComponent) {
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Iniciar sesión con Google",
+                        text = "Google",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onPrimary
                     )

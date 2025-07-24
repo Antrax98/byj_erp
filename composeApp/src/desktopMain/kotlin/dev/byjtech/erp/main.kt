@@ -25,7 +25,7 @@ fun main() {
         val apiClient = ApiClient(
             engine = CIO.create(),
             baseUrl = dotenv["BASE_URL"],
-            basePort = dotenv["BASE_PORT"].toInt(),
+            basePort = dotenv["BASE_PORT"]?.toIntOrNull(),
             settings = settings,
             dispatcher = Dispatchers.IO,
             //onNavigationRequired = {}
@@ -33,12 +33,10 @@ fun main() {
 
         val lifecycle = LifecycleRegistry()
 
-        // Create sessionManager FIRST
         val sessionManager = SessionManager(apiClient, settings, null) {
             // Añadir navegacion aqui si no se hace en el commonMain
         }
 
-        // Now we create DesktopGoogleLoginHandler passing it a lambda to use sessionManager.setAppSession
         val googleLoginHandler = DesktopGoogleLoginHandler(settings) { session ->
             sessionManager.setAppSession(session)
         }

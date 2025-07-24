@@ -18,6 +18,9 @@ class AddCompanyComponentImpl(
 
     private val coroutineScope = componentContext.coroutineScope()
 
+    private val _isBusy = MutableStateFlow(false)
+    override val isBusy: StateFlow<Boolean> = _isBusy
+
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -54,6 +57,7 @@ class AddCompanyComponentImpl(
 
 
     override fun onSubmitted() {
+        _isBusy.value = true
         println("onSubmitted triggered")
         val name = _nameState.value.value
         val rut = _rutState.value.value
@@ -122,6 +126,7 @@ class AddCompanyComponentImpl(
                 val response = apiClient.companiesSA.createCompany(requestData)
                 println("response: $response")
                 _isLoading.value = false
+                _isBusy.value = false
                 when(response){
                     is ApiResponse.Success -> {
                         onFinished(true)

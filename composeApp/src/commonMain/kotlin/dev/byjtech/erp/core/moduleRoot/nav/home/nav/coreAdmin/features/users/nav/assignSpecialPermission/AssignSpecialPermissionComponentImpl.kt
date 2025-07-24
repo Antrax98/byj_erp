@@ -24,9 +24,16 @@ class AssignSpecialPermissionComponentImpl(
     private val _possiblePermissions = MutableStateFlow<Map<String,Set<PermissionWithKey>>>(emptyMap())
     override val possiblePermissions: StateFlow<Map<String,Set<PermissionWithKey>>> = _possiblePermissions
 
+    private val _isLoading = MutableStateFlow(false)
+    override val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _isBusy = MutableStateFlow(false)
+    override val isBusy: StateFlow<Boolean> = _isBusy
+
     override val actPermissions: Set<PermissionKey> = userPermissions.value
 
     override fun addPermission(permission: PermissionKey) {
+        _isBusy.value = true
         coroutineScope.launch {
             val response = apiClient.usersT.assignSpecialPermission(userIdToAssign, permission)
             if (response is dev.byjtech.erp.common.ApiResponse.Error) {
@@ -35,10 +42,12 @@ class AssignSpecialPermissionComponentImpl(
             else{
                 onFinished(true)
             }
+            _isBusy.value = false
         }
     }
 
     override fun loadPermissions() {
+        _isLoading.value = true
         coroutineScope.launch {
             val moduleIdsSet = actModules.map { it.id }.toSet()
             println(moduleIdsSet)
@@ -71,7 +80,9 @@ class AssignSpecialPermissionComponentImpl(
                 }
                 println(_possiblePermissions.value)
             }
+            _isLoading.value = false
         }
+
     }
 
     init {

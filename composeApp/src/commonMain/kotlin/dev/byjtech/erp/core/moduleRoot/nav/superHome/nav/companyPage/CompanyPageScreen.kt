@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -35,6 +36,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -60,7 +62,7 @@ fun CompanyPageScreen(component: CompanyPageComponent) {
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp)
     ) {
-        item { CompanyInfoCard(company = component.company) }
+        item { CompanyInfoCard(company = component.company, component) }
         item { BillingInfoCard() }
         item { SubscriptionsList(component.subsModMap, onAddClick = { component.navToAddSubscription(component.company) }, onToggleAccess = { component.changeSubscriptionAccess(it.id, !it.isAccessible) })  }
     }
@@ -68,7 +70,14 @@ fun CompanyPageScreen(component: CompanyPageComponent) {
 
 
 @Composable
-fun CompanyInfoCard(company: CompanyDTO) {
+fun CompanyInfoCard(company: CompanyDTO, component: CompanyPageComponent) {
+    val showEditNameDialog = remember { mutableStateOf(false) }
+    val showEditEmailDialog = remember { mutableStateOf(false) }
+
+    val nameInput = remember { mutableStateOf(company.name) }
+    val emailInput = remember { mutableStateOf(company.contactEmail) }
+
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -90,29 +99,113 @@ fun CompanyInfoCard(company: CompanyDTO) {
 
             Spacer(Modifier.width(16.dp))
 
-            Column {
-                Text(
-                    text = company.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
+            Column(modifier = Modifier.weight(1f)) {
+                // Nombre con botón
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = company.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(onClick = { showEditNameDialog.value = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar nombre",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
 
-                Text(
-                    text = company.contactEmail,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                // Email con botón
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = company.contactEmail,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(onClick = { showEditEmailDialog.value = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Enviar email",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
 
+                // RUT sin botón
                 Text(
                     text = "RUT: ${company.rut}",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
-
             }
         }
     }
+
+    if (showEditNameDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showEditNameDialog.value = false },
+            title = { Text("Editar nombre de empresa") },
+            text = {
+                TextField(
+                    value = nameInput.value,
+                    onValueChange = { nameInput.value = it },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    component.updateCompanyName(nameInput.value)
+                    showEditNameDialog.value = false
+                }) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditNameDialog.value = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    if (showEditEmailDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showEditEmailDialog.value = false },
+            title = { Text("Editar correo de contacto") },
+            text = {
+                TextField(
+                    value = emailInput.value,
+                    onValueChange = { emailInput.value = it },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    component.updateCompanyEmail(emailInput.value)
+                    showEditEmailDialog.value = false
+                }) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditEmailDialog.value = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
 }
+
 
 @Composable
 fun BillingInfoCard() {

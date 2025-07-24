@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -33,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -64,28 +66,30 @@ import java.util.Locale
 
 @Composable
 fun UserPageScreen(component: UserPageComponent) {
-
     val userInfo by component.userInfo.collectAsState()
     val userSpecialPermissions by component.userSpecialPermissions.collectAsState()
     val userRoles by component.userRoles.collectAsState()
-
     val userPermissions by component.userPermissions.collectAsState()
+
+    val userIsLoading by component.userIsLoading.collectAsState()
+    val permissionsIsLoading by component.permissionsIsLoading.collectAsState()
+    val rolesIsLoading by component.rolesIsLoading.collectAsState()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(16.dp)
     ) {
-        // info del usuario
+        // Info del usuario
         item {
-            if (userInfo != null) {
-                UserDetailsScreen(user = userInfo!!)
-            } else {
+            if (userIsLoading || userInfo == null) {
                 CircularProgressIndicator()
+            } else {
+                UserDetailsScreen(user = userInfo!!, component)
             }
         }
 
-        //roles en su card
+        // Card de Roles
         item {
             Card(
                 modifier = Modifier
@@ -95,55 +99,74 @@ fun UserPageScreen(component: UserPageComponent) {
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Row (
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
-
-                    ){
+                    ) {
                         Text(
                             text = "Roles",
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                         IconButton(
-                            onClick = { component.navTo(Config.AssignRole(userId = component.userId, actUserRoles = userRoles?.toSet()?: emptySet())) }
-                        ){
+                            onClick = {
+                                component.navTo(
+                                    Config.AssignRole(
+                                        userId = component.userId,
+                                        actUserRoles = userRoles?.toSet() ?: emptySet()
+                                    )
+                                )
+                            }
+                        ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
-                                contentDescription = "Add role to user",
+                                contentDescription = "Agregar rol",
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
-
                     }
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                    if (userRoles != null) {
-                        if (userRoles!!.isEmpty()) {
+                    when {
+                        rolesIsLoading -> {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text("Cargando roles...")
+                            }
+                        }
+
+                        userRoles != null && userRoles!!.isEmpty() -> {
                             Text(
                                 text = "El usuario no tiene roles asignados.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray
                             )
-                        } else {
-                            val canUnassignRole = userPermissions.containsAnyOf(CoreDefinition.Roles.Unassign.key)
+                        }
+
+                        userRoles != null -> {
+                            val canUnassignRole =
+                                userPermissions.containsAnyOf(CoreDefinition.Roles.Unassign.key)
                             userRoles!!.forEach { role ->
-                                RoleCard(role, canUnassignRole){
+                                RoleCard(role, canUnassignRole) {
                                     component.deleteRole(role.id)
                                 }
                             }
                         }
-                    } else {
-                        CircularProgressIndicator()
                     }
                 }
             }
         }
 
-        //permisos especiales en un card
+        // Card de Permisos especiales
         item {
             Card(
                 modifier = Modifier
@@ -153,13 +176,11 @@ fun UserPageScreen(component: UserPageComponent) {
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Row (
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
-
-                    ){
+                    ) {
                         Text(
                             text = "Permisos especiales",
                             style = MaterialTheme.typography.titleMedium,
@@ -167,11 +188,15 @@ fun UserPageScreen(component: UserPageComponent) {
                         )
                         if (userPermissions.containsAnyOf(CoreDefinition.Roles.Assign.key)) {
                             IconButton(
-                                onClick = { component.navTo(Config.AssignSpecialPermission(userId = component.userId)) }
-                            ){
+                                onClick = {
+                                    component.navTo(
+                                        Config.AssignSpecialPermission(userId = component.userId)
+                                    )
+                                }
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Add,
-                                    contentDescription = "Add special permission to user",
+                                    contentDescription = "Agregar permiso",
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -180,30 +205,46 @@ fun UserPageScreen(component: UserPageComponent) {
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                    if (userSpecialPermissions != null) {
-                        if (userSpecialPermissions!!.isEmpty()) {
+                    when {
+                        permissionsIsLoading -> {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text("Cargando permisos especiales...")
+                            }
+                        }
+
+                        userSpecialPermissions != null && userSpecialPermissions!!.isEmpty() -> {
                             Text(
                                 text = "El usuario no tiene permisos especiales asignados.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray
                             )
-                        } else {
-                            val canUnassignPermission = userPermissions.containsAnyOf(CoreDefinition.Roles.Unassign.key)
+                        }
+
+                        userSpecialPermissions != null -> {
+                            val canUnassignPermission =
+                                userPermissions.containsAnyOf(CoreDefinition.Roles.Unassign.key)
                             userSpecialPermissions!!.forEach { perm ->
-                                PermissionKeyCard(perm, canUnassignPermission,{component.deleteSpecialPermission(perm.permission.id)})
+                                PermissionKeyCard(
+                                    perm,
+                                    canUnassignPermission
+                                ) { component.deleteSpecialPermission(perm.permission.id) }
                             }
                         }
-                    } else {
-                        CircularProgressIndicator()
                     }
                 }
             }
         }
     }
-
-
-
 }
+
 
 @Composable
 fun PermissionKeyCard(permissionWithKey: PermissionWithKey, canUnassignPermission: Boolean, onActionClick: () -> Unit = {}) {
@@ -285,7 +326,11 @@ fun PermissionKeyCard(permissionWithKey: PermissionWithKey, canUnassignPermissio
 
 
 @Composable
-fun UserDetailsScreen(user: UserDTO) {
+fun UserDetailsScreen(user: UserDTO, component: UserPageComponent) {
+    // Estados para el diálogo de edición
+    val showEditNameDialog = remember { mutableStateOf(false) }
+    val nameInput = remember { mutableStateOf(user.name ?: "") }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -303,7 +348,7 @@ fun UserDetailsScreen(user: UserDTO) {
                     .padding(24.dp)
                     .fillMaxWidth()
             ) {
-                // foto de perfil en un futuro
+                // Imagen o ícono de perfil
                 if (!user.pictureUrl.isNullOrBlank()) {
                     Icon(
                         imageVector = Icons.Default.Person,
@@ -319,11 +364,24 @@ fun UserDetailsScreen(user: UserDTO) {
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                Text(
-                    text = user.name ?: "Sin nombre",
-                    style = MaterialTheme.typography.titleLarge,
+                // Nombre + botón editar
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                ) {
+                    Text(
+                        text = user.name ?: "Sin nombre",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(onClick = { showEditNameDialog.value = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar nombre",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
 
                 Text(
                     text = user.email,
@@ -334,29 +392,51 @@ fun UserDetailsScreen(user: UserDTO) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Info adicional
                 InfoRow("Activo", if (user.isActive) "Sí" else "No")
 
                 user.createdAt?.let {
                     InfoRowDate("Creado el", it.toJavaLocalDateTime())
                 }
 
-//                user.updatedAt?.let {
-//                    InfoRowDate("Actualizado el", it.toJavaLocalDateTime())
-//                }
                 InfoRowDate(
                     "Actualizado el",
                     user.updatedAt?.toJavaLocalDateTime()
                         ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime()
                 )
-
-
-
-
             }
         }
     }
+
+    // Diálogo para editar nombre
+    if (showEditNameDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showEditNameDialog.value = false },
+            title = { Text("Editar nombre del usuario") },
+            text = {
+                TextField(
+                    value = nameInput.value,
+                    onValueChange = { nameInput.value = it },
+                    placeholder = { Text("Nombre del usuario") },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    component.updateUserName(nameInput.value)
+                    showEditNameDialog.value = false
+                }) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditNameDialog.value = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
+
 
 @Composable
 fun InfoRow(label: String, value: String) {

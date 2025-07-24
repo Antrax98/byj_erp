@@ -14,8 +14,16 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
-    jvm()
+
+    jvm {
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    jvmTarget.set(JvmTarget.JVM_17)
+                }
+            }
+        }
+    }
     
     sourceSets {
         commonMain.dependencies {

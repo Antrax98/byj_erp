@@ -30,12 +30,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import dev.byjtech.erp.common.BusyOverlay
 import dev.byjtech.erp.common.UnderConstructionScreen
 
 @Composable
 fun AddUserScreenOld(component: AddUserComponent){
     val userName by component.username.collectAsState()
     val email by component.email.collectAsState()
+    val isBusy by component.isBusy.collectAsState()
 
     Box(
         modifier = Modifier
@@ -85,6 +87,7 @@ fun AddUserScreenOld(component: AddUserComponent){
             }
         }
     }
+    BusyOverlay(isBusy)
 }
 
 @Composable

@@ -8,10 +8,15 @@ import dev.byjtech.erp.core.moduleRoot.nav.superHome.SuperHomeComponentImpl
 import kotlinx.coroutines.flow.StateFlow
 
 interface CompanyPageComponent {
-    val company: CompanyDTO
+    var company: CompanyDTO
     val apiClient: ApiClient
     val subsModMap: StateFlow<Map<SubscriptionDTO, ModuleDTO>>
     val navTo: (SuperHomeComponentImpl.Config) -> Unit
+    val isLoading: StateFlow<Boolean>
+    val isBusy: StateFlow<Boolean>
+    val isLoadingMods: StateFlow<Boolean>
     fun navToAddSubscription(company: CompanyDTO)
     fun changeSubscriptionAccess(subscriptionId: String, isAllowed: Boolean)
+    fun updateCompanyName(newName: String)
+    fun updateCompanyEmail(newEmail: String)
 }

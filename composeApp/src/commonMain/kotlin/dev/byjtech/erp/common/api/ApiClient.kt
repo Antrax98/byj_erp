@@ -40,9 +40,16 @@ import dev.byjtech.erp.core.request.AssignPermissionRoleRequest
 import dev.byjtech.erp.core.request.AssignRoleRequest
 import dev.byjtech.erp.core.request.AssignSpecialPermissionRequest
 import dev.byjtech.erp.core.request.CreateCompanyRequest
+import dev.byjtech.erp.core.response.AccessibleModulesResponse
+import dev.byjtech.erp.core.response.CompanyUsersResponse
 import dev.byjtech.erp.core.response.ErrorList
+import dev.byjtech.erp.core.response.PermissionKeysResponse
+import dev.byjtech.erp.core.response.PermittedModulesResponse
 import dev.byjtech.erp.core.response.RolePermisisonKeysResponse
+import dev.byjtech.erp.core.response.SubscribedModulesResponse
 import dev.byjtech.erp.core.response.SubscriptionsModResponse
+import dev.byjtech.erp.core.response.UserPermissionsResponse
+import dev.byjtech.erp.core.response.UserRolesResponse
 import io.ktor.client.utils.EmptyContent.contentType
 import java.util.UUID
 
@@ -83,10 +90,12 @@ class ApiClient(
         install(authorizationPlugin { settings.getStringOrNull(sessionKey) })
         defaultRequest {
             url {
-                protocol = if (baseUrl.startsWith("https")) URLProtocol.HTTPS else URLProtocol.HTTP
-
+                //protocol = if (baseUrl.startsWith("https")) URLProtocol.HTTPS else URLProtocol.HTTP
+                //protocol = URLProtocol.HTTPS
+                println(baseUrl)
+                protocol = URLProtocol.HTTPS
                 host = baseUrl
-                basePort?.let { port = it }
+                //basePort?.let { port = it }
             }
             // Añadir el appSession en el header de todas las peticiones
 //            settings.getStringOrNull(sessionKey)?.let {
@@ -121,18 +130,18 @@ class ApiClient(
     }
 
     //!!!NO USAR KTORFIT!!!!
-    val ktorfit = Ktorfit.Builder()
-        .httpClient(clientKtor)
-        .build()
+//    val ktorfit = Ktorfit.Builder()
+//        .httpClient(clientKtor)
+//        .build()
 
     //core
-    val coreAuth = ktorfit.create<CoreAuth>() //importante no moverlo
-    val coreApi = ktorfit.create<CoreApi>() //importante no moverlo
+    val coreAuth = CoreAuth(clientKtor)//ktorfit.create<CoreAuth>() //importante no moverlo
+    val coreApi = CoreApi(clientKtor)//ktorfit.create<CoreApi>() //importante no moverlo
 
     //TODO() QUITAR TODOS LOS KTORFIT y usar ktorClient directamente
     //core-users
-    val usersSuperAdminApi = ktorfit.create<UsersSuperAdminApi>()
-    val usersTenantApi = ktorfit.create<UsersTenantApi>()
+    //val usersSuperAdminApi = ktorfit.create<UsersSuperAdminApi>()
+    val usersTenantApi = UsersTenantApi(clientKtor)//ktorfit.create<UsersTenantApi>()
 
     //companies
     val companiesSA = CompanySA(clientKtor)
@@ -163,8 +172,8 @@ class ApiClient(
             //maxAge = 3600,  // Tiempo de expiración en segundos
             domain = baseUrl,  // Dominio
             path = "/",  // Ruta
-            secure = false,  // Usar HTTPS si es necesario, por ahora es false
-            httpOnly = true  // Solo accesible por HTTP, no JavaScript
+            secure = true,  // Usar HTTPS si es necesario, por ahora es false
+            //httpOnly = true  // Solo accesible por HTTP, no JavaScript
         )
 
         CoroutineScope(dispatcher).launch {
@@ -249,6 +258,52 @@ class CompanySA(private val client: HttpClient) {
             ApiResponse.Error(null, "NETWORK_ERROR")
         }
     }
+
+    suspend fun updateCompanyName(companyId: String, newName: String): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.patch("api/core/companies/super-admin/update-company-name/$companyId/$newName"){
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+
+        }
+    }
+
+    suspend fun updateCompanyEmail(companyId: String, newEmail: String): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.patch("api/core/companies/super-admin/update-company-contact-email/$companyId/$newEmail"){
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
 }
 
 class RoleT(private val client: HttpClient) {
@@ -487,6 +542,29 @@ class RoleT(private val client: HttpClient) {
         }
     }
 
+    suspend fun updateRoleName(roleId: String, newName: String): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.patch("api/core/roles/tenant/update-role-name/$roleId/$newName"){
+                expectSuccess = false
+                contentType(ContentType.Application.Json)
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            return ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
 }
 
 class UsersT(private val client: HttpClient){
@@ -553,6 +631,30 @@ class UsersT(private val client: HttpClient){
                 }
             }
         } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun updateUserName(userId: String, newName: String): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.patch("api/core/users/tenant/update-user-name/$userId/$newName"){
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+            } catch (e: Exception) {
             ApiResponse.Error(Unit, "NETWORK_ERROR")
         }
     }
@@ -647,4 +749,262 @@ class SubscriptionsSA(private val client: HttpClient) {
             ApiResponse.Error(Unit, "NETWORK_ERROR")
         }
     }
+}
+
+//TODO: recrear con apiresponse (cambio de Ktorfit a raw ktor)
+class CoreAuth(private val client: HttpClient) {
+    suspend fun test(): String {
+        return try {
+            val response = client.get("auth/test")
+            response.body()
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    suspend fun logout(): String {
+        return try {
+            val response = client.get("auth/logout"){
+                expectSuccess = false
+            }
+            response.body()
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    suspend fun login(): String {
+        return try {
+            val response = client.get("auth/login"){
+                expectSuccess = false
+            }
+            response.body()
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    suspend fun getMyType(): String {
+        return try {
+            val response = client.get("auth/me/type"){
+                expectSuccess = false
+            }
+            response.body()
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    suspend fun getMe(): UserDTO {
+        return try {
+            val response = client.get("auth/me") {
+                expectSuccess = false
+            }
+            response.body<UserDTO>()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    suspend fun permittedModules(): PermittedModulesResponse {
+        return try {
+            val response = client.get("auth/permitted-modules") {
+                expectSuccess = false
+            }
+            response.body<PermittedModulesResponse>()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    suspend fun subscribedModules(): SubscribedModulesResponse {
+        return try {
+            val response = client.get("auth/subscribed-modules") {
+                expectSuccess = false
+            }
+            response.body<SubscribedModulesResponse>()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    suspend fun accessibleModules(): AccessibleModulesResponse {
+        return try {
+            val response = client.get("auth/accessible-modules") {
+                expectSuccess = false
+            }
+            response.body<AccessibleModulesResponse>()
+            } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    suspend fun userPermissions(): UserPermissionsResponse {
+        return try {
+            val response = client.get("auth/user-permissions") {
+                expectSuccess = false
+            }
+            response.body<UserPermissionsResponse>()
+            } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    suspend fun userRoles(userId: String): UserRolesResponse {
+        return try {
+            val response = client.get("auth/userRoles/$userId") {
+                expectSuccess = false
+            }
+            response.body<UserRolesResponse>()
+            } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    suspend fun getSpecialPermissionsByUserId(userId: String): PermissionKeysResponse {
+        return try {
+            val response = client.get("auth/userSpecialPermissions/$userId") {
+                expectSuccess = false
+            }
+            response.body<PermissionKeysResponse>()
+            } catch (e: Exception) {
+            throw e
+        }
+    }
+
+}
+
+class CoreApi(private val client: HttpClient) {
+    suspend fun getMyType(): String {
+        return try {
+            val response = client.get("api/core/users/me/type"){
+                expectSuccess = false
+            }
+            response.body()
+        } catch (e: Exception) {
+            ""
+        }
+    }
+}
+
+class UsersTenantApi(private val client: HttpClient) {
+    suspend fun getActualUser(): UserDTO {
+        return try {
+            val response = client.get("api/core/users/tenant/me") {
+                expectSuccess = false
+            }
+            response.body<UserDTO>()
+            } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    suspend fun getCompanyUsers(): CompanyUsersResponse? {
+        return try {
+            val response = client.get("api/core/users/tenant/company-users") {
+                expectSuccess = false
+            }
+            response.body<CompanyUsersResponse>()
+            } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    suspend fun getUser(userId: String): UserDTO? {
+        return try {
+            val response = client.get("api/core/users/tenant/$userId") {
+                expectSuccess = false
+            }
+            response.body<UserDTO>()
+            } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    suspend fun assignRole(assignRoleRequest: AssignRoleRequest): ApiResponse<Unit,Unit> {
+        return try {
+            val response = client.post("api/core/users/assign-role") {
+                contentType(ContentType.Application.Json)
+                setBody(assignRoleRequest)
+                expectSuccess = false
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    ApiResponse.Success(Unit)
+                }
+
+                HttpStatusCode.BadRequest -> {
+                    val errorMessage = response.bodyAsText()
+                    ApiResponse.Error(Unit, errorMessage)
+                }
+
+                else -> {
+                    ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+                }
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun assignSpecialPermission(
+        assignSpecialPermissionRequest: AssignSpecialPermissionRequest
+    ): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.post("api/core/users/assign-special-permission") {
+                contentType(ContentType.Application.Json)
+                setBody(assignSpecialPermissionRequest)
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> ApiResponse.Success(Unit)
+                HttpStatusCode.BadRequest -> ApiResponse.Error(Unit, response.bodyAsText())
+                else -> ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun unassignRole(userId: String, roleId: String): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.delete("api/core/users/unassign-role/$userId/$roleId")
+            when (response.status) {
+                HttpStatusCode.OK -> ApiResponse.Success(Unit)
+                HttpStatusCode.BadRequest -> ApiResponse.Error(Unit, response.bodyAsText())
+                else -> ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun unassignSpecialPermission(userId: String, permissionId: String): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.delete("api/core/users/unassign-special-permission/$userId/$permissionId")
+            when (response.status) {
+                HttpStatusCode.OK -> ApiResponse.Success(Unit)
+                HttpStatusCode.BadRequest -> ApiResponse.Error(Unit, response.bodyAsText())
+                else -> ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
+    suspend fun createUser(userDTO: UserDTO): ApiResponse<Unit, Unit> {
+        return try {
+            val response = client.post("api/core/users/create-user") {
+                contentType(ContentType.Application.Json)
+                setBody(userDTO)
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> ApiResponse.Success(Unit)
+                HttpStatusCode.BadRequest -> ApiResponse.Error(Unit, response.bodyAsText())
+                else -> ApiResponse.Error(Unit, "UNKNOWN_REQUEST_ERROR")
+            }
+        } catch (e: Exception) {
+            ApiResponse.Error(Unit, "NETWORK_ERROR")
+        }
+    }
+
 }

@@ -16,4 +16,6 @@ interface RoleRepository {
     fun attachPermissions(role:Role): Role
     fun findByCompanyId(companyId: UUID): Set<Role>
     fun findByName(name: String): Role?
+    fun updateName(roleId: UUID, newName: String)
+
 }

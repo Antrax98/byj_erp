@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.byjtech.erp.common.BusyOverlay
 
 //@Composable
 //fun AddRoleScreen(component: AddRoleComponent) {
@@ -88,6 +89,9 @@ import androidx.compose.ui.unit.dp
 fun AddRoleScreen(component: AddRoleComponent) {
     val name by component.name.collectAsState()
     val description by component.description.collectAsState()
+
+    val isBusy by component.isBusy.collectAsState()
+    BusyOverlay(isBusy)
 
     Box(
         modifier = Modifier

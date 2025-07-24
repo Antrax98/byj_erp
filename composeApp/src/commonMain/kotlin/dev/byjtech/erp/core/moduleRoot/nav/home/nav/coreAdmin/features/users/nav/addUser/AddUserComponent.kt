@@ -9,6 +9,7 @@ interface AddUserComponent: PermissionAwareComponent {
     val apiClient: ApiClient
     val username: StateFlow<TextFieldState>
     val email: StateFlow<TextFieldState>
+    val isBusy: StateFlow<Boolean>
     val onFinished: (added: Boolean) -> Unit
     fun onUsernameChange(value: String)
     fun onEmailChange(value: String)

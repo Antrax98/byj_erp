@@ -1,12 +1,14 @@
 package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.nav.addPermission
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,30 +34,43 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import dev.byjtech.erp.common.BusyOverlay
 import dev.byjtech.erp.common.PermissionWithKey
 
 @Composable
 fun AddPermissionScreen(component: AddPermissionComponent) {
     val possiblePermissions by component.possiblePermissions.collectAsState()
     val isLoading by component.isLoading.collectAsState()
+    val isBusy by component.isBusy.collectAsState()
 
-    //estados de las expanciones
     val expandedModules = remember { mutableStateMapOf<String, Boolean>() }
     val expandedCategories = remember { mutableStateMapOf<Pair<String, String>, Boolean>() }
 
+    BusyOverlay(isBusy)
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Spacer(Modifier.height(8.dp))
+                Text("Cargando permisos...", style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+        return
+    }
+
     LaunchedEffect(possiblePermissions) {
         for ((module, permissions) in possiblePermissions) {
-            // marcar el modulo comoi colapsado
             expandedModules.putIfAbsent(module, false)
-
-            //agrupar categorias
             val groupedByCategory = permissions.groupBy { it.key.category }
             for (category in groupedByCategory.keys) {
                 expandedCategories.putIfAbsent(module to category, false)
             }
         }
     }
-
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -93,7 +109,6 @@ fun AddPermissionScreen(component: AddPermissionComponent) {
                         }
 
                         if (isModuleExpanded) {
-
                             val groupedByCategory = permissions.groupBy { it.key.category }
 
                             for ((category, permissionList) in groupedByCategory) {
@@ -138,6 +153,7 @@ fun AddPermissionScreen(component: AddPermissionComponent) {
         }
     }
 }
+
 
 @Composable
 fun PermissionCard(permission: PermissionWithKey, onClick: () -> Unit) {

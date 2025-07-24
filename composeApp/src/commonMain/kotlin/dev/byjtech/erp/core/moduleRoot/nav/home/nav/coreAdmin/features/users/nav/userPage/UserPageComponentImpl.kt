@@ -39,15 +39,30 @@ class UserPageComponentImpl(
 
     private val coroutineScope = componentContext.coroutineScope()
 
+    private val _isBusy = MutableStateFlow(false)
+    override val isBusy: StateFlow<Boolean> = _isBusy.asStateFlow()
+
+    private val _userIsLoading = MutableStateFlow(false)
+    override val userIsLoading: StateFlow<Boolean> = _userIsLoading.asStateFlow()
+
+    private val _permissionsIsLoading = MutableStateFlow(false)
+    override val permissionsIsLoading: StateFlow<Boolean> = _permissionsIsLoading.asStateFlow()
+
+    private val _rolesIsLoading = MutableStateFlow(false)
+    override val rolesIsLoading: StateFlow<Boolean> = _rolesIsLoading.asStateFlow()
+
     private val _userInfo = MutableStateFlow<UserDTO?>(null)
     override val userInfo: StateFlow<UserDTO?> = _userInfo.asStateFlow()
 
     override fun fetchUser() {
+        _userIsLoading.value = true
+        println("Fetching user with ID: $userId")
         coroutineScope.launch {
             val userResponse = apiClient.usersTenantApi.getUser(userId)
             if (userResponse != null) {
                 _userInfo.value = userResponse
             }
+            _userIsLoading.value = false
         }
     }
 
@@ -55,6 +70,7 @@ class UserPageComponentImpl(
     override val userSpecialPermissions: StateFlow<List<PermissionWithKey>?> = _userSpecialPermissions.asStateFlow()
 
     override fun fetchUserSpecialPermissions() {
+        _permissionsIsLoading.value = true
         println("Fetching user special permissions for user ID: $userId")
         coroutineScope.launch {
             val response = apiClient.usersT.getUserSpecialPermissionsWithKey(userId)
@@ -66,6 +82,7 @@ class UserPageComponentImpl(
                     _userSpecialPermissions.value = null
                 }
             }
+            _permissionsIsLoading.value = false
         }
     }
 
@@ -73,14 +90,17 @@ class UserPageComponentImpl(
     override val userRoles: StateFlow<List<RoleDTO>?> = _userRoles.asStateFlow()
 
     override fun fetchUserRoles() {
+        _rolesIsLoading.value = true
         println("Fetching user roles for user ID: $userId")
         coroutineScope.launch {
             val userRolesResponse = apiClient.coreAuth.userRoles(userId)
             _userRoles.value = userRolesResponse.roles
+            _rolesIsLoading.value = false
         }
     }
 
     override fun deleteSpecialPermission(permissionId: String) {
+        _isBusy.value = true
         coroutineScope.launch {
             val response = apiClient.rolesT.deleteUserPermission(userId, permissionId)
             when (response) {
@@ -91,10 +111,12 @@ class UserPageComponentImpl(
                     // Handle error
                 }
             }
+            _isBusy.value = false
         }
     }
 
     override fun deleteRole(roleId: String) {
+        _isBusy.value = true
         coroutineScope.launch {
             println("Deleting role with ID: $roleId")
             val response = apiClient.rolesT.deleteUserRole(userId, roleId)
@@ -106,15 +128,27 @@ class UserPageComponentImpl(
                     // Handle error
                 }
             }
+            _isBusy.value = false
+        }
+    }
+
+    override fun updateUserName(name: String) {
+        _isBusy.value = true
+        coroutineScope.launch {
+            val response = apiClient.usersT.updateUserName(userId, name)
+            if (response is dev.byjtech.erp.common.ApiResponse.Success) {
+                fetchUser()
+            } else if (response is dev.byjtech.erp.common.ApiResponse.Error) {
+                println("Error updating user name: ${response.code}")
+            }
+            _isBusy.value = false
         }
     }
 
     init {
-        coroutineScope.launch {
             fetchUser()
             fetchUserSpecialPermissions()
             fetchUserRoles()
-        }
     }
 
 }

@@ -94,5 +94,51 @@ fun Route.superAdminCompanies(authServ: CoreAuthWrapper, companyRepo: CompanyRep
         call.respond(HttpStatusCode.OK)
     }
 
+    patch("/update-company-name/{companyId}/{name}"){
+        authServ.authorizeOrThrow(call, requiredSuperAdmin = true)
+        val companyId = call.parameters["companyId"]
+        if (companyId == null) {
+            call.respond(HttpStatusCode.BadRequest, "NO_COMPANY_ID")
+            return@patch
+        }
+        val newName = call.parameters["name"]
+        if (newName == null) {
+            call.respond(HttpStatusCode.BadRequest, "NO_NEW_NAME")
+            return@patch
+        }
+        val company = companyRepo.findById(UUID.fromString(companyId))
+        if (company == null) {
+            call.respond(HttpStatusCode.NotFound, "COMPANY_NOT_FOUND")
+            return@patch
+        }
+
+        companyRepo.updateName(company.id, newName)
+        call.respond(HttpStatusCode.OK)
+
+    }
+
+    patch("/update-company-contact-email/{companyId}/{email}") {
+        authServ.authorizeOrThrow(call, requiredSuperAdmin = true)
+        val companyId = call.parameters["companyId"]
+        if (companyId == null) {
+            call.respond(HttpStatusCode.BadRequest, "NO_COMPANY_ID")
+            return@patch
+        }
+        val newEmail = call.parameters["email"]
+        if (newEmail == null) {
+            call.respond(HttpStatusCode.BadRequest, "NO_NEW_EMAIL")
+            return@patch
+        }
+        val company = companyRepo.findById(UUID.fromString(companyId))
+        if (company == null) {
+            call.respond(HttpStatusCode.NotFound, "COMPANY_NOT_FOUND")
+            return@patch
+        }
+
+        companyRepo.updateContactEmail(company.id, newEmail)
+        call.respond(HttpStatusCode.OK)
+
+    }
+
 
 }

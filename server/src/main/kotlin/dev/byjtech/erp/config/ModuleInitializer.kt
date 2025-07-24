@@ -10,7 +10,7 @@ import org.jetbrains.exposed.sql.Table
 abstract class ModuleInitializer(
     val definition: ModuleDefinition,
     val tables: Set<Table>,
-    val database: Database,
+    val database: Database?,
     private val moduleRoutesInstaller: ModuleRoutesInstaller,
 ) {
 

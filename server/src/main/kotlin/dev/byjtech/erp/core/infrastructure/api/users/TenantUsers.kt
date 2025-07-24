@@ -240,4 +240,32 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
         call.respond(HttpStatusCode.OK, permissionsWithKey)
     }
 
+    patch("/update-user-name/{userId}/{name}") {
+        authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Users.Update.key,
+                CoreDefinition.Admin.All.key
+            )
+        )
+        val userId = call.parameters["userId"]
+        if (userId == null) {
+            call.respond(HttpStatusCode.BadRequest, "NO_USER_ID")
+            return@patch
+        }
+        val newName = call.parameters["name"]
+        if (newName == null) {
+            call.respond(HttpStatusCode.BadRequest, "NO_NEW_NAME")
+            return@patch
+        }
+        val user = userRepo.find(UUID.fromString(userId))
+        if (user == null) {
+            call.respond(HttpStatusCode.NotFound, "NO_USER")
+            return@patch
+        }
+        userRepo.updateName(user.id, newName)
+        call.respond(HttpStatusCode.OK)
+
+    }
+
 }

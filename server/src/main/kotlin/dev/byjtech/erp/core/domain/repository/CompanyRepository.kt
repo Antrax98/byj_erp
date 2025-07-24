@@ -9,4 +9,8 @@ interface CompanyRepository {
     fun findAll(): List<Company>
     fun delete(id: UUID)
     fun existWithRut(rut: String): Boolean
+    fun updateName(id: UUID, newName: String)
+    fun updateContactEmail(id: UUID, newEmail: String)
+
+
 }

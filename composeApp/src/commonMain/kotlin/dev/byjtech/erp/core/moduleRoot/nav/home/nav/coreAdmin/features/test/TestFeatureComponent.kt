@@ -6,5 +6,4 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface TestFeatureComponent: FeatureComponent {
     val state: StateFlow<TestFeatureState>
-    val usersTenantApi: UsersTenantApi //solo para testear si funciona este enfoque
 }

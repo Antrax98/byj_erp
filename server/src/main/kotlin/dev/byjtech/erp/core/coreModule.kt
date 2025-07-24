@@ -14,9 +14,7 @@ import org.jetbrains.exposed.sql.Database
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-val dotenv = dotenv{
-    ignoreIfMissing = false
-}
+
 
 val coreModule = module {
     includes(
@@ -25,9 +23,23 @@ val coreModule = module {
         infrastructureModule
     )
 
-    single(named("coreDatabase")){
-        CreateDatabase(dotenv["DB_HOST"],dotenv["DB_PORT"],dotenv["DB_NAME"],dotenv["DB_USER"],dotenv["DB_PASSWORD"])
+    val dotenv = dotenv{
+        ignoreIfMissing = true
     }
+
+
+    single(named("coreDatabase")) {
+        CreateDatabase(
+            System.getenv("DB_HOST") ?: dotenv.get("DB_HOST") ?: error("DB_HOST not set"),
+            System.getenv("DB_PORT") ?: dotenv.get("DB_PORT") ?: error("DB_PORT not set"),
+            System.getenv("DB_NAME") ?: dotenv.get("DB_NAME") ?: error("DB_NAME not set"),
+            System.getenv("DB_USER") ?: dotenv.get("DB_USER") ?: error("DB_USER not set"),
+            System.getenv("DB_PASSWORD") ?: dotenv.get("DB_PASSWORD") ?: error("DB_PASSWORD not set")
+        )
+    }
+
+
+
 
     //TODO() posiblemente hacer lo mismo de routes pero con los permission y las tablas
     single<ModuleInitializer>(named("coreInit")) {

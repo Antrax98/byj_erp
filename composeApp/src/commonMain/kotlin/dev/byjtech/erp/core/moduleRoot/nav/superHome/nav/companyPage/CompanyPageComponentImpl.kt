@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class CompanyPageComponentImpl(
     componentContext: ComponentContext,
-    override val company: CompanyDTO,
+    override var company: CompanyDTO,
     override val apiClient: ApiClient,
     override val navTo: (SuperHomeComponentImpl.Config) -> Unit
 ): CompanyPageComponent, ComponentContext by componentContext {
@@ -24,6 +24,15 @@ class CompanyPageComponentImpl(
 
     private val _subsModMap = MutableStateFlow<Map<SubscriptionDTO, ModuleDTO>>(emptyMap())
     override val subsModMap: StateFlow<Map<SubscriptionDTO, ModuleDTO>> = _subsModMap.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _isBusy = MutableStateFlow(false)
+    override val isBusy: StateFlow<Boolean> = _isBusy.asStateFlow()
+
+    private val _isLoadingMods = MutableStateFlow(false)
+    override val isLoadingMods: StateFlow<Boolean> = _isLoadingMods.asStateFlow()
 
     override fun navToAddSubscription(company: CompanyDTO) {
         val modulesSet: Set<ModuleDTO> = subsModMap.value.values.toSet()
@@ -48,6 +57,7 @@ class CompanyPageComponentImpl(
     }
 
     private fun loadSubsModMap() {
+        _isLoadingMods.value = true
         coroutineScope.launch {
             val response = apiClient.subscriptionsSA.getCompanySubscriptions(company.id)
             when (response) {
@@ -61,9 +71,45 @@ class CompanyPageComponentImpl(
                     }
                 }
             }
-
+            _isLoadingMods.value = false
         }
     }
+
+    override fun updateCompanyName(newName: String) {
+        _isBusy.value = true
+        coroutineScope.launch {
+            val response = apiClient.companiesSA.updateCompanyName(company.id, newName)
+            when (response) {
+                is dev.byjtech.erp.common.ApiResponse.Success -> {
+                    company = company.copy(name = newName)
+                }
+                else -> {
+                    println("error")
+                }
+            }
+            _isBusy.value = false
+        }
+
+    }
+
+    override fun updateCompanyEmail(newEmail: String) {
+        _isBusy.value = true
+        coroutineScope.launch {
+            val response = apiClient.companiesSA.updateCompanyEmail(company.id, newEmail)
+            when (response) {
+                is dev.byjtech.erp.common.ApiResponse.Success -> {
+                    company = company.copy(contactEmail = newEmail)
+                }
+
+                else -> {
+                    println("error")
+                }
+            }
+        }
+    }
+
+
+
 
     init {
         loadSubsModMap()

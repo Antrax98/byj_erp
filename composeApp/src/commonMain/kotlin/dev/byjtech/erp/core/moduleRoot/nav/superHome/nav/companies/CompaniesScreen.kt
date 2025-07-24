@@ -81,16 +81,23 @@ fun CompaniesScreen(component: CompaniesComponent) {
                 CircularProgressIndicator()
             }else{
                 if(companies != null){
-                    LazyColumn {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         companies!!.forEach { company ->
                             item {
-                                CompanyContainer(company){component.navTo(SuperHomeComponentImpl.Config.CompanyPage(company))}
+                                CompanyContainer(company) {
+                                    component.navTo(SuperHomeComponentImpl.Config.CompanyPage(company))
+                                }
                             }
                         }
                         item {
-                            Spacer(modifier = Modifier.height(100.dp))
+                            Spacer(modifier = Modifier.height(32.dp))
                         }
                     }
+
                 }else{
                     ErrorWithRetry(
                         "No hay empresas",

@@ -2,6 +2,7 @@ package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.na
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Star
@@ -31,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,8 +46,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.byjtech.erp.common.BusyOverlay
 import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.UnderConstructionScreen
+import dev.byjtech.erp.common.tools.containsAnyOf
+import dev.byjtech.erp.core.CoreDefinition
 import dev.byjtech.erp.core.dto.RoleDTO
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.RolesFeatureComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.userPage.InfoRow
@@ -62,6 +68,11 @@ fun RolePageScreen(component: RolePageComponent) {
     val role by component.roleInfo.collectAsState()
     val permissions by component.rolePermissions.collectAsState()
     val isLoading by component.isLoading.collectAsState()
+    val isPermissionLoading by component.isPermissionLoading.collectAsState()
+    val isBusy by component.isBusy.collectAsState()
+    val userPermissions by component.userPermissions.collectAsState()
+
+    BusyOverlay(isBusy)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -70,12 +81,29 @@ fun RolePageScreen(component: RolePageComponent) {
     ) {
         // Card: Información del Rol
         item {
-            if (role != null) {
-                RoleInfoCard(role = role!!)
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             } else {
-                CircularProgressIndicator()
+                role?.let {
+                    RoleInfoCard(role = it, component)
+                } ?: Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No se encontró información del rol.", color = Color.Gray)
+                }
             }
         }
+
         // Card: Permisos asignados al Rol
         item {
             Card(
@@ -95,20 +123,29 @@ fun RolePageScreen(component: RolePageComponent) {
                             text = "Permisos del Rol",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        IconButton(onClick = {
-                            component.navTo(RolesFeatureComponentImpl.Config.AddPermission(component.roleId))
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Agregar permiso"
-                            )
+                        if (userPermissions.containsAnyOf(setOf(CoreDefinition.Roles.Update.key))) {
+                            IconButton(onClick = {
+                                component.navTo(RolesFeatureComponentImpl.Config.AddPermission(component.roleId))
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Agregar permiso"
+                                )
+                            }
                         }
                     }
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                    if (isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    if (isPermissionLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     } else {
                         if (permissions.isEmpty()) {
                             Text(
@@ -133,8 +170,13 @@ fun RolePageScreen(component: RolePageComponent) {
     }
 }
 
+
 @Composable
-fun RoleInfoCard(role: RoleDTO) {
+fun RoleInfoCard(role: RoleDTO, component: RolePageComponent) {
+    // Estados para el diálogo
+    val showEditNameDialog = remember { mutableStateOf(false) }
+    val nameInput = remember { mutableStateOf(role.name) }
+
     Card(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -147,11 +189,23 @@ fun RoleInfoCard(role: RoleDTO) {
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Text(
-                text = role.name,
-                style = MaterialTheme.typography.titleLarge,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            ) {
+                Text(
+                    text = role.name,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(onClick = { showEditNameDialog.value = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Editar nombre del rol",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
 
             Text(
                 text = role.description,
@@ -162,24 +216,12 @@ fun RoleInfoCard(role: RoleDTO) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-//            InfoRow("ID", role.id)
-//            InfoRow("Company ID", role.companyId)
-
-//            role.createdAt?.let {
-////                InfoRow("Creado el", it.toString())
-//                InfoRow("Creado el", role.createdAt?.toString() ?: "2025-04-16 10:00")
-//            }
             InfoRowDate(
                 "Creado el",
                 role.createdAt?.toJavaLocalDateTime()
                     ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime()
             )
 
-
-//            role.updatedAt?.let {
-////                InfoRow("Actualizado el", it.toString())
-//                InfoRow("Actualizado el", role.updatedAt?.toString() ?: "2025-07-10 15:30")
-//            }
             InfoRowDate(
                 "Actualizado el",
                 role.updatedAt?.toJavaLocalDateTime()
@@ -187,7 +229,36 @@ fun RoleInfoCard(role: RoleDTO) {
             )
         }
     }
+
+    // Diálogo para editar el nombre
+    if (showEditNameDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showEditNameDialog.value = false },
+            title = { Text("Editar nombre del rol") },
+            text = {
+                TextField(
+                    value = nameInput.value,
+                    onValueChange = { nameInput.value = it },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    component.updateRoleName(nameInput.value)
+                    showEditNameDialog.value = false
+                }) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditNameDialog.value = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
+
 
 
 @Composable

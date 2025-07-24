@@ -191,4 +191,12 @@ class UserRepositoryImpl(private val db: Database): UserRepository {
         }
     }
 
+    override fun updateName(userId: UUID, newName: String) {
+        transaction(db) {
+            val user = UserEntity.findById(userId) ?: return@transaction
+            user.name = newName
+            user.updatedAt = LocalDateTime.now()
+        }
+    }
+
 }

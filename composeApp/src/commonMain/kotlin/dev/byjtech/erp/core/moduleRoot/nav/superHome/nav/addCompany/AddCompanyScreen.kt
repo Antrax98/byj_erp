@@ -40,117 +40,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import dev.byjtech.erp.common.BusyOverlay
 import dev.byjtech.erp.common.UnderConstructionScreen
-
-//@Composable
-//fun AddCompanyScreen(component: AddCompanyComponent) {
-//    val nameState by component.nameState.collectAsState()
-//    val rutState by component.rutState.collectAsState()
-//    val contactEmailState by component.contactEmailState.collectAsState()
-//    val companyAdminEmailState by component.companyAdminEmailState.collectAsState()
-//    val adminNameState by component.adminNameState.collectAsState()
-//    val isLoading by component.isLoading.collectAsState()
-//
-//    Box(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(MaterialTheme.colorScheme.background),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        LazyColumn {
-//            item {
-//                Card(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(24.dp),
-//                    elevation = CardDefaults.cardElevation(8.dp),
-//                    shape = RoundedCornerShape(16.dp)
-//                ) {
-//                    Column(
-//                        modifier = Modifier
-//                            .padding(24.dp)
-//                            .fillMaxWidth(),
-//                        verticalArrangement = Arrangement.spacedBy(16.dp),
-//                        horizontalAlignment = Alignment.Start
-//                    ) {
-//                        val labelModifier = Modifier.padding(bottom = 4.dp)
-//                        val labelColor = MaterialTheme.colorScheme.primary
-//                        val labelStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
-//
-//                        Text("Nombre", style = labelStyle, color = labelColor, modifier = labelModifier)
-//                        OutlinedTextField(
-//                            value = nameState.value,
-//                            onValueChange = component::onNameChanged,
-//                            isError = nameState.error != null,
-//                            supportingText = {
-//                                nameState.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-//                            },
-//                            modifier = Modifier.fillMaxWidth()
-//                        )
-//
-//                        Text("Rut", style = labelStyle, color = labelColor, modifier = labelModifier)
-//                        OutlinedTextField(
-//                            value = rutState.value,
-//                            onValueChange = component::onRutChanged,
-//                            isError = rutState.error != null,
-//                            supportingText = {
-//                                rutState.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-//                            },
-//                            modifier = Modifier.fillMaxWidth()
-//                        )
-//
-//                        Text("Email de contacto", style = labelStyle, color = labelColor, modifier = labelModifier)
-//                        OutlinedTextField(
-//                            value = contactEmailState.value,
-//                            onValueChange = component::onContactEmailChanged,
-//                            isError = contactEmailState.error != null,
-//                            supportingText = {
-//                                contactEmailState.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-//                            },
-//                            modifier = Modifier.fillMaxWidth()
-//                        )
-//
-//                        Text("Email del administrador", style = labelStyle, color = labelColor, modifier = labelModifier)
-//                        OutlinedTextField(
-//                            value = companyAdminEmailState.value,
-//                            onValueChange = component::onCompanyAdminEmailChanged,
-//                            isError = companyAdminEmailState.error != null,
-//                            supportingText = {
-//                                companyAdminEmailState.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-//                            },
-//                            modifier = Modifier.fillMaxWidth()
-//                        )
-//
-//                        Text("Nombre del administrador", style = labelStyle, color = labelColor, modifier = labelModifier)
-//                        OutlinedTextField(
-//                            value = adminNameState.value,
-//                            onValueChange = component::onAdminNameChanged,
-//                            isError = adminNameState.error != null,
-//                            supportingText = {
-//                                adminNameState.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-//                            },
-//                            modifier = Modifier.fillMaxWidth()
-//                        )
-//
-//                        Spacer(modifier = Modifier.height(8.dp))
-//
-//                        Button(
-//                            onClick = component::onSubmitted,
-//                            modifier = Modifier.fillMaxWidth(),
-//                            enabled = !isLoading
-//                        ) {
-//                            if(isLoading){
-//                                CircularProgressIndicator()
-//                            }else{
-//                                Text("Crear")
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
 
 @Composable
 fun AddCompanyScreen(component: AddCompanyComponent) {
@@ -160,6 +51,7 @@ fun AddCompanyScreen(component: AddCompanyComponent) {
     val companyAdminEmailState by component.companyAdminEmailState.collectAsState()
     val adminNameState by component.adminNameState.collectAsState()
     val isLoading by component.isLoading.collectAsState()
+    val isBusy by component.isBusy.collectAsState()
 
     Box(
         modifier = Modifier
@@ -250,6 +142,8 @@ fun AddCompanyScreen(component: AddCompanyComponent) {
             }
         }
     }
+
+    BusyOverlay(isBusy, "Creando...")
 }
 
 

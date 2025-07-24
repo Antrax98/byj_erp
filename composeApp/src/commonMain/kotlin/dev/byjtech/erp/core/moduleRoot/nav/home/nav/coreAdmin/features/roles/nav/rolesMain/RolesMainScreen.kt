@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.common.UnderConstructionScreen
 import dev.byjtech.erp.common.tools.containsAnyOf
@@ -54,7 +55,7 @@ fun RolesMainScreen(component: RolesMainComponent) {
 
     Scaffold(
         floatingActionButton = {
-            if (userPermissions.containsAnyOf(setOf(CoreDefinition.Users.Create.key))) {
+            if (userPermissions.containsAnyOf(setOf(CoreDefinition.Roles.Create.key))) {
                 FloatingActionButton(
                     onClick = { component.navTo(Config.AddRole) },
                     shape = RoundedCornerShape(16.dp)
@@ -85,29 +86,18 @@ fun RolesMainScreen(component: RolesMainComponent) {
                 }
 
                 rolesSet!!.isEmpty() -> {
-                    LazyColumn(
+                    Box(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(top = 32.dp)
+                        contentAlignment = Alignment.Center
                     ) {
-//                        item {
-//                            Text(
-//                                text = "No hay roles en la empresa",
-//                                style = MaterialTheme.typography.bodyMedium,
-//                                //modifier = Modifier.align(Alignment.CenterHorizontally)
-//                            )
-//                        }
-                        testRoles.forEach { role ->
-                            item {
-                                RoleContainer(role) {
-                                    println("Clicked on test role ${role.name}")
-                                }
-                            }
-                        }
-                        item {
-                            Spacer(modifier = Modifier.height(100.dp))
-                        }
+                        Text(
+                            text = "No hay roles en la empresa",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
+
 
                 else -> {
                     LazyColumn(
