@@ -5,6 +5,7 @@ import dev.byjtech.erp.document_management.domain.repository.DocumentRepository
 import dev.byjtech.erp.document_management.domain.repository.CompanyValidationRepository
 import dev.byjtech.erp.document_management.dto.DocumentDTO
 import dev.byjtech.erp.document_management.infrastructure.exposed.extensions.toDTO
+import kotlinx.datetime.*
 import java.util.UUID
 
 class DocumentService(
@@ -71,13 +72,24 @@ class DocumentService(
     // Lógica de negocio: Validaciones
     private fun validateDocumentBusinessRules(document: Document) {
         // Validar que la compañía existe en la base de datos core
-        if (document.companyId != null && !companyValidationRepository.existsById(document.companyId!!)) {
+        if (document.companyId != null && !companyValidationRepository.existsById(document.companyId)) {
             throw IllegalArgumentException("Company with ID '${document.companyId}' does not exist")
         }
         
         // Validar que el usuario que creó el documento existe en la base de datos core
         if (!companyValidationRepository.userExistsById(document.createdBy)) {
             throw IllegalArgumentException("User with ID '${document.createdBy}' does not exist")
+        }
+        
+        // Validar fechas
+        if (document.dueDate != null && document.dueDate < document.issueDate) {
+            throw IllegalArgumentException("Due date cannot be earlier than issue date")
+        }
+        
+        // Validar que la fecha de vencimiento no sea anterior a la fecha actual
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        if (document.dueDate != null && document.dueDate < today) {
+            throw IllegalArgumentException("Due date cannot be earlier than today")
         }
         
         if (document.netAmount < 0) {

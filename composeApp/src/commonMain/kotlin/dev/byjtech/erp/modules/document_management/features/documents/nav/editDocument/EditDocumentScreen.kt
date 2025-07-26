@@ -81,13 +81,23 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
     }
 
     // Validar formulario
-    LaunchedEffect(state.documentType, state.documentNumber, state.issueDate, state.netAmount) {
+    LaunchedEffect(state.documentType, state.documentNumber, state.issueDate, state.dueDate, state.netAmount) {
+        val today = LocalDate(2025, 7, 25) // Fecha actual
+        val minValidDate = if (state.issueDate != null) {
+            if (state.issueDate!! > today) state.issueDate!! else today
+        } else {
+            today
+        }
+        
+        val isDueDateValid = state.dueDate == null || state.dueDate!! >= minValidDate
+        
         state = state.copy(
             isValid = state.documentType.isNotBlank() &&
                     state.documentNumber.isNotBlank() &&
                     state.issueDate != null &&
                     state.netAmount.isNotBlank() &&
-                    state.netAmount.toDoubleOrNull() != null
+                    state.netAmount.toDoubleOrNull() != null &&
+                    isDueDateValid // Agregar validación de fechas (incluyendo fecha actual)
         )
     }
 
@@ -209,15 +219,72 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                         isError = state.issueDate == null && state.error != null,
                         supportingText = if (state.issueDate == null && state.error != null) {
                             { Text("La fecha de emisión es obligatoria", color = MaterialTheme.colorScheme.error) }
-                        } else null
+                        } else null,
+                        maxDate = LocalDate(2025, 7, 25) // No permitir fechas futuras más allá de hoy
                     )
 
                     // Fecha de vencimiento
                     DatePickerField(
                         value = state.dueDate,
-                        onValueChange = { state = state.copy(dueDate = it) },
+                        onValueChange = { 
+                            val today = LocalDate(2025, 7, 25) // Fecha actual
+                            val minValidDate = if (state.issueDate != null) {
+                                if (state.issueDate!! > today) state.issueDate!! else today
+                            } else {
+                                today
+                            }
+                            
+                            // Validar que la fecha de vencimiento no sea anterior a la fecha de emisión ni a hoy
+                            if (it != null && it < minValidDate) {
+                                val errorMessage = when {
+                                    state.issueDate != null && it < state.issueDate!! -> 
+                                        "La fecha de vencimiento no puede ser anterior a la fecha de emisión"
+                                    it < today -> 
+                                        "La fecha de vencimiento no puede ser anterior a la fecha actual"
+                                    else -> null
+                                }
+                                state = state.copy(error = errorMessage)
+                            } else {
+                                state = state.copy(dueDate = it, error = null)
+                            }
+                        },
                         label = "Fecha de Vencimiento (Opcional)",
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        minDate = run {
+                            val today = LocalDate(2025, 7, 25) // Fecha actual
+                            if (state.issueDate != null) {
+                                if (state.issueDate!! > today) state.issueDate!! else today
+                            } else {
+                                today
+                            }
+                        },
+                        supportingText = if (state.dueDate != null) {
+                            val today = LocalDate(2025, 7, 25)
+                            val minValidDate = if (state.issueDate != null) {
+                                if (state.issueDate!! > today) state.issueDate!! else today
+                            } else {
+                                today
+                            }
+                            
+                            when {
+                                state.dueDate!! < minValidDate && state.issueDate != null && state.dueDate!! < state.issueDate!! -> {
+                                    { Text("La fecha de vencimiento no puede ser anterior a la fecha de emisión", color = MaterialTheme.colorScheme.error) }
+                                }
+                                state.dueDate!! < today -> {
+                                    { Text("La fecha de vencimiento no puede ser anterior a la fecha actual", color = MaterialTheme.colorScheme.error) }
+                                }
+                                else -> null
+                            }
+                        } else null,
+                        isError = state.dueDate != null && run {
+                            val today = LocalDate(2025, 7, 25)
+                            val minValidDate = if (state.issueDate != null) {
+                                if (state.issueDate!! > today) state.issueDate!! else today
+                            } else {
+                                today
+                            }
+                            state.dueDate!! < minValidDate
+                        }
                     )
 
                     // Moneda

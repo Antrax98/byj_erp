@@ -32,7 +32,9 @@ fun DatePickerField(
     label: String,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
-    supportingText: @Composable (() -> Unit)? = null
+    supportingText: @Composable (() -> Unit)? = null,
+    minDate: LocalDate? = null,  // Nueva propiedad para fecha mínima
+    maxDate: LocalDate? = null   // Nueva propiedad para fecha máxima
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     
@@ -64,7 +66,9 @@ fun DatePickerField(
                 onValueChange(selectedDate)
                 showDatePicker = false
             },
-            onDismiss = { showDatePicker = false }
+            onDismiss = { showDatePicker = false },
+            minDate = minDate,  // Pasar parámetros de validación
+            maxDate = maxDate
         )
     }
 }
@@ -73,12 +77,14 @@ fun DatePickerField(
 private fun DatePickerDialog(
     selectedDate: LocalDate?,
     onDateSelected: (LocalDate) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    minDate: LocalDate? = null,
+    maxDate: LocalDate? = null
 ) {
     // Fecha actual simplificada - usando la fecha actual real
     val currentYear = 2025
     val currentMonth = 7  // Julio
-    val currentDay = 24
+    val currentDay = 25   // Actualizado a la fecha actual
     
     var displayedMonth by remember { mutableStateOf(selectedDate?.monthNumber ?: currentMonth) }
     var displayedYear by remember { mutableStateOf(selectedDate?.year ?: currentYear) }
@@ -180,6 +186,13 @@ private fun DatePickerDialog(
                             val isSelected = selectedDate == date
                             val isToday = (displayedYear == currentYear && displayedMonth == currentMonth && day == currentDay)
                             
+                            // Validar restricciones de fecha mínima y máxima
+                            val isDateEnabled = when {
+                                minDate != null && date < minDate -> false
+                                maxDate != null && date > maxDate -> false
+                                else -> true
+                            }
+                            
                             Box(
                                 modifier = Modifier
                                     .size(32.dp)
@@ -187,21 +200,26 @@ private fun DatePickerDialog(
                                     .background(
                                         when {
                                             isSelected -> MaterialTheme.colorScheme.primary
-                                            isToday -> MaterialTheme.colorScheme.primaryContainer
+                                            isToday && isDateEnabled -> MaterialTheme.colorScheme.primaryContainer
                                             else -> Color.Transparent
                                         }
                                     )
                                     .border(
-                                        width = if (isToday && !isSelected) 1.dp else 0.dp,
+                                        width = if (isToday && !isSelected && isDateEnabled) 1.dp else 0.dp,
                                         color = MaterialTheme.colorScheme.primary,
                                         shape = RoundedCornerShape(8.dp)
                                     )
-                                    .clickable { onDateSelected(date) },
+                                    .clickable(enabled = isDateEnabled) { 
+                                        if (isDateEnabled) {
+                                            onDateSelected(date) 
+                                        }
+                                    },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = day.toString(),
                                     color = when {
+                                        !isDateEnabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                         isSelected -> MaterialTheme.colorScheme.onPrimary
                                         isToday -> MaterialTheme.colorScheme.primary
                                         else -> MaterialTheme.colorScheme.onSurface
@@ -231,11 +249,31 @@ private fun DatePickerDialog(
                     TextButton(onClick = {
                         try {
                             val todayDate = LocalDate(currentYear, currentMonth, currentDay)
-                            onDateSelected(todayDate)
+                            // Validar que la fecha de hoy está dentro de los límites permitidos
+                            val isTodayValid = when {
+                                minDate != null && todayDate < minDate -> false
+                                maxDate != null && todayDate > maxDate -> false
+                                else -> true
+                            }
+                            if (isTodayValid) {
+                                onDateSelected(todayDate)
+                            }
                         } catch (e: Exception) {
                             // Si no se puede crear la fecha de hoy, usar la fecha seleccionada actual o una fecha válida
                             val fallbackDate = selectedDate ?: LocalDate(2025, 1, 1)
                             onDateSelected(fallbackDate)
+                        }
+                    }, enabled = run {
+                        // Habilitar el botón "Hoy" solo si la fecha actual está dentro de los límites
+                        try {
+                            val todayDate = LocalDate(currentYear, currentMonth, currentDay)
+                            when {
+                                minDate != null && todayDate < minDate -> false
+                                maxDate != null && todayDate > maxDate -> false
+                                else -> true
+                            }
+                        } catch (e: Exception) {
+                            false
                         }
                     }) {
                         Text("Hoy")
