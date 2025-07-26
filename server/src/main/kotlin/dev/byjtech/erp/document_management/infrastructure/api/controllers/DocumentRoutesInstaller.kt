@@ -9,6 +9,7 @@ import dev.byjtech.erp.document_management.infrastructure.exposed.extensions.toD
 import dev.byjtech.erp.document_management.infrastructure.exposed.extensions.applyUpdate
 import dev.byjtech.erp.document_management.request.CreateDocumentRequest
 import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
+import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
 import dev.byjtech.erp.shared.routing.RoutesInstaller
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
@@ -36,26 +37,7 @@ fun Route.documentsRoutes(
 ) {
     
     get("/all") {
-        // 1. Primero verificar si es SuperAdmin (no necesita permisos específicos ni compañía)
-        val isSuperAdmin = try {
-            authWrapper.authorizeOrThrow(call, requiredSuperAdmin = true)
-            true
-        } catch (e: Exception) {
-            false
-        }
-        
-        if (isSuperAdmin) {
-            // SuperAdmin: acceso completo a todos los documentos
-            try {
-                val documentsDTO = documentService.getAllDocuments()
-                call.respond(HttpStatusCode.OK, documentsDTO)
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "Error retrieving documents: ${e.message}")
-            }
-            return@get
-        }
-        
-        // 2. Para usuarios normales: validar sesión y permisos específicos
+        // 1. Validar sesión y autorización
         val session = authWrapper.authorizeOrThrow(
             call,
             requiredAnyPermissions = setOf(
@@ -63,7 +45,7 @@ fun Route.documentsRoutes(
             )
         )
         
-        // 3. Verificar contexto de empresa para usuarios normales
+        // 2. Verificar contexto de empresa
         if (session.companyId == null) {
             call.respond(HttpStatusCode.BadRequest, "User has no company")
             return@get
@@ -71,12 +53,44 @@ fun Route.documentsRoutes(
         
         val companyId = session.companyId // Ya sabemos que no es null por la validación anterior
         
-        // 4. Usar service para obtener documentos por compañía
+        // 3. Usar service para obtener documentos por compañía
         try {
             val documentsDTO = documentService.getAllDocumentsByCompany(companyId)
             call.respond(HttpStatusCode.OK, documentsDTO)
         } catch (e: Exception) {
             call.respond(HttpStatusCode.InternalServerError, "Error retrieving documents: ${e.message}")
+        }
+    }
+    
+    post("/search") {
+        // 1. Validar sesión y autorización
+        val session = authWrapper.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                DocumentManagementDefinition.Documents.View.key
+            )
+        )
+        
+        // 2. Verificar contexto de empresa
+        if (session.companyId == null) {
+            call.respond(HttpStatusCode.BadRequest, "User has no company")
+            return@post
+        }
+        
+        // 3. Recibir parámetros de búsqueda
+        val searchRequest = try {
+            call.receive<DocumentSearchRequest>()
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid search request format")
+            return@post
+        }
+        
+        // 4. Realizar búsqueda
+        try {
+            val searchResponse = documentService.searchDocuments(session.companyId, searchRequest)
+            call.respond(HttpStatusCode.OK, searchResponse)
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, "Error performing search: ${e.message}")
         }
     }
     

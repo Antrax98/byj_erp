@@ -1,6 +1,6 @@
 package dev.byjtech.erp.document_management.domain.model
 
-
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import java.util.UUID

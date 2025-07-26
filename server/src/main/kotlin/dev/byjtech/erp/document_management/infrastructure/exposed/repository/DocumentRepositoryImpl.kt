@@ -2,13 +2,19 @@ package dev.byjtech.erp.document_management.infrastructure.exposed.repository
 
 import dev.byjtech.erp.document_management.domain.model.Document
 import dev.byjtech.erp.document_management.domain.repository.DocumentRepository
+import dev.byjtech.erp.document_management.domain.repository.SearchResult
 import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentsTable
+import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
+import dev.byjtech.erp.modules.document_management.request.SortDirection
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.datetime.toJavaLocalDateTime
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.lessEq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.Database
 import java.util.UUID
@@ -29,6 +35,103 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
     override fun findByCompanyId(companyId: UUID): List<Document> = transaction(database) {
         DocumentsTable.selectAll().where { DocumentsTable.companyId eq companyId }
             .map { it.toDomain() }
+    }
+
+    override fun search(companyId: UUID, searchRequest: DocumentSearchRequest): SearchResult = transaction(database) {
+        val baseQuery = DocumentsTable.selectAll().where { 
+            DocumentsTable.companyId eq companyId and (DocumentsTable.active eq true)
+        }
+        
+        // Aplicar filtros
+        var query = baseQuery
+        val conditions = mutableListOf<Op<Boolean>>()
+        
+        // Filtros específicos
+        searchRequest.documentType?.let { type ->
+            conditions.add(DocumentsTable.documentType like "%$type%")
+        }
+        
+        searchRequest.documentNumber?.let { number ->
+            conditions.add(DocumentsTable.documentNumber like "%$number%")
+        }
+        
+        searchRequest.status?.let { status ->
+            conditions.add(DocumentsTable.status eq status)
+        }
+        
+        searchRequest.currency?.let { currency ->
+            conditions.add(DocumentsTable.currency like "%$currency%")
+        }
+        
+        searchRequest.issueDateFrom?.let { dateFrom ->
+            conditions.add(DocumentsTable.issueDate greaterEq dateFrom.toJavaLocalDate())
+        }
+        
+        searchRequest.issueDateTo?.let { dateTo ->
+            conditions.add(DocumentsTable.issueDate lessEq dateTo.toJavaLocalDate())
+        }
+        
+        searchRequest.dueDateFrom?.let { dateFrom ->
+            conditions.add(DocumentsTable.dueDate greaterEq dateFrom.toJavaLocalDate())
+        }
+        
+        searchRequest.dueDateTo?.let { dateTo ->
+            conditions.add(DocumentsTable.dueDate lessEq dateTo.toJavaLocalDate())
+        }
+        
+        searchRequest.minAmount?.let { minAmount ->
+            conditions.add(DocumentsTable.totalAmount greaterEq minAmount.toBigDecimal())
+        }
+        
+        searchRequest.maxAmount?.let { maxAmount ->
+            conditions.add(DocumentsTable.totalAmount lessEq maxAmount.toBigDecimal())
+        }
+        
+        searchRequest.createdBy?.let { createdBy ->
+            conditions.add(DocumentsTable.createdBy eq UUID.fromString(createdBy))
+        }
+        
+        // Búsqueda de texto general
+        searchRequest.searchText?.let { searchText ->
+            val textSearchCondition = DocumentsTable.documentType.like("%$searchText%") or
+                    DocumentsTable.documentNumber.like("%$searchText%") or
+                    DocumentsTable.currency.like("%$searchText%")
+            conditions.add(textSearchCondition)
+        }
+        
+        // Aplicar todas las condiciones
+        if (conditions.isNotEmpty()) {
+            query = query.andWhere { conditions.reduce { acc, condition -> acc and condition } }
+        }
+        
+        // Contar total de resultados
+        val totalCount = query.count()
+        
+        // Aplicar ordenamiento
+        val sortColumn = when (searchRequest.sortBy) {
+            "document_type" -> DocumentsTable.documentType
+            "document_number" -> DocumentsTable.documentNumber
+            "issue_date" -> DocumentsTable.issueDate
+            "due_date" -> DocumentsTable.dueDate
+            "status" -> DocumentsTable.status
+            "total_amount" -> DocumentsTable.totalAmount
+            "updated_at" -> DocumentsTable.updatedAt
+            else -> DocumentsTable.createdAt
+        }
+        
+        query = when (searchRequest.sortDirection) {
+            SortDirection.ASC -> query.orderBy(sortColumn to SortOrder.ASC)
+            SortDirection.DESC -> query.orderBy(sortColumn to SortOrder.DESC)
+        }
+        
+        // Aplicar paginación
+        val offset = (searchRequest.page - 1) * searchRequest.pageSize
+        val documents = query
+            .drop(offset)
+            .take(searchRequest.pageSize)
+            .map { it.toDomain() }
+        
+        return@transaction SearchResult(documents, totalCount)
     }
 
     override fun save(document: Document): Document = transaction(database) {

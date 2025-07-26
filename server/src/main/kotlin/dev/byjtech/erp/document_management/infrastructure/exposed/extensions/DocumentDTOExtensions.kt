@@ -6,6 +6,7 @@ import dev.byjtech.erp.document_management.domain.model.DocumentAuditLog
 import dev.byjtech.erp.document_management.dto.DocumentDTO
 import dev.byjtech.erp.document_management.dto.DocumentEditHistoryDTO
 import dev.byjtech.erp.document_management.dto.DocumentAuditLogDTO
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 
 // Extensión para convertir Document (modelo de dominio) a DocumentDTO
 fun Document.toDTO(): DocumentDTO {
@@ -15,7 +16,7 @@ fun Document.toDTO(): DocumentDTO {
         documentNumber = this.documentNumber,
         issueDate = this.issueDate,
         dueDate = this.dueDate,
-        status = this.status.name, // Convertir enum a string
+        status = this.status, // Pasar el enum directamente
         currency = this.currency,
         netAmount = this.netAmount,
         taxAmount = this.taxAmount,
@@ -62,7 +63,7 @@ fun DocumentDTO.toDomain(): dev.byjtech.erp.document_management.domain.model.Doc
         documentNumber = this.documentNumber,
         issueDate = this.issueDate,
         dueDate = this.dueDate,
-        status = dev.byjtech.erp.document_management.domain.model.DocumentStatus.valueOf(this.status),
+        status = this.status,
         currency = this.currency,
         netAmount = this.netAmount,
         taxAmount = this.taxAmount,

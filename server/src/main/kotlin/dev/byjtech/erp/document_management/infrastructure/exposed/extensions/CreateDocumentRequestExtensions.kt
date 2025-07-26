@@ -1,7 +1,7 @@
 package dev.byjtech.erp.document_management.infrastructure.exposed.extensions
 
 import dev.byjtech.erp.document_management.domain.model.Document
-import dev.byjtech.erp.document_management.domain.model.DocumentStatus
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 import dev.byjtech.erp.document_management.request.CreateDocumentRequest
 import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
 import kotlinx.datetime.Clock

@@ -1,5 +1,6 @@
 package dev.byjtech.erp.document_management.dto
 
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
@@ -11,7 +12,7 @@ data class DocumentDTO(
     val documentNumber: String,
     val issueDate: LocalDate,
     val dueDate: LocalDate?,
-    val status: String,
+    val status: DocumentStatus,
     val currency: String,
     val netAmount: Double,
     val taxAmount: Double,

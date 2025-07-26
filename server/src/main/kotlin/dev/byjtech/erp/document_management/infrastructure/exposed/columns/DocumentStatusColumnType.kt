@@ -1,6 +1,6 @@
 package dev.byjtech.erp.document_management.infrastructure.exposed.columns
 
-import dev.byjtech.erp.document_management.domain.model.DocumentStatus
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 import org.jetbrains.exposed.sql.ColumnType
 
 class DocumentStatusColumnType : ColumnType<DocumentStatus>() {

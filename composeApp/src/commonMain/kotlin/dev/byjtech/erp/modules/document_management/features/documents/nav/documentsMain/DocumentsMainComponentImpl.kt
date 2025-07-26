@@ -5,6 +5,7 @@ import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponentImpl
+import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -27,13 +28,67 @@ class DocumentsMainComponentImpl(
             val documents = apiClient.documentManagement.getAllDocuments()
             _state.value = _state.value.copy(
                 isLoading = false,
-                documents = documents
+                documents = documents,
+                isSearchMode = false
             )
         } catch (e: Exception) {
             _state.value = _state.value.copy(
                 isLoading = false,
                 error = e.message ?: "Error desconocido"
             )
+        }
+    }
+
+    override suspend fun searchDocuments(searchRequest: DocumentSearchRequest) {
+        _state.value = _state.value.copy(isLoading = true, error = null)
+        try {
+            val searchResponse = apiClient.documentManagement.searchDocuments(searchRequest)
+            if (searchResponse != null) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    searchResponse = searchResponse,
+                    documents = searchResponse.documents,
+                    currentSearchRequest = searchRequest,
+                    isSearchMode = true
+                )
+            } else {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    error = "Error al realizar la búsqueda"
+                )
+            }
+        } catch (e: Exception) {
+            _state.value = _state.value.copy(
+                isLoading = false,
+                error = e.message ?: "Error desconocido en la búsqueda"
+            )
+        }
+    }
+
+    override fun updateSearchRequest(searchRequest: DocumentSearchRequest) {
+        _state.value = _state.value.copy(currentSearchRequest = searchRequest)
+    }
+
+    override fun onPageChange(page: Int) {
+        val currentState = _state.value
+        if (currentState.isSearchMode) {
+            val newSearchRequest = currentState.currentSearchRequest.copy(page = page)
+            coroutineScope.launch {
+                searchDocuments(newSearchRequest)
+            }
+        }
+    }
+
+    override fun toggleSearchMode() {
+        val currentState = _state.value
+        if (currentState.isSearchMode) {
+            // Volver al modo normal
+            coroutineScope.launch {
+                loadDocuments()
+            }
+        } else {
+            // Activar modo búsqueda
+            _state.value = currentState.copy(isSearchMode = true)
         }
     }
 

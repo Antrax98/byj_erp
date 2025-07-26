@@ -59,8 +59,7 @@ class DatabaseInitializer (private val database: Database) {
                                 PermissionEntity.new {
                                     name = permission.action
                                     description = permission.description
-                                    // TODO: Comentado temporalmente por error de compilación con campo 'category'
-                                    // category = newCat
+                                    category = newCat
                                 }
                                 println("Permission ${permission.action} created")
                             }
@@ -162,6 +161,65 @@ class DatabaseInitializer (private val database: Database) {
                     ?: throw Exception("No se encontro el modulo core")
             }
 
+            // Asignar permiso de document_management:documents:view a los superadmins para testing
+            try {
+                val documentManagementModule = ModuleEntity.find(ModulesTable.name eq "document_management").firstOrNull()
+                if (documentManagementModule != null) {
+                    val documentsCategory = CategoryEntity
+                        .find((CategoriesTable.name eq "documents") and (CategoriesTable.moduleId eq documentManagementModule.id.value))
+                        .firstOrNull()
+                    
+                    if (documentsCategory != null) {
+                        val viewPermission = PermissionEntity
+                            .find((PermissionsTable.name eq "view") and (PermissionsTable.categoryId eq documentsCategory.id))
+                            .firstOrNull()
+                        
+                        if (viewPermission != null) {
+                            // Asignar permiso a superadmins para testing
+                            val superAdminEmails = listOf(
+                                "usuariotesttesttester@gmail.com",
+                                "minepoker.lol@gmail.com", 
+                                "anaysmr21@gmail.com"
+                            )
+                            
+                            superAdminEmails.forEach { email ->
+                                val superAdminUser = UserEntity.find { UsersTable.email eq email }.firstOrNull()
+                                if (superAdminUser != null) {
+                                    // Verificar si ya tiene el permiso
+                                    val existingPermission = UserPermissionEntity.find {
+                                        (UserPermissionTable.userId eq superAdminUser.id) and 
+                                        (UserPermissionTable.permissionId eq viewPermission.id)
+                                    }.firstOrNull()
+                                    
+                                    if (existingPermission == null) {
+                                        UserPermissionEntity.new {
+                                            user = superAdminUser
+                                            permission = viewPermission
+                                        }
+                                        println("Asignado permiso document_management:documents:view a $email")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // También crear subscripción para document_management
+                    val existingDocumentSubscription = SubscriptionEntity.find {
+                        (SubscriptionsTable.companyId eq newcompany.id) and 
+                        (SubscriptionsTable.moduleId eq documentManagementModule.id)
+                    }.firstOrNull()
+                    
+                    if (existingDocumentSubscription == null) {
+                        SubscriptionEntity.new(UUID.randomUUID()) {
+                            company = newcompany
+                            module = documentManagementModule
+                        }
+                        println("Creada subscripción a document_management para la empresa")
+                    }
+                }
+            } catch (e: Exception) {
+                println("Error asignando permisos de document_management: ${e.message}")
+            }
 
         }
     }

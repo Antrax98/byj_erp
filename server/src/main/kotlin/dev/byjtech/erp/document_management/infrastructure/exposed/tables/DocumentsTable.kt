@@ -5,7 +5,7 @@ import dev.byjtech.erp.core.infrastructure.exposed.tables.*
 import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.javatime.datetime
-import dev.byjtech.erp.document_management.domain.model.DocumentStatus
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 
 object DocumentsTable : UUIDTable("document") {
     val documentType = varchar("document_type", 255) // tipo de documento

@@ -1,5 +1,8 @@
-package dev.byjtech.erp.document_management.domain.model
+package dev.byjtech.erp.modules.document_management.domain.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class DocumentStatus {
     UPLOADED,  // Documento cargado, aún no enviado
     SENT,      // Documento enviado para revisión u otro proceso

@@ -1,0 +1,56 @@
+package dev.byjtech.erp.modules.document_management.utils
+
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
+
+/**
+ * Obtiene el nombre para mostrar de un estado de documento
+ */
+fun getStatusDisplayName(status: DocumentStatus): String {
+    return when (status) {
+        DocumentStatus.UPLOADED -> "Cargado"
+        DocumentStatus.SENT -> "Enviado"
+        DocumentStatus.APPROVED -> "Aprobado"
+        DocumentStatus.REJECTED -> "Rechazado"
+    }
+}
+
+/**
+ * Data class para representar las acciones disponibles
+ */
+data class DocumentActions(
+    val canSend: Boolean = false,
+    val canApprove: Boolean = false,
+    val canReject: Boolean = false,
+    val canEdit: Boolean = false,
+    val canDelete: Boolean = false,
+    val canView: Boolean = true,
+    val canDownload: Boolean = false
+)
+
+/**
+ * Obtiene las acciones disponibles para un documento según su estado y rol del usuario
+ */
+fun getAvailableActions(status: DocumentStatus, userRole: String = "USER"): DocumentActions {
+    return when (status) {
+        DocumentStatus.UPLOADED -> DocumentActions(
+            canSend = true,
+            canEdit = true,
+            canDelete = true,
+            canView = true
+        )
+        DocumentStatus.SENT -> DocumentActions(
+            canApprove = userRole == "ADMIN" || userRole == "MANAGER",
+            canReject = userRole == "ADMIN" || userRole == "MANAGER",
+            canView = true
+        )
+        DocumentStatus.APPROVED -> DocumentActions(
+            canView = true,
+            canDownload = true
+        )
+        DocumentStatus.REJECTED -> DocumentActions(
+            canEdit = true,
+            canView = true,
+            canSend = true // Puede reenviar después de editar
+        )
+    }
+}

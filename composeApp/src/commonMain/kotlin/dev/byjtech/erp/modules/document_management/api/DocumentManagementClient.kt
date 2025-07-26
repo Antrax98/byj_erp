@@ -5,6 +5,8 @@ import dev.byjtech.erp.document_management.dto.DocumentAuditLogDTO
 import dev.byjtech.erp.document_management.dto.DocumentEditHistoryDTO
 import dev.byjtech.erp.document_management.request.CreateDocumentRequest
 import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
+import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
+import dev.byjtech.erp.modules.document_management.dto.DocumentSearchResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -18,6 +20,17 @@ class DocumentManagementClient(private val client: HttpClient) {
             client.get(urlString = "api/document_management/documents/all").body()
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+    
+    suspend fun searchDocuments(searchRequest: DocumentSearchRequest): DocumentSearchResponse? {
+        return try {
+            client.post(urlString = "api/document_management/documents/search") {
+                contentType(ContentType.Application.Json)
+                setBody(searchRequest)
+            }.body()
+        } catch (e: Exception) {
+            null
         }
     }
     

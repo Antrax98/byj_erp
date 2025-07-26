@@ -20,8 +20,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.document_management.dto.DocumentDTO
-import dev.byjtech.erp.document_management.utils.getAvailableActions
-import dev.byjtech.erp.document_management.utils.getStatusDisplayName
+import dev.byjtech.erp.modules.document_management.utils.getAvailableActions
+import dev.byjtech.erp.modules.document_management.utils.getStatusDisplayName
+import dev.byjtech.erp.modules.document_management.utils.DocumentActions
 import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponentImpl
 import kotlinx.coroutines.launch
 

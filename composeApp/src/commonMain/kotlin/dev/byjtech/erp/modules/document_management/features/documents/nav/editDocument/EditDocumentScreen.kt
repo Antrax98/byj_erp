@@ -64,7 +64,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                     taxAmount = document.taxAmount.toString(),
                     totalAmount = document.totalAmount.toString(),
                     fileUrl = document.fileUrl,
-                    status = document.status
+                    status = document.status.name
                 )
             } else {
                 state = state.copy(

@@ -5,6 +5,9 @@ import dev.byjtech.erp.document_management.domain.repository.DocumentRepository
 import dev.byjtech.erp.document_management.domain.repository.CompanyValidationRepository
 import dev.byjtech.erp.document_management.dto.DocumentDTO
 import dev.byjtech.erp.document_management.infrastructure.exposed.extensions.toDTO
+import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
+import dev.byjtech.erp.modules.document_management.dto.DocumentSearchResponse
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 import kotlinx.datetime.*
 import java.util.UUID
 
@@ -22,6 +25,18 @@ class DocumentService(
     fun getAllDocumentsByCompany(companyId: UUID): List<DocumentDTO> {
         val documents = documentRepository.findByCompanyId(companyId)
         return documents.map { it.toDTO() }
+    }
+    
+    fun searchDocuments(companyId: UUID, searchRequest: DocumentSearchRequest): DocumentSearchResponse {
+        val searchResult = documentRepository.search(companyId, searchRequest)
+        val documentDTOs = searchResult.documents.map { it.toDTO() }
+        
+        return DocumentSearchResponse.create(
+            documents = documentDTOs,
+            totalCount = searchResult.totalCount,
+            page = searchRequest.page,
+            pageSize = searchRequest.pageSize
+        )
     }
     
     fun getDocumentById(documentId: UUID, companyId: UUID): DocumentDTO? {
@@ -129,7 +144,7 @@ class DocumentService(
     
     private fun validateDocumentDeletion(document: Document) {
         // No permitir eliminar documentos aprobados
-        if (document.status.name == "APPROVED") {
+        if (document.status == DocumentStatus.APPROVED) {
             throw IllegalArgumentException("Cannot delete approved documents")
         }
     }
