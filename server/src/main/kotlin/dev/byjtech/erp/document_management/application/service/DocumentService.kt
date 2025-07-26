@@ -2,12 +2,14 @@ package dev.byjtech.erp.document_management.application.service
 
 import dev.byjtech.erp.document_management.domain.model.Document
 import dev.byjtech.erp.document_management.domain.repository.DocumentRepository
+import dev.byjtech.erp.document_management.domain.repository.CompanyValidationRepository
 import dev.byjtech.erp.document_management.dto.DocumentDTO
 import dev.byjtech.erp.document_management.infrastructure.exposed.extensions.toDTO
 import java.util.UUID
 
 class DocumentService(
-    private val documentRepository: DocumentRepository
+    private val documentRepository: DocumentRepository,
+    private val companyValidationRepository: CompanyValidationRepository
 ) {
     
     // Método para SuperAdmins: obtener TODOS los documentos sin filtro por compañía
@@ -68,6 +70,16 @@ class DocumentService(
     
     // Lógica de negocio: Validaciones
     private fun validateDocumentBusinessRules(document: Document) {
+        // Validar que la compañía existe en la base de datos core
+        if (document.companyId != null && !companyValidationRepository.existsById(document.companyId!!)) {
+            throw IllegalArgumentException("Company with ID '${document.companyId}' does not exist")
+        }
+        
+        // Validar que el usuario que creó el documento existe en la base de datos core
+        if (!companyValidationRepository.userExistsById(document.createdBy)) {
+            throw IllegalArgumentException("User with ID '${document.createdBy}' does not exist")
+        }
+        
         if (document.netAmount < 0) {
             throw IllegalArgumentException("Net amount cannot be negative")
         }

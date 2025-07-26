@@ -10,7 +10,7 @@ import dev.byjtech.erp.document_management.domain.model.DocumentStatus
 object DocumentsTable : UUIDTable("document") {
     val documentType = varchar("document_type", 255) // tipo de documento
     val documentNumber = varchar("document_number", 255) // numero del documento
-    val companyId = reference("company_id", CompaniesTable) // empresa asociada
+    val companyId = uuid("company_id") // empresa asociada (sin restricción FK - referencia a companies en otra DB)
     val issueDate = date("issue_date") // fecha de emision
     val dueDate = date("due_date").nullable() // fecha de vencimiento
     val status = registerColumn<DocumentStatus>("status", DocumentStatusColumnType())// estado del documento
@@ -19,7 +19,7 @@ object DocumentsTable : UUIDTable("document") {
     val taxAmount = decimal("tax_amount", 20, 2) // valor del impuesto
     val totalAmount = decimal("total_amount", 20, 2) // neto + impuesto
     val fileUrl = text("file_url") // ruta al archivo
-    val createdBy = reference("created_by", UsersTable) // usuario que lo creó
+    val createdBy = uuid("created_by") // usuario que lo creó (sin restricción FK - referencia a users en otra DB)
     val createdAt = datetime("created_at")
     val updatedAt = datetime("updated_at")
     val active = bool("active").default(true)

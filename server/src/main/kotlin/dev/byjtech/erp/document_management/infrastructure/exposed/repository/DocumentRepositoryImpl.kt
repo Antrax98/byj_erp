@@ -1,15 +1,14 @@
 package dev.byjtech.erp.document_management.infrastructure.exposed.repository
 
 import dev.byjtech.erp.document_management.domain.model.Document
-import dev.byjtech.erp.document_management.domain.model.DocumentStatus
 import dev.byjtech.erp.document_management.domain.repository.DocumentRepository
 import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentsTable
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.datetime.toKotlinLocalDateTime
-import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toJavaLocalDateTime
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.Database
 import java.util.UUID
@@ -17,7 +16,7 @@ import java.util.UUID
 class DocumentRepositoryImpl(private val database: Database) : DocumentRepository {
 
     override fun findById(id: UUID): Document? = transaction(database) {
-        DocumentsTable.select(DocumentsTable.id eq id)
+        DocumentsTable.selectAll().where { DocumentsTable.id eq id }
             .map { it.toDomain() }
             .singleOrNull()
     }
@@ -28,7 +27,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
     }
 
     override fun findByCompanyId(companyId: UUID): List<Document> = transaction(database) {
-        DocumentsTable.select(DocumentsTable.companyId eq companyId)
+        DocumentsTable.selectAll().where { DocumentsTable.companyId eq companyId }
             .map { it.toDomain() }
     }
 
@@ -51,7 +50,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
             row[active] = document.active
         }.value
 
-        findById(insertedId)!!
+        return@transaction findById(insertedId) ?: throw IllegalStateException("Failed to retrieve saved document with ID: $insertedId")
     }
 
     override fun update(document: Document): Document = transaction(database) {
@@ -91,10 +90,10 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         taxAmount = this[DocumentsTable.taxAmount].toDouble(),
         totalAmount = this[DocumentsTable.totalAmount].toDouble(),
         fileUrl = this[DocumentsTable.fileUrl],
-        createdBy = this[DocumentsTable.createdBy].value,
+        createdBy = this[DocumentsTable.createdBy],
         createdAt = this[DocumentsTable.createdAt].toKotlinLocalDateTime(),
         updatedAt = this[DocumentsTable.updatedAt].toKotlinLocalDateTime(),
         active = this[DocumentsTable.active],
-        companyId = this[DocumentsTable.companyId].value
+        companyId = this[DocumentsTable.companyId]
     )
 }

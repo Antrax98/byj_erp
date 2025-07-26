@@ -4,35 +4,41 @@ import dev.byjtech.erp.document_management.domain.model.Document
 import dev.byjtech.erp.document_management.domain.model.DocumentStatus
 import dev.byjtech.erp.document_management.request.CreateDocumentRequest
 import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.util.UUID
 
-// Extensión para convertir CreateDocumentRequest a Document (modelo de dominio)
 fun CreateDocumentRequest.toDomain(companyId: UUID, userId: UUID): Document {
+    val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+
+    // Validar el status manualmente con mensaje claro
+    val documentStatus = try {
+        DocumentStatus.valueOf(this.status.uppercase())
+    } catch (e: IllegalArgumentException) {
+        val validStatuses = DocumentStatus.entries.joinToString(", ") { it.name }
+        throw IllegalArgumentException(
+            "Invalid document status: '${this.status}'. Valid statuses are: $validStatuses"
+        )
+    }
+
     return Document(
         id = UUID.randomUUID(),
         documentType = this.documentType,
         documentNumber = this.documentNumber,
+        companyId = companyId, // ✅ se inyecta correctamente
         issueDate = this.issueDate,
         dueDate = this.dueDate,
-        status = try {
-            DocumentStatus.valueOf(this.status.uppercase())
-        } catch (e: IllegalArgumentException) {
-            DocumentStatus.UPLOADED // valor por defecto
-        },
+        status = documentStatus, // ✅ status validado con mensaje claro
         currency = this.currency,
         netAmount = this.netAmount,
         taxAmount = this.taxAmount,
         totalAmount = this.totalAmount,
         fileUrl = this.fileUrl,
         createdBy = userId,
-        createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-        updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-        active = true,
-        companyId = companyId
+        createdAt = now,
+        updatedAt = now,
+        active = true
     )
 }
 

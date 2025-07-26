@@ -12,7 +12,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val dotenv = dotenv {
-    ignoreIfMissing = false
+    ignoreIfMissing = true
 }
 
 val documentManagementModule = module {
@@ -23,14 +23,14 @@ val documentManagementModule = module {
     )
 
     single(named("documentManagementDatabase")) {
-    CreateDatabase(
-        dotenv["DOCUMENT_DB_HOST"],
-        dotenv["DOCUMENT_DB_PORT"],
-        dotenv["DOCUMENT_DB_NAME"],
-        dotenv["DOCUMENT_DB_USER"],
-        dotenv["DOCUMENT_DB_PASSWORD"]
-    )
-}
+        CreateDatabase(
+            dotenv["DOCUMENT_DB_HOST"] ?: "localhost",
+            dotenv["DOCUMENT_DB_PORT"] ?: "3306", 
+            dotenv["DOCUMENT_DB_NAME"] ?: "documentos_db",
+            dotenv["DOCUMENT_DB_USER"] ?: "root",
+            dotenv["DOCUMENT_DB_PASSWORD"] ?: ""
+        )
+    }
 
     single<ModuleInitializer>(named("documentManagementInit")){
         DocumentManagementInitializer(

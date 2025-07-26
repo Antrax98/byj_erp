@@ -12,6 +12,9 @@ val documentManagementInfrastructureModule = module {
     single<DocumentRepository> { DocumentRepositoryImpl(get(named("documentManagementDatabase"))) }
     single<DocumentEditHistoryRepository> { DocumentEditHistoryRepositoryImpl(get(named("documentManagementDatabase"))) }
     single<DocumentAuditLogRepository> { DocumentAuditLogRepositoryImpl(get(named("documentManagementDatabase"))) }
+    
+    // Repositorio para validar referencias cruzadas con la base de datos core
+    single<CompanyValidationRepository> { CompanyValidationRepositoryImpl(get(named("coreDatabase"))) }
 
     // Auth wrapper para el módulo
     single<DocumentManagementAuthWrapper> {
