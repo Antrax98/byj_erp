@@ -6,15 +6,16 @@ import dev.byjtech.erp.document_management.domain.repository.SearchResult
 import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentsTable
 import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
 import dev.byjtech.erp.modules.document_management.request.SortDirection
-import kotlinx.datetime.toJavaLocalDate
-import kotlinx.datetime.toKotlinLocalDate
-import kotlinx.datetime.toKotlinLocalDateTime
-import kotlinx.datetime.toJavaLocalDateTime
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
+import kotlinx.datetime.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.lessEq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.less
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.isNotNull
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.Database
 import java.util.UUID
@@ -97,6 +98,17 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
                     DocumentsTable.documentNumber.like("%$searchText%") or
                     DocumentsTable.currency.like("%$searchText%")
             conditions.add(textSearchCondition)
+        }
+        
+        // Filtro de documentos vencidos
+        searchRequest.isOverdue?.let { isOverdue ->
+            if (isOverdue) {
+                val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+                val overdueCondition = DocumentsTable.dueDate.isNotNull() and
+                        (DocumentsTable.dueDate less today.toJavaLocalDate()) and
+                        (DocumentsTable.status neq DocumentStatus.APPROVED)
+                conditions.add(overdueCondition)
+            }
         }
         
         // Aplicar todas las condiciones

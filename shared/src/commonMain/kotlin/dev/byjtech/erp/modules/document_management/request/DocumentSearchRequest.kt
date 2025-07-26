@@ -43,6 +43,9 @@ data class DocumentSearchRequest(
     @SerialName("search_text")
     val searchText: String? = null, // Búsqueda general en múltiples campos
     
+    @SerialName("is_overdue")
+    val isOverdue: Boolean? = null, // Filtrar documentos vencidos
+    
     @SerialName("page")
     val page: Int = 1,
     

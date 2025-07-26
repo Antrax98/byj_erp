@@ -170,6 +170,28 @@ fun DocumentSearchFilters(
                     }
                 }
                 
+                // Filtros adicionales con checkboxes
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = searchRequest.isOverdue == true,
+                            onCheckedChange = { checked ->
+                                onSearchRequestChange(searchRequest.copy(isOverdue = if (checked) true else null))
+                            }
+                        )
+                        Text(
+                            text = "Solo documentos vencidos",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+                
                 // Botones de acción
                 Row(
                     modifier = Modifier.fillMaxWidth(),

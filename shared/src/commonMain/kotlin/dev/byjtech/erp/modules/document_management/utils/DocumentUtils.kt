@@ -1,6 +1,7 @@
 package dev.byjtech.erp.modules.document_management.utils
 
 import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
+import kotlinx.datetime.*
 
 /**
  * Obtiene el nombre para mostrar de un estado de documento
@@ -12,6 +13,18 @@ fun getStatusDisplayName(status: DocumentStatus): String {
         DocumentStatus.APPROVED -> "Aprobado"
         DocumentStatus.REJECTED -> "Rechazado"
     }
+}
+
+/**
+ * Verifica si un documento está vencido
+ */
+fun isDocumentOverdue(dueDate: LocalDate?, status: DocumentStatus): Boolean {
+    if (dueDate == null || status == DocumentStatus.APPROVED) {
+        return false
+    }
+    
+    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    return dueDate < today
 }
 
 /**
