@@ -36,13 +36,13 @@ fun logEnvironmentVariables() {
 //TODO: esto se ve bien, no se si hay que mejorarlo todavia
 
 fun Application.configureOAuth(httpClient: HttpClient, stateCache: Cache<String, String>) {
-
-    // Log environment variables at startup
-    logEnvironmentVariables()
-
+    val dotenv = dotenv {
+        ignoreIfMissing = true
+    }
     install(Authentication) {
         oauth("google-oauth") {
-            urlProvider = { dotenv["OAUTH_REDIRECT_URI"] }
+            urlProvider = { System.getenv("OAUTH_REDIRECT_URI") ?: dotenv["OAUTH_REDIRECT_URI"]
+            ?: error("OAUTH_REDIRECT_URI not set") }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "google",
@@ -50,8 +50,10 @@ fun Application.configureOAuth(httpClient: HttpClient, stateCache: Cache<String,
                     //accessTokenUrl = "https://oauth2.googleapis.com/token", //usable con https
                     accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
                     requestMethod = HttpMethod.Post,
-                    clientId = dotenv["GOOGLE_CLIENT_ID"],
-                    clientSecret = dotenv["GOOGLE_CLIENT_SECRET"],
+                    clientId = System.getenv("GOOGLE_CLIENT_ID") ?: dotenv["GOOGLE_CLIENT_ID"]
+                    ?: error("GOOGLE_CLIENT_ID not set"),
+                    clientSecret = System.getenv("GOOGLE_CLIENT_SECRET") ?: dotenv["GOOGLE_CLIENT_SECRET"]
+                    ?: error("GOOGLE_CLIENT_SECRET not set"),
                     defaultScopes = listOf("openid","https://www.googleapis.com/auth/userinfo.profile","https://www.googleapis.com/auth/userinfo.email"),
                     extraAuthParameters = listOf(
                         "access_type" to "offline",

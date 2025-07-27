@@ -31,7 +31,14 @@ class RolePageComponentImpl(
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _isBusy = MutableStateFlow(false)
+    override val isBusy: StateFlow<Boolean> = _isBusy
+
+    private val _isPermissionLoading = MutableStateFlow(false)
+    override val isPermissionLoading: StateFlow<Boolean> = _isPermissionLoading
+
     override fun fetchRole() {
+        _isLoading.value = true
         coroutineScope.launch {
             val roleResponse = apiClient.rolesT.getRoleById(roleId)
             if (roleResponse is ApiResponse.Success) {
@@ -39,9 +46,11 @@ class RolePageComponentImpl(
             } else if (roleResponse is ApiResponse.Error) {
                 _roleInfo.value = null
             }
+            _isLoading.value = false
         }
     }
     override fun fetchRolePermissions() {
+        _isPermissionLoading.value = true
         coroutineScope.launch {
             val permissionsResponse = apiClient.rolesT.getPermissionsByRoleId(roleId)
             if (permissionsResponse is ApiResponse.Success) {
@@ -51,10 +60,12 @@ class RolePageComponentImpl(
                 _rolePermissions.value = emptySet()
                 println("Error fetching role permissions: ${permissionsResponse.code}")
             }
+            _isPermissionLoading.value = false
         }
     }
 
     override fun deletePermission(permissionId: String) {
+        _isBusy.value = true
         coroutineScope.launch {
             val response = apiClient.rolesT.deleteRolePermission(roleId, permissionId)
             if (response is ApiResponse.Success) {
@@ -62,15 +73,25 @@ class RolePageComponentImpl(
             } else if (response is ApiResponse.Error) {
                 println("Error deleting role permission: ${response.code}")
             }
+            _isBusy.value = false
+        }
+    }
+
+    override fun updateRoleName(name: String) {
+        _isBusy.value = true
+        coroutineScope.launch {
+            val response = apiClient.rolesT.updateRoleName(roleId, name)
+            if (response is ApiResponse.Success) {
+                fetchRole()
+            } else if (response is ApiResponse.Error) {
+                println("Error updating role name: ${response.code}")
+            }
+            _isBusy.value = false
         }
     }
 
     init {
-        coroutineScope.launch {
-            _isLoading.value = true
             fetchRole()
             fetchRolePermissions()
-            _isLoading.value = false
-        }
     }
 }

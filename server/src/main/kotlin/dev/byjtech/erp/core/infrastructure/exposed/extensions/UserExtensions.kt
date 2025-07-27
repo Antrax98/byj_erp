@@ -17,7 +17,6 @@ fun UserEntity.toDTO(): UserDTO {
         email = this.email,
         pictureUrl = this.pictureUrl,
         isActive = this.isActive,
-        googleId = this.googleId,
         createdAt = this.createdAt?.toKotlinx(),
         updatedAt = this.updatedAt?.toKotlinx(),
         companyId = this.company?.id?.value.toString()
@@ -30,7 +29,6 @@ fun UserEntity.toModel(rolesSet: Set<RoleEntity>? = null, specialSet: Set<Permis
         id = this.id.value,
         name = this.name,
         email = this.email,
-        googleId = this.googleId,
         pictureUrl = this.pictureUrl,
         isActive = this.isActive,
         createdAt = this.createdAt?.toKotlinx(),
@@ -44,7 +42,6 @@ fun UserEntity.toModel(rolesSet: Set<RoleEntity>? = null, specialSet: Set<Permis
 fun UserEntity.fromModel(user: User) {
     this.name = user.name
     this.email = user.email
-    this.googleId = user.googleId
     this.pictureUrl = user.pictureUrl
     this.isActive = user.isActive
     this.createdAt = user.createdAt?.toJavaLocalDateTime()
@@ -59,25 +56,8 @@ fun User.toDTO(): UserDTO {
         email = this.email,
         pictureUrl = this.pictureUrl,
         isActive = this.isActive,
-        googleId = this.googleId,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         companyId = this.companyId.toString()
     )
 }
-
-//fun UserDTO.toModel(): User {
-//    return User(
-//        id = this.id,
-//        name = this.name,
-//        email = this.email,
-//        pictureUrl = this.pictureUrl,
-//        isActive = this.isActive,
-//        googleId = this.googleId,
-//        createdAt = this.createdAt,
-//        updatedAt = this.updatedAt,
-//        companyId = this.companyId,
-//        roles = emptySet(),
-//        specialPermissions = emptySet()
-//    )
-//}

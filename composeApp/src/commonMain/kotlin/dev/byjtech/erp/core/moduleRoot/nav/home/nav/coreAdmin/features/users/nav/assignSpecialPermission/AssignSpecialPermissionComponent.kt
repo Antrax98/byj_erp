@@ -13,6 +13,8 @@ interface AssignSpecialPermissionComponent: PermissionAwareComponent {
     val actPermissions : Set<PermissionKey>
     val actModules : Set<ModuleDTO>
     val possiblePermissions : StateFlow<Map<String, Set<PermissionWithKey>>>
+    val isLoading : StateFlow<Boolean>
+    val isBusy : StateFlow<Boolean>
     val onFinished: (assigned: Boolean) -> Unit
     fun addPermission(permission: PermissionKey)
     fun loadPermissions()

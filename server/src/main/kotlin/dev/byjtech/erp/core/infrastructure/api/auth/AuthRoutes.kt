@@ -369,6 +369,8 @@ fun Route.googleAuthRoutes(
 
 
                 if (googleUserInfo != null) {
+                    //TODO: de implementar uso de passwords, esta parte requeriria verificar si hay una entrada en la tabla Authentications
+                    // sino crearla.....
                     val user = userRepo.findByEmail(googleUserInfo.email)
                     if (user != null) {
                         println("User found: ${user.id}")
@@ -401,15 +403,6 @@ fun Route.googleAuthRoutes(
                             sessionCookie = AppSession(existingSessionAux.id.toString(), sessionExpiresAt.toEpochMilli())
                             logger.debug("Updated appSession: {}", sessionCookie)
                         } else {
-//                            val newSession = USDS.createSession( //TODO MODIFICAR
-//                                userId = userEntity.id.value,
-//                                accessToken = accessToken,
-//                                refreshToken = principal.refreshToken ?: "",
-//                                userAgent = userAgent,
-//                                deviceId = deviceId,
-//                                platform = platform,
-//                                expiresAt = sessionExpiresAt  // Store expiration
-//                            )
                             val newSession = sessionRepo.create(Session(
                                 userId = user.id,
                                 id = UUID.randomUUID(), //este no importa pero hay que darlo igual

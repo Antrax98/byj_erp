@@ -36,4 +36,17 @@ class CompanyRepositoryImpl(private val db: Database) : CompanyRepository {
     override fun existWithRut(rut: String): Boolean = transaction(db) {
         CompanyEntity.find { CompaniesTable.rut eq rut }.firstOrNull() != null
     }
+
+    override fun updateName(id: UUID, newName: String) {
+        transaction(db) {
+            CompanyEntity.findById(id)?.name = newName
+        }
+
+    }
+
+    override fun updateContactEmail(id: UUID, newEmail: String) {
+        transaction(db) {
+            CompanyEntity.findById(id)?.contactEmail = newEmail
+        }
+    }
 }

@@ -12,6 +12,7 @@ interface AddCompanyComponent {
     val contactEmailState: StateFlow<TextFieldState>
     val companyAdminEmailState: StateFlow<TextFieldState>
     val adminNameState: StateFlow<TextFieldState>
+    val isBusy: StateFlow<Boolean>
     fun onNameChanged(value: String)
     fun onRutChanged(value: String)
     fun onContactEmailChanged(value: String)

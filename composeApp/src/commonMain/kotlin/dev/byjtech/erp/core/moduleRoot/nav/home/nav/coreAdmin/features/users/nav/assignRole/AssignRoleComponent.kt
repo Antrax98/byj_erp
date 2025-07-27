@@ -10,6 +10,8 @@ interface AssignRoleComponent: PermissionAwareComponent {
     val userIdToAssign: String
     val actUserRoles: Set<RoleDTO>
     val assignableRoles: StateFlow<Set<RoleDTO>>
+    val isLoading: StateFlow<Boolean>
+    val isBusy: StateFlow<Boolean>
     val onFinished: (assigned: Boolean) -> Unit
     fun fetchAssignableRoles()
     fun assignRole(roleId: String)

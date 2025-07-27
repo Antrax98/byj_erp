@@ -18,6 +18,7 @@ object CoreTables {
         SessionsTable,
         SuperAdminsTable,
         UserPermissionTable,
-        BillingsTable
+        BillingsTable,
+        AuthenticationsTable
     )
 }

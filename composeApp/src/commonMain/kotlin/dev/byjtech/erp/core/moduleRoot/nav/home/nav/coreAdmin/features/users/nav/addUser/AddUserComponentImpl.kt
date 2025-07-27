@@ -19,6 +19,9 @@ class AddUserComponentImpl(
 ): AddUserComponent, ComponentContext by componentContext {
     override val requiredPermissions: Set<PermissionKey> = setOf()
 
+    private val _isBusy = MutableStateFlow(false)
+    override val isBusy: StateFlow<Boolean> = _isBusy
+
     private val _username = MutableStateFlow(TextFieldState())
     override val username: StateFlow<TextFieldState> = _username
 

@@ -10,5 +10,5 @@ class TestInitializer(
     definition: ModuleDefinition,
     tables: Set<Table>,
     moduleRoutesInstaller: ModuleRoutesInstaller,
-    database: Database,
+    database: Database?,
 ): ModuleInitializer(definition,tables,database,moduleRoutesInstaller)

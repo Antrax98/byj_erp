@@ -122,4 +122,12 @@ class RoleRepositoryImpl(private val db: Database): RoleRepository {
             return@transaction roleEntity?.toModel()
         }
     }
+
+    override fun updateName(roleId: UUID, newName: String) {
+        return transaction(db) {
+            val roleEntity = RoleEntity.findById(roleId)!!
+            roleEntity.name = newName
+            roleEntity.updatedAt = LocalDateTime.now()
+        }
+    }
 }

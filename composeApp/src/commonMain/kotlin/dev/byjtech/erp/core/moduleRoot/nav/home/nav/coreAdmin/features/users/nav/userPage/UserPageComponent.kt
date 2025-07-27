@@ -17,9 +17,15 @@ interface UserPageComponent: PermissionAwareComponent {
     val userSpecialPermissions: StateFlow<List<PermissionWithKey>?>
     val userRoles: StateFlow<List<RoleDTO>?>
     val navTo: (UsersFeatureComponentImpl.Config) -> Unit
+    val userIsLoading: StateFlow<Boolean>
+    val permissionsIsLoading: StateFlow<Boolean>
+    val rolesIsLoading: StateFlow<Boolean>
+    val isBusy: StateFlow<Boolean>
     fun fetchUserSpecialPermissions()
     fun deleteSpecialPermission(permissionId: String)
     fun deleteRole(roleId: String)
     fun fetchUserRoles()
     fun fetchUser()
+    fun updateUserName(name: String)
+
 }

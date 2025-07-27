@@ -30,10 +30,16 @@ class MainActivity : ComponentActivity() { //se cambia ComponentActivity por App
         initAndroidSettings(applicationContext)
         val settings : Settings = provideSettings()
         AndroidEnv.init(this)
+        val basePortString = AndroidEnv.get("BASE_PORT")
+        println("BASE_PORT raw string: $basePortString")
+        val basePortaux: Int? = if (basePortString == "NO_PORT") null else basePortString.toIntOrNull()
+        println("basePortaux after processing: $basePortaux")
+
+
         apiClient = ApiClient(
             engine = Android.create(),
             baseUrl = AndroidEnv.get("BASE_URL"),
-            basePort = AndroidEnv.get("BASE_PORT").toInt(),
+            basePort = null,//basePortaux,
             settings = settings,
             dispatcher = Dispatchers.IO,
             //onNavigationRequired = {}

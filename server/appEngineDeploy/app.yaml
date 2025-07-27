@@ -1,0 +1,27 @@
+runtime: java17
+entrypoint: java -jar server-all.jar
+
+
+env_variables:
+  DB_HOST: proyectron.duckdns.org
+  DB_PORT: 3306
+  DB_NAME: kmp_db
+  DB_USER: root
+  DB_PASSWORD: rootpassword
+#  DB_HOST: sql305.infinityfree.com
+#  DB_PORT: 3306
+#  DB_NAME: if0_39546549_kmp_db
+#  DB_USER: if0_39546549
+#  DB_PASSWORD: Hydorah19
+
+  TEST_DB_HOST: proyectron.duckdns.org
+  TEST_DB_PORT: 3309
+  TEST_DB_NAME: kmp_db
+  TEST_DB_USER: root
+  TEST_DB_PASSWORD: rootpassword
+
+  SERVER_PORT: 8080
+
+  GOOGLE_CLIENT_ID: 790925765947-ke3ootqhbo4db6p1or5ib4jdtcoremvc.apps.googleusercontent.com
+  GOOGLE_CLIENT_SECRET: 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
+  OAUTH_REDIRECT_URI: https://proyecto-tesis-448722.rj.r.appspot.com/auth/callback

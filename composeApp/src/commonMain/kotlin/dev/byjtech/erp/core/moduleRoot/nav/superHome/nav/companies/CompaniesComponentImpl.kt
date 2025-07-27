@@ -36,10 +36,14 @@ class CompaniesComponentImpl(
             if(response.isNotEmpty()){
                 _companiesList.value = response.toList()
             }else{
-                _companiesList.value = dummyCompanies
+                _companiesList.value = emptyList()
             }
             _isLoading.value = false
         }
+    }
+
+    init {
+        loadCompanies()
     }
 
 

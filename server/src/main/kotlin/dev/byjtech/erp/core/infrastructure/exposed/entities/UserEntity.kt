@@ -13,7 +13,6 @@ class UserEntity(id: EntityID<UUID>) : UUIDEntity(id) {
 
     var name by UsersTable.name
     var email by UsersTable.email
-    var googleId by UsersTable.googleId
     var pictureUrl by UsersTable.pictureUrl
     var isActive by UsersTable.isActive
     var createdAt by UsersTable.createdAt

@@ -12,6 +12,7 @@ import dev.byjtech.erp.core.domain.model.Module
 interface ModuleRepository {
     fun create(module: Module): Module
     fun get(moduleId: UUID): Module? //solo el module
+    fun getAll(): List<Module>
     fun getWithCategories(moduleId: UUID): Module? //con categories
     fun getWithCategoriesAndPermissions(moduleId: UUID): Module? //con categories y permissions
     fun getCategoryById(categoryId: UUID): Category?

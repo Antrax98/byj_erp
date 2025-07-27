@@ -15,8 +15,11 @@ import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import dev.byjtech.erp.core.dto.CompanyDTO
+import dev.byjtech.erp.core.dto.ModuleDTO
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addCompany.AddCompanyComponent
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addCompany.AddCompanyComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addSubscription.AddSubscriptionComponent
+import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addSubscription.AddSubscriptionComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companies.CompaniesComponent
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companies.CompaniesComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companyPage.CompanyPageComponent
@@ -69,6 +72,8 @@ class SuperHomeComponentImpl (
         @Serializable
         data class CompanyPage(val company: CompanyDTO) : Config()
         @Serializable
+        data class AddSubscription(val company: CompanyDTO, val subModules: Set<ModuleDTO>) : Config()
+        @Serializable
         data object DocumentsFeature : Config()
     }
 
@@ -101,18 +106,13 @@ class SuperHomeComponentImpl (
     private fun companyPageComponent(componentContext: ComponentContext, company: CompanyDTO): CompanyPageComponent =
         CompanyPageComponentImpl(componentContext, company, api, ::navTo)
 
-    private fun documentsFeatureComponent(componentContext: ComponentContext): DocumentsFeatureComponent =
-        DocumentsFeatureComponentImpl(
-            componentContext = componentContext,
-            userPermissions = userPermissions,
-            apiClient = api,
-            toHome = {
-                navigation.popTo(0)
-            },
-            updateTitle = { title ->
-                // En SuperHome no actualizamos título, ya que es la pantalla principal
-            }
-        )
+    private fun addSubscriptionComponent(componentContext: ComponentContext, company: CompanyDTO, subModules: Set<ModuleDTO>): AddSubscriptionComponent =
+        AddSubscriptionComponentImpl(componentContext, api, company, subModules){
+            added ->
+            println("added: $added")
+            println("terminar funcion")
+            navigation.pop()
+        }
 
     private fun childFactory(config: Config, componentContext: ComponentContext): SuperHomeComponent.Child {
         return when (config) {
@@ -120,6 +120,7 @@ class SuperHomeComponentImpl (
             is Config.Main -> SuperHomeComponent.Child.Main(mainComponent(componentContext.childContext("main-page")))
             is Config.AddCompany -> SuperHomeComponent.Child.AddCompany(addCompanyComponent(componentContext.childContext("add-company")))
             is Config.CompanyPage -> SuperHomeComponent.Child.CompanyPage(companyPageComponent(componentContext.childContext("company-page"), config.company))
+            is Config.AddSubscription -> SuperHomeComponent.Child.AddSubscription(addSubscriptionComponent(componentContext.childContext("add-subscription"), config.company, config.subModules))
             is Config.DocumentsFeature -> SuperHomeComponent.Child.DocumentsFeature(documentsFeatureComponent(componentContext.childContext("documents-feature")))
         }
     }

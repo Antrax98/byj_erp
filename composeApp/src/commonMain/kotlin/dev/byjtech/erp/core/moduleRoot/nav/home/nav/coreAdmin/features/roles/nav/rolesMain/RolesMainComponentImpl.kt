@@ -42,16 +42,21 @@ class RolesMainComponentImpl(
         _isLoading.value = isLoading
     }
 
-    override suspend fun fetchAllRoles() {
-        when (val response = apiClient.rolesT.getAllRoles()) {
-            is ApiResponse.Success -> {
-                _rolesState.value = response.data
+    override fun fetchAllRoles() {
+        _isLoading.value = true
+        coroutineScope.launch {
+            when (val response = apiClient.rolesT.getAllRoles()) {
+                is ApiResponse.Success -> {
+                    _rolesState.value = response.data
+                }
+                is ApiResponse.Error -> {
+                    _rolesState.value = null
+                    //enviar un pop up o snackbar?
+                }
             }
-            is ApiResponse.Error -> {
-                _rolesState.value = null
-                //enviar un pop up o snackbar?
-            }
+            _isLoading.value = false
         }
+
     }
 
     override val navToRolePage: (roleId: String) -> Unit = { roleId ->
@@ -59,10 +64,6 @@ class RolesMainComponentImpl(
     }
 
     init {
-        coroutineScope.launch {
-            _isLoading.value = true
-            fetchAllRoles()
-            _isLoading.value = false
-        }
+        fetchAllRoles()
     }
 }

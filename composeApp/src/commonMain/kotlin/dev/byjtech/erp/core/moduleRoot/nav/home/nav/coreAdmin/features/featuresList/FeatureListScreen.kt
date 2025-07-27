@@ -16,6 +16,13 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddBox
+import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,41 +41,6 @@ import dev.byjtech.erp.common.ButtonMetadata
 import dev.byjtech.erp.common.ComponentConfig
 
 @Composable
-//fun FeatureListScreen (component: FeatureListComponent) {
-//    val state by component.state.collectAsState()
-//
-//    Column(
-//        verticalArrangement = Arrangement.Top,
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//
-//        val moduleFeaturesMap = component.buttonsMap
-//
-//        LazyColumn(
-//            modifier = Modifier.fillMaxSize(),
-//        ) {
-//            moduleFeaturesMap.forEach { (moduleName, featuresMap) ->
-//                item {
-//                    Text(
-//                        text = moduleName,
-//                        modifier = Modifier.fillMaxWidth(),
-//                        style = MaterialTheme.typography.titleLarge
-//                    )
-//                    LazyRow {
-//                        featuresMap.forEach { (featureName, buttonMetadata) ->
-//                            item {
-//                                Button(onClick = {component.navTo(ComponentConfig(moduleName, featureName))}){
-//                                    Text(buttonMetadata.displayName)
-//                                }
-//                            }
-//                        }
-//                    }
-//                    HorizontalDivider(thickness = 1.dp)
-//                }
-//            }
-//        }
-//    }
-//}
 fun FeatureListScreen(component: FeatureListComponent) {
     val state by component.state.collectAsState()
     val moduleFeaturesMap = component.buttonsMap
@@ -112,6 +84,44 @@ fun FeatureListScreen(component: FeatureListComponent) {
             }
         }
     }
+
+//    LazyColumn(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(16.dp),
+//        verticalArrangement = Arrangement.spacedBy(24.dp)
+//    ) {
+//        dummyButtonsMap.forEach { (moduleName, featuresMap) ->
+//            item {
+//                Column {
+//                    Text(
+//                        text = moduleName,
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(bottom = 8.dp),
+//                        style = MaterialTheme.typography.titleLarge
+//                    )
+//
+//                    LazyRow(
+//                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+//                        contentPadding = PaddingValues(horizontal = 4.dp)
+//                    ) {
+//                        featuresMap.forEach { (_, buttonMetadata) ->
+//                            item {
+//                                FeatureButton(
+//                                    metadata = buttonMetadata,
+//                                    onClick = {} // Puedes poner un log o toast
+//                                )
+//                            }
+//                        }
+//                    }
+//
+//                    Spacer(modifier = Modifier.height(12.dp))
+//                    HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
+//                }
+//            }
+//        }
+//    }
 }
 
 @Composable
@@ -120,7 +130,6 @@ fun FeatureButton(metadata: ButtonMetadata, onClick: () -> Unit) {
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-//        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
         colors = CardDefaults.cardColors(containerColor = metadata.color ),
         modifier = Modifier
             .widthIn(min = 120.dp)
@@ -149,3 +158,34 @@ fun FeatureButton(metadata: ButtonMetadata, onClick: () -> Unit) {
         }
     }
 }
+
+val dummyButtonsMap = mapOf(
+    "Gestión de Accesos" to mapOf(
+        "Usuarios" to ButtonMetadata(
+            displayName = "Usuarios",
+            color = Color(0xFF90CAF9), // Azul claro
+            icon = Icons.Default.Person,
+            config = ComponentConfig("accesos", "usuarios")
+        ),
+        "Roles" to ButtonMetadata(
+            displayName = "Roles",
+            color = Color(0xFFCE93D8), // Violeta claro
+            icon = Icons.Default.Security,
+            config = ComponentConfig("accesos", "roles")
+        )
+    ),
+    "Inventario" to mapOf(
+        "Agregar Item" to ButtonMetadata(
+            displayName = "Agregar",
+            color = Color(0xFFFFCC80), // Naranja suave
+            icon = Icons.Default.AddBox,
+            config = ComponentConfig("inventario", "agregar")
+        ),
+        "Ver Stock" to ButtonMetadata(
+            displayName = "Stock",
+            color = Color(0xFFFFAB91), // Coral claro
+            icon = Icons.Default.Inventory,
+            config = ComponentConfig("inventario", "stock")
+        )
+    )
+)

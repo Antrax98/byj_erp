@@ -27,10 +27,17 @@ class AssignRoleComponentImpl(
 
     val coroutineScope = componentContext.coroutineScope()
 
+    private val _isLoading = MutableStateFlow(false)
+    override val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _isBusy = MutableStateFlow(false)
+    override val isBusy: StateFlow<Boolean> = _isBusy
+
     private val _assignableRoles = MutableStateFlow<Set<RoleDTO>>(emptySet())
     override val assignableRoles: StateFlow<Set<RoleDTO>> = _assignableRoles
 
     override fun fetchAssignableRoles() {
+        _isLoading.value = true
         coroutineScope.launch {
             val response = apiClient.rolesT.getAllRoles()
             when(response){
@@ -46,11 +53,13 @@ class AssignRoleComponentImpl(
                 }
 
             }
+            _isLoading.value = false
         }
 
     }
 
     override fun assignRole(roleId: String) {
+        _isBusy.value = true
         coroutineScope.launch {
             val data = AssignRoleRequest(userIdToAssign, roleId)
             val response = apiClient.rolesT.assignRoleToUser(data)
@@ -63,6 +72,7 @@ class AssignRoleComponentImpl(
                     onFinished(false)
                 }
             }
+            _isBusy.value = false
         }
     }
 

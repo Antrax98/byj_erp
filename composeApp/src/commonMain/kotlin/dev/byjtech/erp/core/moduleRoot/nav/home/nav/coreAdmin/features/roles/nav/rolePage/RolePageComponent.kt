@@ -14,9 +14,11 @@ interface RolePageComponent: PermissionAwareComponent {
     val roleInfo: StateFlow<RoleDTO?>
     val rolePermissions: StateFlow<Set<PermissionWithKey>>
     val isLoading: StateFlow<Boolean>
+    val isPermissionLoading: StateFlow<Boolean>
+    val isBusy: StateFlow<Boolean>
     val navTo: (Config) -> Unit
     fun deletePermission(permissionId: String)
     fun fetchRole()
     fun fetchRolePermissions()
-
+    fun updateRoleName(name: String)
 }

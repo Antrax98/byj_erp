@@ -263,4 +263,33 @@ fun Route.tenantRoles(authServ: CoreAuthWrapper, roleRepo: RoleRepository, userR
         }
     }
 
+    patch("/update-role-name/{roleId}/{name}") {
+        val session = authServ.authorizeOrThrow(
+            call,
+            requiredAnyPermissions = setOf(
+                CoreDefinition.Admin.All.key,
+                CoreDefinition.Roles.Update.key
+            )
+        )
+        val roleId = call.parameters["roleId"]
+        if (roleId == null) {
+            call.respond(HttpStatusCode.BadRequest, message = "NO_ROLE_ID")
+            return@patch
+        }
+        val newName = call.parameters["name"]
+        if (newName == null) {
+            call.respond(HttpStatusCode.BadRequest, message = "NO_NEW_NAME")
+            return@patch
+        }
+        val role = roleRepo.getById(UUID.fromString(roleId))
+        if (role == null) {
+            call.respond(HttpStatusCode.NotFound, message = "NO_ROLE")
+            return@patch
+        }
+        roleRepo.updateName(role.id, newName)
+        call.respond(HttpStatusCode.OK)
+
+
+    }
+
 }

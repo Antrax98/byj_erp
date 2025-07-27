@@ -13,6 +13,7 @@ interface AddPermissionComponent: PermissionAwareComponent {
     val actModules : Set<ModuleDTO>
     val possiblePermissions : StateFlow<Map<String,Set<PermissionWithKey>>>
     val isLoading : StateFlow<Boolean>
+    val isBusy : StateFlow<Boolean>
     val roleId : String
     val onFinished: (added: Boolean) -> Unit
     fun addPermission(permission: PermissionKey)

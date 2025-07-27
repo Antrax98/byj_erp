@@ -42,7 +42,7 @@ class DesktopGoogleLoginHandler(
     }
 
     private val dotenv = dotenv {
-        ignoreIfMissing = false
+        ignoreIfMissing = true
     }
 
     override fun initiateGoogleLogin() {
@@ -55,8 +55,15 @@ class DesktopGoogleLoginHandler(
         )
         val jsonState = Json.encodeToString(stateMap)
         val encodedState = Base64.getUrlEncoder().encodeToString(jsonState.toByteArray())
+        val baseUrlFromEnv: String? = dotenv.get("BASE_URL")
+        val basePortFromEnv: String? = dotenv.get("BASE_PORT")
+        val hostPortPart = if (basePortFromEnv.isNullOrBlank()) {
+            baseUrlFromEnv
+        } else {
+            "${baseUrlFromEnv}:${basePortFromEnv}"
+        }
         //val loginUrl = "http://localhost:8080/auth/login?state=$encodedState"
-        val loginUrl = "http://${dotenv["BASE_URL"]}:${dotenv["BASE_PORT"]}/auth/login?state=$encodedState"
+        val loginUrl = "http://${hostPortPart}/auth/login?state=$encodedState"
         println("loginUrl: $loginUrl")
         openBrowser(loginUrl)
     }
