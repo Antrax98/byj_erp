@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class UserDTO(
     val id: String = "",
     val name: String? = null,
-    val email: String,
+    val email: String = "",
     val pictureUrl: String? = null,
     val isActive: Boolean = true,
     val createdAt: LocalDateTime? = null,

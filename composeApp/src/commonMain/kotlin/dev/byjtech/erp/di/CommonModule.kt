@@ -12,7 +12,7 @@ expect val platformModule: Module
 
 val commonModule = module {
     includes(
-        CoreModule //este lo cree yo
+        CoreModule, //este lo cree yo
         DocumentManagementModule
     )
 

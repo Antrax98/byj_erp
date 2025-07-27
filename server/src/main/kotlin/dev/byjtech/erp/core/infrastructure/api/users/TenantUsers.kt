@@ -207,10 +207,12 @@ fun Route.tenantUsers(authServ: CoreAuthWrapper, userRepo: UserRepository, modul
             }
         }
         //TODO: validar que el email no exista en la base de datos
-        val exist = userRepo.findByEmail(newUser.email)
-        if (exist != null) {
-            call.respond(HttpStatusCode.BadRequest, "USER_EMAIL_ALREADY_EXISTS")
-            return@post
+        if (newUser.email.isNotEmpty()) {
+            val exist = userRepo.findByEmail(newUser.email)
+            if (exist != null) {
+                call.respond(HttpStatusCode.BadRequest, "USER_EMAIL_ALREADY_EXISTS")
+                return@post
+            }
         }
 
         val response = userRepo.create(newUser)

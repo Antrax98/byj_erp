@@ -156,6 +156,9 @@ class ApiClient(
     //subscriptions
     val subscriptionsSA = SubscriptionsSA(clientKtor)
 
+    //document management
+    val documentManagement = DocumentManagementClient(clientKtor)
+
 
     fun setAuthHeaderProvider(provider: (() -> String?)?) {
         this.authHeaderProvider = provider

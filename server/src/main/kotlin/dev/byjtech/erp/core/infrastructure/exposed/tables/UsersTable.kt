@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 
 object UsersTable : UUIDTable("users") {
     val name = text("name").nullable()
-    val email = text("email")
+    val email = text("email").default("")
     //val googleId = text("google_id").nullable()
     val pictureUrl = text("picture_url").nullable()
     val isActive = bool("is_active").default(true)

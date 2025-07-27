@@ -114,6 +114,9 @@ class SuperHomeComponentImpl (
             navigation.pop()
         }
 
+    private fun documentsFeatureComponent(componentContext: ComponentContext): DocumentsFeatureComponent =
+        DocumentsFeatureComponentImpl(componentContext, userPermissions, api, ::toHome) { _ -> }
+
     private fun childFactory(config: Config, componentContext: ComponentContext): SuperHomeComponent.Child {
         return when (config) {
             is Config.Companies -> SuperHomeComponent.Child.Companies(companiesComponent(componentContext.childContext("companies")))

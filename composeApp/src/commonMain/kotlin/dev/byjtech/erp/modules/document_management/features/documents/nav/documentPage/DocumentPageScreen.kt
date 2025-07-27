@@ -45,7 +45,7 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
     LaunchedEffect(component.documentId) {
         state = state.copy(isLoading = true)
         try {
-            val document = component.apiClient.documentManagement.getDocumentById(component.documentId)
+            val document: DocumentDTO? = component.apiClient.documentManagement.getDocumentById(component.documentId)
             if (document != null) {
                 state = state.copy(
                     isLoading = false,

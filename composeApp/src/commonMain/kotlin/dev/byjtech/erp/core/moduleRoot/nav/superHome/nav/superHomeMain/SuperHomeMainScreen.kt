@@ -93,7 +93,11 @@ fun SuperHomeMainScreen(component: SuperHomeMainComponent) {
             }
 
             item {
-                NavigationCard("Gestión Documentos", "Administrar documentos del sistema") {
+                NavigationCard(
+                    title = "Gestión Documentos", 
+                    subtitle = "Administrar documentos del sistema",
+                    icon = Icons.Default.Settings
+                ) {
                     component.navTo(Config.DocumentsFeature)
                 }
             }
