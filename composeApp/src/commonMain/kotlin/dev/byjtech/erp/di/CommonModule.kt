@@ -13,7 +13,7 @@ expect val platformModule: Module
 val commonModule = module {
     includes(
         CoreModule //este lo cree yo
-        //aqui van los demas modules
+        DocumentManagementModule
     )
 
     single<List<ModuleEntry>>{
@@ -22,11 +22,7 @@ val commonModule = module {
             //aqui van los demas modulesEntry
         )
     }
-
-
-        CoreModule, //este lo cree yo
-        DocumentManagementModule
-    )
+        
     single<OldModuleManager> {
         OldModuleManager(modules = getAll())
     }
