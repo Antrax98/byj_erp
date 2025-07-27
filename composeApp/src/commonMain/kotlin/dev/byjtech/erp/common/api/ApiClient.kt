@@ -91,11 +91,11 @@ class ApiClient(
         defaultRequest {
             url {
                 //protocol = if (baseUrl.startsWith("https")) URLProtocol.HTTPS else URLProtocol.HTTP
-                //protocol = URLProtocol.HTTPS
+                protocol = URLProtocol.HTTP
                 println(baseUrl)
-                protocol = URLProtocol.HTTPS
+                //protocol = URLProtocol.HTTPS
                 host = baseUrl
-                //basePort?.let { port = it }
+                basePort?.let { port = it }
             }
             // Añadir el appSession en el header de todas las peticiones
 //            settings.getStringOrNull(sessionKey)?.let {
