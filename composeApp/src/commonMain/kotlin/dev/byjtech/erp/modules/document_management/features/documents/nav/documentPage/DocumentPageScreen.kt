@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.document_management.dto.DocumentDTO
+import dev.byjtech.erp.modules.document_management.domain.model.getDocumentTypeDisplayName
 import dev.byjtech.erp.modules.document_management.utils.getAvailableActions
 import dev.byjtech.erp.modules.document_management.utils.getStatusDisplayName
 import dev.byjtech.erp.modules.document_management.utils.DocumentActions
@@ -232,7 +233,7 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = document.documentType,
+                                text = getDocumentTypeDisplayName(document.type),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer

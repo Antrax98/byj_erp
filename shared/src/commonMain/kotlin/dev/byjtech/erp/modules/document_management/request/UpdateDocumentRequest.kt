@@ -1,11 +1,12 @@
 package dev.byjtech.erp.document_management.request
 
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentType
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class UpdateDocumentRequest(
-    val documentType: String?,
+    val type: DocumentType?,
     val documentNumber: String?,
     val issueDate: LocalDate?,
     val dueDate: LocalDate?,

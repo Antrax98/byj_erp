@@ -55,9 +55,13 @@ fun Route.documentsRoutes(
         
         // 3. Usar service para obtener documentos por compañía
         try {
+            println("🔍 Obteniendo documentos para companyId: $companyId")
             val documentsDTO = documentService.getAllDocumentsByCompany(companyId)
+            println("🔍 Documentos obtenidos: ${documentsDTO.size} documentos")
             call.respond(HttpStatusCode.OK, documentsDTO)
         } catch (e: Exception) {
+            println("❌ Error obteniendo documentos: ${e.message}")
+            e.printStackTrace()
             call.respond(HttpStatusCode.InternalServerError, "Error retrieving documents: ${e.message}")
         }
     }
@@ -157,20 +161,37 @@ fun Route.documentsRoutes(
         
         // 3. Recibir y validar datos
         val createRequest = try {
-            call.receive<CreateDocumentRequest>()
+            println("🔍 Intentando recibir CreateDocumentRequest...")
+            println("🔍 Content-Type: ${call.request.headers["Content-Type"]}")
+            println("🔍 Content-Length: ${call.request.headers["Content-Length"]}")
+            val request = call.receive<CreateDocumentRequest>()
+            println("🔍 Request recibido exitosamente: $request")
+            request
         } catch (e: Exception) {
-            call.respond(HttpStatusCode.BadRequest, "Invalid request format")
+            println("❌ Error recibiendo request: ${e.message}")
+            println("❌ Error class: ${e::class.simpleName}")
+            e.printStackTrace()
+            call.respond(HttpStatusCode.BadRequest, "Invalid request format: ${e.message}")
             return@post
         }
         
         // 4. Usar service para crear documento (con lógica de negocio)
         try {
+            println("🔍 Convirtiendo request a dominio...")
             val document = createRequest.toDomain(companyId, session.userId)
+            println("🔍 Documento de dominio creado: $document")
+            
+            println("🔍 Llamando al servicio para crear documento...")
             val documentDTO = documentService.createDocument(document)
+            println("🔍 Documento creado exitosamente: $documentDTO")
+            
             call.respond(HttpStatusCode.Created, documentDTO)
         } catch (e: IllegalArgumentException) {
+            println("❌ Error de validación: ${e.message}")
             call.respond(HttpStatusCode.BadRequest, e.message ?: "Validation error")
         } catch (e: Exception) {
+            println("❌ Error interno creando documento: ${e.message}")
+            e.printStackTrace()
             call.respond(HttpStatusCode.InternalServerError, "Error creating document: ${e.message}")
         }
     }
@@ -336,7 +357,7 @@ fun Route.documentsRoutes(
             
             // Crear request de actualización solo para el estado
             val updateRequest = UpdateDocumentRequest(
-                documentType = null,
+                type = null,
                 documentNumber = null,
                 issueDate = null,
                 dueDate = null,

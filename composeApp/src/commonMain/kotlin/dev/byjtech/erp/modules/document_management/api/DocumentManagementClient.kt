@@ -44,11 +44,16 @@ class DocumentManagementClient(private val client: HttpClient) {
     
     suspend fun createDocument(request: CreateDocumentRequest): DocumentDTO? {
         return try {
-            client.post(urlString = "api/document_management/documents") {
+            println("🔍 Enviando request: $request")
+            val response = client.post(urlString = "api/document_management/documents") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
-            }.body()
+            }
+            println("🔍 Response status: ${response.status}")
+            response.body()
         } catch (e: Exception) {
+            println("❌ Error en createDocument: ${e.message}")
+            e.printStackTrace()
             null
         }
     }

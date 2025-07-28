@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.document_management.dto.DocumentDTO
 import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
+import dev.byjtech.erp.modules.document_management.domain.model.getDocumentTypeDisplayName
 import dev.byjtech.erp.modules.document_management.utils.getStatusDisplayName
 import dev.byjtech.erp.modules.document_management.features.documents.components.DocumentSearchFilters
 import dev.byjtech.erp.modules.document_management.features.documents.components.DocumentPagination
@@ -202,7 +203,7 @@ fun DocumentCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "${document.documentType} - ${document.documentNumber}",
+                        text = "${getDocumentTypeDisplayName(document.type)} - ${document.documentNumber}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )

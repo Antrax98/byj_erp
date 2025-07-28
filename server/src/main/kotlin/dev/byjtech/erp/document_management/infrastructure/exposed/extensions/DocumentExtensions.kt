@@ -8,7 +8,7 @@ import kotlinx.datetime.toKotlinLocalDateTime
 fun DocumentEntity.toModel(): Document {
     return Document(
         id = this.id.value,
-        documentType = this.documentType,
+        type = this.type,
         documentNumber = this.documentNumber,
         issueDate = this.issueDate.toKotlinLocalDate(),
         dueDate = this.dueDate?.toKotlinLocalDate(),

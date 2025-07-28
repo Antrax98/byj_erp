@@ -1,14 +1,16 @@
 package dev.byjtech.erp.document_management.infrastructure.exposed.tables
 
 import dev.byjtech.erp.document_management.infrastructure.exposed.columns.DocumentStatusColumnType
+import dev.byjtech.erp.document_management.infrastructure.exposed.columns.DocumentTypeColumnType
 import dev.byjtech.erp.core.infrastructure.exposed.tables.*
 import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.javatime.datetime
 import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentType
 
 object DocumentsTable : UUIDTable("document") {
-    val documentType = varchar("document_type", 255) // tipo de documento
+    val type = registerColumn<DocumentType>("type", DocumentTypeColumnType()) // tipo de documento usando enum
     val documentNumber = varchar("document_number", 255) // numero del documento
     val companyId = uuid("company_id") // empresa asociada (sin restricción FK - referencia a companies en otra DB)
     val issueDate = date("issue_date") // fecha de emision
@@ -25,6 +27,6 @@ object DocumentsTable : UUIDTable("document") {
     val active = bool("active").default(true)
 
     init {
-        index(true , documentType, documentNumber)
+        index(true , type, documentNumber)
     }
 }

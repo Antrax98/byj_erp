@@ -7,6 +7,7 @@ import dev.byjtech.erp.document_management.infrastructure.exposed.tables.Documen
 import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
 import dev.byjtech.erp.modules.document_management.request.SortDirection
 import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentType
 import kotlinx.datetime.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -16,6 +17,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.lessEq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.less
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.isNotNull
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.Database
 import java.util.UUID
@@ -49,7 +51,19 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         
         // Filtros específicos
         searchRequest.documentType?.let { type ->
-            conditions.add(DocumentsTable.documentType like "%$type%")
+            // Para enums, buscar por coincidencia exacta o convertir el enum name a string para búsqueda parcial
+            try {
+                val documentType = DocumentType.valueOf(type.uppercase())
+                conditions.add(DocumentsTable.type eq documentType)
+            } catch (e: IllegalArgumentException) {
+                // Si no es un valor de enum válido, buscar en el nombre del enum como string
+                val matchingTypes = DocumentType.entries.filter { 
+                    it.name.contains(type, ignoreCase = true) 
+                }
+                if (matchingTypes.isNotEmpty()) {
+                    conditions.add(DocumentsTable.type inList matchingTypes)
+                }
+            }
         }
         
         searchRequest.documentNumber?.let { number ->
@@ -94,9 +108,19 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         
         // Búsqueda de texto general
         searchRequest.searchText?.let { searchText ->
-            val textSearchCondition = DocumentsTable.documentType.like("%$searchText%") or
-                    DocumentsTable.documentNumber.like("%$searchText%") or
-                    DocumentsTable.currency.like("%$searchText%")
+            // Para la búsqueda de texto, buscar en tipos de documento que contengan el texto en sus nombres
+            val matchingTypes = DocumentType.entries.filter { 
+                it.name.contains(searchText, ignoreCase = true) 
+            }
+            
+            val textSearchCondition = if (matchingTypes.isNotEmpty()) {
+                DocumentsTable.type.inList(matchingTypes) or
+                        DocumentsTable.documentNumber.like("%$searchText%") or
+                        DocumentsTable.currency.like("%$searchText%")
+            } else {
+                DocumentsTable.documentNumber.like("%$searchText%") or
+                        DocumentsTable.currency.like("%$searchText%")
+            }
             conditions.add(textSearchCondition)
         }
         
@@ -121,7 +145,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         
         // Aplicar ordenamiento
         val sortColumn = when (searchRequest.sortBy) {
-            "document_type" -> DocumentsTable.documentType
+            "document_type" -> DocumentsTable.type
             "document_number" -> DocumentsTable.documentNumber
             "issue_date" -> DocumentsTable.issueDate
             "due_date" -> DocumentsTable.dueDate
@@ -148,7 +172,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
 
     override fun save(document: Document): Document = transaction(database) {
         val insertedId = DocumentsTable.insertAndGetId { row ->
-            row[documentType] = document.documentType
+            row[type] = document.type
             row[documentNumber] = document.documentNumber
             row[companyId] = document.companyId!!
             row[issueDate] = document.issueDate.toJavaLocalDate()
@@ -170,7 +194,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
 
     override fun update(document: Document): Document = transaction(database) {
         DocumentsTable.update({ DocumentsTable.id eq document.id }) { row ->
-            row[documentType] = document.documentType
+            row[type] = document.type
             row[documentNumber] = document.documentNumber
             row[companyId] = document.companyId!!
             row[issueDate] = document.issueDate.toJavaLocalDate()
@@ -195,7 +219,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
 
     private fun ResultRow.toDomain(): Document = Document(
         id = this[DocumentsTable.id].value,
-        documentType = this[DocumentsTable.documentType],
+        type = this[DocumentsTable.type],
         documentNumber = this[DocumentsTable.documentNumber],
         issueDate = this[DocumentsTable.issueDate].toKotlinLocalDate(),
         dueDate = this[DocumentsTable.dueDate]?.toKotlinLocalDate(),

@@ -24,7 +24,7 @@ fun CreateDocumentRequest.toDomain(companyId: UUID, userId: UUID): Document {
 
     return Document(
         id = UUID.randomUUID(),
-        documentType = this.documentType,
+        type = this.type,
         documentNumber = this.documentNumber,
         companyId = companyId, // ✅ se inyecta correctamente
         issueDate = this.issueDate,
@@ -45,7 +45,7 @@ fun CreateDocumentRequest.toDomain(companyId: UUID, userId: UUID): Document {
 // Extensión para aplicar UpdateDocumentRequest a Document existente
 fun Document.applyUpdate(request: UpdateDocumentRequest): Document {
     return this.copy(
-        documentType = request.documentType ?: this.documentType,
+        type = request.type ?: this.type,
         documentNumber = request.documentNumber ?: this.documentNumber,
         issueDate = request.issueDate ?: this.issueDate,
         dueDate = request.dueDate ?: this.dueDate,

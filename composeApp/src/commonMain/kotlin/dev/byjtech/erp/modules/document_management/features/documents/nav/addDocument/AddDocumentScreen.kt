@@ -6,6 +6,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.document_management.request.CreateDocumentRequest
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentType
+import dev.byjtech.erp.modules.document_management.domain.model.getDocumentTypeDisplayName
 import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponentImpl
 import dev.byjtech.erp.common.ui.DatePickerField
 import kotlinx.coroutines.launch
@@ -20,7 +23,8 @@ import kotlinx.datetime.LocalDate
 
 data class AddDocumentState(
     val isLoading: Boolean = false,
-    val documentType: String = "",
+    val selectedDocumentType: DocumentType? = null,
+    val isDropdownExpanded: Boolean = false,
     val documentNumber: String = "",
     val issueDate: LocalDate? = null,
     val dueDate: LocalDate? = null,
@@ -42,7 +46,7 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
     val scrollState = rememberScrollState()
 
     // Validar formulario
-    LaunchedEffect(state.documentType, state.documentNumber, state.issueDate, state.dueDate, state.netAmount) {
+    LaunchedEffect(state.selectedDocumentType, state.documentNumber, state.issueDate, state.dueDate, state.netAmount) {
         val today = LocalDate(2025, 7, 25) // Fecha actual
         val minValidDate = if (state.issueDate != null) {
             if (state.issueDate!! > today) state.issueDate!! else today
@@ -53,7 +57,7 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
         val isDueDateValid = state.dueDate == null || state.dueDate!! >= minValidDate
         
         state = state.copy(
-            isValid = state.documentType.isNotBlank() &&
+            isValid = state.selectedDocumentType != null &&
                     state.documentNumber.isNotBlank() &&
                     state.issueDate != null &&
                     state.netAmount.isNotBlank() &&
@@ -95,15 +99,43 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Tipo de documento
-            OutlinedTextField(
-                value = state.documentType,
-                onValueChange = { state = state.copy(documentType = it) },
-                label = { Text("Tipo de Documento") },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Ej: Factura, Boleta, Nota de Crédito") },
-                isError = state.documentType.isBlank() && state.error != null
-            )
+            // Tipo de documento - Dropdown
+            ExposedDropdownMenuBox(
+                expanded = state.isDropdownExpanded,
+                onExpandedChange = { state = state.copy(isDropdownExpanded = it) }
+            ) {
+                OutlinedTextField(
+                    value = state.selectedDocumentType?.let { getDocumentTypeDisplayName(it) } ?: "",
+                    onValueChange = { },
+                    readOnly = true,
+                    label = { Text("Tipo de Documento") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = state.isDropdownExpanded) },
+                    isError = state.selectedDocumentType == null && state.error != null,
+                    supportingText = if (state.selectedDocumentType == null && state.error != null) {
+                        { Text("Debe seleccionar un tipo de documento", color = MaterialTheme.colorScheme.error) }
+                    } else null
+                )
+                
+                ExposedDropdownMenu(
+                    expanded = state.isDropdownExpanded,
+                    onDismissRequest = { state = state.copy(isDropdownExpanded = false) }
+                ) {
+                    DocumentType.entries.forEach { documentType ->
+                        DropdownMenuItem(
+                            text = { Text(getDocumentTypeDisplayName(documentType)) },
+                            onClick = {
+                                state = state.copy(
+                                    selectedDocumentType = documentType,
+                                    isDropdownExpanded = false
+                                )
+                            }
+                        )
+                    }
+                }
+            }
 
             // Número de documento
             OutlinedTextField(
@@ -283,7 +315,7 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
                             state = state.copy(isLoading = true, error = null)
                             try {
                                 val request = CreateDocumentRequest(
-                                    documentType = state.documentType,
+                                    type = state.selectedDocumentType!!,
                                     documentNumber = state.documentNumber,
                                     issueDate = state.issueDate!!,
                                     dueDate = state.dueDate,

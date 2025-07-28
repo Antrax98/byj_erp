@@ -4,7 +4,7 @@ import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 import org.jetbrains.exposed.sql.ColumnType
 
 class DocumentStatusColumnType : ColumnType<DocumentStatus>() {
-    override fun sqlType(): String = "VARCHAR(20)"
+    override fun sqlType(): String = "VARCHAR(255)"
 
     override fun valueFromDB(value: Any): DocumentStatus = when (value) {
         is DocumentStatus -> value

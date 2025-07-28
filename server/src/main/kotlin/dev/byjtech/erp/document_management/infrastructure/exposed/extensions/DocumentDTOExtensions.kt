@@ -12,7 +12,7 @@ import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 fun Document.toDTO(): DocumentDTO {
     return DocumentDTO(
         id = this.id.toString(),
-        documentType = this.documentType,
+        type = this.type,
         documentNumber = this.documentNumber,
         issueDate = this.issueDate,
         dueDate = this.dueDate,
@@ -59,7 +59,7 @@ fun DocumentAuditLog.toDTO(): DocumentAuditLogDTO {
 fun DocumentDTO.toDomain(): dev.byjtech.erp.document_management.domain.model.Document {
     return dev.byjtech.erp.document_management.domain.model.Document(
         id = java.util.UUID.fromString(this.id),
-        documentType = this.documentType,
+        type = this.type,
         documentNumber = this.documentNumber,
         issueDate = this.issueDate,
         dueDate = this.dueDate,

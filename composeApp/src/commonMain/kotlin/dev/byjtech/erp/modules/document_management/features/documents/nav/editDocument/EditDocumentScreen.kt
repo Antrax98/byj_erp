@@ -16,6 +16,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.document_management.dto.DocumentDTO
 import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentType
+import dev.byjtech.erp.modules.document_management.domain.model.getDocumentTypeDisplayName
 import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponentImpl
 import dev.byjtech.erp.common.ui.DatePickerField
 import kotlinx.coroutines.launch
@@ -24,7 +26,8 @@ import kotlinx.datetime.LocalDate
 data class EditDocumentState(
     val isLoading: Boolean = false,
     val document: DocumentDTO? = null,
-    val documentType: String = "",
+    val selectedDocumentType: DocumentType? = null,
+    val isDropdownExpanded: Boolean = false,
     val documentNumber: String = "",
     val issueDate: LocalDate? = null,
     val dueDate: LocalDate? = null,
@@ -55,7 +58,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                 state = state.copy(
                     isLoading = false,
                     document = document,
-                    documentType = document.documentType,
+                    selectedDocumentType = document.type,
                     documentNumber = document.documentNumber,
                     issueDate = document.issueDate,
                     dueDate = document.dueDate,
@@ -81,7 +84,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
     }
 
     // Validar formulario
-    LaunchedEffect(state.documentType, state.documentNumber, state.issueDate, state.dueDate, state.netAmount) {
+    LaunchedEffect(state.selectedDocumentType, state.documentNumber, state.issueDate, state.dueDate, state.netAmount) {
         val today = LocalDate(2025, 7, 25) // Fecha actual
         val minValidDate = if (state.issueDate != null) {
             if (state.issueDate!! > today) state.issueDate!! else today
@@ -92,7 +95,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
         val isDueDateValid = state.dueDate == null || state.dueDate!! >= minValidDate
         
         state = state.copy(
-            isValid = state.documentType.isNotBlank() &&
+            isValid = state.selectedDocumentType != null &&
                     state.documentNumber.isNotBlank() &&
                     state.issueDate != null &&
                     state.netAmount.isNotBlank() &&
@@ -192,14 +195,43 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                         }
                     }
 
-                    // Tipo de documento
-                    OutlinedTextField(
-                        value = state.documentType,
-                        onValueChange = { state = state.copy(documentType = it) },
-                        label = { Text("Tipo de Documento") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = state.documentType.isBlank() && state.error != null
-                    )
+                    // Tipo de documento - Dropdown
+                    ExposedDropdownMenuBox(
+                        expanded = state.isDropdownExpanded,
+                        onExpandedChange = { state = state.copy(isDropdownExpanded = it) }
+                    ) {
+                        OutlinedTextField(
+                            value = state.selectedDocumentType?.let { getDocumentTypeDisplayName(it) } ?: "",
+                            onValueChange = { },
+                            readOnly = true,
+                            label = { Text("Tipo de Documento") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = state.isDropdownExpanded) },
+                            isError = state.selectedDocumentType == null && state.error != null,
+                            supportingText = if (state.selectedDocumentType == null && state.error != null) {
+                                { Text("Debe seleccionar un tipo de documento", color = MaterialTheme.colorScheme.error) }
+                            } else null
+                        )
+                        
+                        ExposedDropdownMenu(
+                            expanded = state.isDropdownExpanded,
+                            onDismissRequest = { state = state.copy(isDropdownExpanded = false) }
+                        ) {
+                            DocumentType.entries.forEach { documentType ->
+                                DropdownMenuItem(
+                                    text = { Text(getDocumentTypeDisplayName(documentType)) },
+                                    onClick = {
+                                        state = state.copy(
+                                            selectedDocumentType = documentType,
+                                            isDropdownExpanded = false
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
 
                     // Número de documento
                     OutlinedTextField(
@@ -342,20 +374,36 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    // Error message
-                    state.error?.let { error ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
-                        ) {
-                            Text(
-                                text = error,
-                                modifier = Modifier.padding(16.dp),
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
+                        // Validación especial para facturas
+                        if (state.document?.type == DocumentType.INVOICE) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                            ) {
+                                Text(
+                                    text = "⚠️ Las facturas no pueden ser editadas según las políticas de la empresa",
+                                    modifier = Modifier.padding(16.dp),
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+
+                        // Error message
+                        state.error?.let { error ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                            ) {
+                                Text(
+                                    text = error,
+                                    modifier = Modifier.padding(16.dp),
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
                         }
                     }
-
+                    
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Botones de acción
@@ -376,7 +424,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                                     state = state.copy(isLoading = true, error = null)
                                     try {
                                         val request = UpdateDocumentRequest(
-                                            documentType = state.documentType,
+                                            type = state.selectedDocumentType,
                                             documentNumber = state.documentNumber,
                                             issueDate = state.issueDate!!,
                                             dueDate = state.dueDate,
@@ -410,7 +458,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                                 }
                             },
                             modifier = Modifier.weight(1f),
-                            enabled = state.isValid && !state.isLoading
+                                                        enabled = state.isValid && !state.isLoading && state.document?.type != DocumentType.INVOICE
                         ) {
                             if (state.isLoading) {
                                 CircularProgressIndicator(
@@ -425,47 +473,46 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                 }
             }
         }
-    }
-
-    // Diálogo de confirmación para eliminar
-    if (state.showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { state = state.copy(showDeleteDialog = false) },
-            title = { Text("Confirmar eliminación") },
-            text = { Text("¿Está seguro de que desea eliminar este documento? Esta acción no se puede deshacer.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        scope.launch {
-                            state = state.copy(showDeleteDialog = false, isLoading = true)
-                            try {
-                                val success = component.apiClient.documentManagement.deleteDocument(component.documentId)
-                                if (success) {
-                                    // Navegar de vuelta a la lista
-                                    component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain)
-                                } else {
+        
+        // DiÃ¡logo de confirmaciÃ³n para eliminar
+        if (state.showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { state = state.copy(showDeleteDialog = false) },
+                title = { Text("Confirmar eliminación") },
+                text = { Text("¿Está seguro de que desea eliminar este documento? Esta acción no se puede deshacer.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                state = state.copy(showDeleteDialog = false, isLoading = true)
+                                try {
+                                    val success = component.apiClient.documentManagement.deleteDocument(component.documentId)
+                                    if (success) {
+                                        // Navegar de vuelta a la lista
+                                        component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain)
+                                    } else {
+                                        state = state.copy(
+                                            isLoading = false,
+                                            error = "Error al eliminar el documento"
+                                        )
+                                    }
+                                } catch (e: Exception) {
                                     state = state.copy(
                                         isLoading = false,
-                                        error = "Error al eliminar el documento"
+                                        error = "Error: ${e.message}"
                                     )
                                 }
-                            } catch (e: Exception) {
-                                state = state.copy(
-                                    isLoading = false,
-                                    error = "Error: ${e.message}"
-                                )
                             }
                         }
+                    ) {
+                        Text("Eliminar", color = MaterialTheme.colorScheme.error)
                     }
-                ) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                },
+                dismissButton = {
+                    TextButton(onClick = { state = state.copy(showDeleteDialog = false) }) {
+                        Text("Cancelar")
+                    }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { state = state.copy(showDeleteDialog = false) }) {
-                    Text("Cancelar")
-                }
-            }
-        )
+            )
+        }
     }
-}

@@ -2,14 +2,12 @@ package dev.byjtech.erp.document_management.infrastructure.exposed.entities
 
 import dev.byjtech.erp.core.infrastructure.exposed.entities.UserEntity
 import dev.byjtech.erp.core.infrastructure.exposed.entities.CompanyEntity
-import dev.byjtech.erp.core.infrastructure.exposed.entities.CategoryEntity
 import dev.byjtech.erp.document_management.domain.model.Document
 import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentType
 import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentsTable
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.datetime.toKotlinLocalDateTime
-import kotlinx.datetime.toJavaLocalDate
-import kotlinx.datetime.toJavaLocalDateTime
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -18,7 +16,7 @@ import java.util.UUID
 class DocumentEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<DocumentEntity>(DocumentsTable)
 
-    var documentType by DocumentsTable.documentType
+    var type by DocumentsTable.type
     var documentNumber by DocumentsTable.documentNumber
     var companyId by CompanyEntity referencedOn DocumentsTable.companyId
     var issueDate by DocumentsTable.issueDate
@@ -36,7 +34,7 @@ class DocumentEntity(id: EntityID<UUID>) : UUIDEntity(id) {
 
     fun toDomain() = Document( //permite usar los modelos sin importar cómo se guarden
         id = id.value,
-        documentType = documentType,
+        type = type,
         documentNumber = documentNumber,
         issueDate = issueDate.toKotlinLocalDate(),
         dueDate = dueDate?.toKotlinLocalDate(),

@@ -63,6 +63,9 @@ class DocumentService(
             return null
         }
         
+        // Validar que el documento puede ser editado según las reglas de negocio DDD
+        existingDocument.validateCanBeEdited()
+        
         // Lógica de negocio: Validaciones
         validateDocumentBusinessRules(updatedDocument)
         
