@@ -23,6 +23,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import dev.byjtech.erp.common.utils.DateUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,10 +85,11 @@ private fun DatePickerDialog(
     minDate: LocalDate? = null,
     maxDate: LocalDate? = null
 ) {
-    // Fecha actual simplificada - usando la fecha actual real
-    val currentYear = 2025
-    val currentMonth = 7  // Julio
-    val currentDay = 25   // Actualizado a la fecha actual
+    // Obtener la fecha actual real del sistema usando DateUtils
+    val today = DateUtils.today()
+    val currentYear = today.year
+    val currentMonth = today.monthNumber
+    val currentDay = today.dayOfMonth
     
     var displayedMonth by remember { mutableStateOf(selectedDate?.monthNumber ?: currentMonth) }
     var displayedYear by remember { mutableStateOf(selectedDate?.year ?: currentYear) }

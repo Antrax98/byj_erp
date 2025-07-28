@@ -22,6 +22,7 @@ import dev.byjtech.erp.modules.document_management.features.documents.DocumentsF
 import dev.byjtech.erp.common.ui.DatePickerField
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import dev.byjtech.erp.common.utils.DateUtils
 
 data class EditDocumentState(
     val isLoading: Boolean = false,
@@ -85,7 +86,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
 
     // Validar formulario
     LaunchedEffect(state.selectedDocumentType, state.documentNumber, state.issueDate, state.dueDate, state.netAmount) {
-        val today = LocalDate(2025, 7, 25) // Fecha actual
+        val today = DateUtils.today() // Fecha actual
         val minValidDate = if (state.issueDate != null) {
             if (state.issueDate!! > today) state.issueDate!! else today
         } else {
@@ -252,14 +253,14 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                         supportingText = if (state.issueDate == null && state.error != null) {
                             { Text("La fecha de emisión es obligatoria", color = MaterialTheme.colorScheme.error) }
                         } else null,
-                        maxDate = LocalDate(2025, 7, 25) // No permitir fechas futuras más allá de hoy
+                        maxDate = DateUtils.today() // No permitir fechas futuras más allá de hoy
                     )
 
                     // Fecha de vencimiento
                     DatePickerField(
                         value = state.dueDate,
                         onValueChange = { 
-                            val today = LocalDate(2025, 7, 25) // Fecha actual
+                            val today = DateUtils.today() // Fecha actual
                             val minValidDate = if (state.issueDate != null) {
                                 if (state.issueDate!! > today) state.issueDate!! else today
                             } else {
@@ -283,7 +284,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                         label = "Fecha de Vencimiento (Opcional)",
                         modifier = Modifier.fillMaxWidth(),
                         minDate = run {
-                            val today = LocalDate(2025, 7, 25) // Fecha actual
+                            val today = DateUtils.today() // Fecha actual
                             if (state.issueDate != null) {
                                 if (state.issueDate!! > today) state.issueDate!! else today
                             } else {
@@ -291,7 +292,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                             }
                         },
                         supportingText = if (state.dueDate != null) {
-                            val today = LocalDate(2025, 7, 25)
+                            val today = DateUtils.today()
                             val minValidDate = if (state.issueDate != null) {
                                 if (state.issueDate!! > today) state.issueDate!! else today
                             } else {
@@ -309,7 +310,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                             }
                         } else null,
                         isError = state.dueDate != null && run {
-                            val today = LocalDate(2025, 7, 25)
+                            val today = DateUtils.today()
                             val minValidDate = if (state.issueDate != null) {
                                 if (state.issueDate!! > today) state.issueDate!! else today
                             } else {
