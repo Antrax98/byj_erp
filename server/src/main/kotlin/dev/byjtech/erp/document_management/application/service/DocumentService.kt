@@ -13,7 +13,8 @@ import java.util.UUID
 
 class DocumentService(
     private val documentRepository: DocumentRepository,
-    private val companyValidationRepository: CompanyValidationRepository
+    private val companyValidationRepository: CompanyValidationRepository,
+    private val documentEditHistoryService: DocumentEditHistoryService
 ) {
     
     // Método para SuperAdmins: obtener TODOS los documentos sin filtro por compañía
@@ -56,7 +57,7 @@ class DocumentService(
         return savedDocument.toDTO()
     }
     
-    fun updateDocument(documentId: UUID, updatedDocument: Document, companyId: UUID): DocumentDTO? {
+    fun updateDocument(documentId: UUID, updatedDocument: Document, companyId: UUID, userId: UUID): DocumentDTO? {
         val existingDocument = documentRepository.findById(documentId)
         
         if (existingDocument == null || existingDocument.companyId != companyId) {
@@ -68,6 +69,13 @@ class DocumentService(
         
         // Lógica de negocio: Validaciones
         validateDocumentBusinessRules(updatedDocument)
+        
+        // Registrar historial de cambios ANTES de actualizar
+        documentEditHistoryService.recordDocumentChanges(
+            oldDocument = existingDocument,
+            newDocument = updatedDocument,
+            userId = userId
+        )
         
         val savedDocument = documentRepository.update(updatedDocument)
         return savedDocument.toDTO()

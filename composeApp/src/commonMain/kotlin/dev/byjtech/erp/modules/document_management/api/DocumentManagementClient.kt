@@ -63,11 +63,30 @@ class DocumentManagementClient(private val client: HttpClient) {
         request: UpdateDocumentRequest
     ): DocumentDTO? {
         return try {
-            client.put(urlString = "api/document_management/documents/$documentId") {
+            println("🚀 Enviando request de actualización: documentId=$documentId, request=$request")
+            val response = client.put(urlString = "api/document_management/documents/$documentId") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
-            }.body()
+            }
+            println("🔍 Response status: ${response.status}")
+            
+            when (response.status.value) {
+                200 -> {
+                    response.body<DocumentDTO>()
+                }
+                else -> {
+                    val errorBody = try {
+                        response.body<String>()
+                    } catch (e: Exception) {
+                        "Unable to read error response"
+                    }
+                    println("❌ Server error (${response.status}): $errorBody")
+                    null
+                }
+            }
         } catch (e: Exception) {
+            println("❌ Error en updateDocument: ${e.message}")
+            e.printStackTrace()
             null
         }
     }
@@ -95,19 +114,27 @@ class DocumentManagementClient(private val client: HttpClient) {
         }
     }
     
-    // Audit logs endpoints
-    suspend fun getDocumentAuditLogs(documentId: String): List<DocumentAuditLogDTO> {
-        return try {
-            client.get(urlString = "api/document_management/documents/$documentId/audit-logs").body()
-        } catch (e: Exception) {
-            emptyList()
-        }
-    }
-    
     // Edit history endpoints
     suspend fun getDocumentEditHistory(documentId: String): List<DocumentEditHistoryDTO> {
         return try {
             client.get(urlString = "api/document_management/documents/$documentId/edit-history").body()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun getDocumentEditHistorySummary(documentId: String): Map<String, Any> {
+        return try {
+            client.get(urlString = "api/document_management/documents/$documentId/edit-history/summary").body()
+        } catch (e: Exception) {
+            emptyMap()
+        }
+    }
+
+    // Audit logs endpoints
+    suspend fun getDocumentAuditLogs(documentId: String): List<DocumentAuditLogDTO> {
+        return try {
+            client.get(urlString = "api/document_management/documents/$documentId/audit-logs").body()
         } catch (e: Exception) {
             emptyList()
         }

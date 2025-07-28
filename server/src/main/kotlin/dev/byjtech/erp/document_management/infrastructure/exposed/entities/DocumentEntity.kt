@@ -18,7 +18,7 @@ class DocumentEntity(id: EntityID<UUID>) : UUIDEntity(id) {
 
     var type by DocumentsTable.type
     var documentNumber by DocumentsTable.documentNumber
-    var companyId by CompanyEntity referencedOn DocumentsTable.companyId
+    var companyId by DocumentsTable.companyId
     var issueDate by DocumentsTable.issueDate
     var dueDate by DocumentsTable.dueDate
     var status by DocumentsTable.status
@@ -27,7 +27,7 @@ class DocumentEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     var taxAmount by DocumentsTable.taxAmount
     var totalAmount by DocumentsTable.totalAmount
     var fileUrl by DocumentsTable.fileUrl
-    var createdBy by UserEntity referencedOn DocumentsTable.createdBy
+    var createdBy by DocumentsTable.createdBy
     var createdAt by DocumentsTable.createdAt
     var updatedAt by DocumentsTable.updatedAt
     var active by DocumentsTable.active
@@ -44,10 +44,10 @@ class DocumentEntity(id: EntityID<UUID>) : UUIDEntity(id) {
         taxAmount = taxAmount.toDouble(),
         totalAmount = totalAmount.toDouble(),
         fileUrl = fileUrl,
-        createdBy = createdBy.id.value,
+        createdBy = createdBy,
         createdAt = createdAt.toKotlinLocalDateTime(),
         updatedAt = updatedAt.toKotlinLocalDateTime(),
         active = active,
-        companyId = companyId.id.value
+        companyId = companyId
     )
 }

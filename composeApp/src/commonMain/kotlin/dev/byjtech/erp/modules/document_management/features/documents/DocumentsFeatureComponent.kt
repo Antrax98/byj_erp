@@ -7,6 +7,7 @@ import dev.byjtech.erp.modules.document_management.features.documents.nav.docume
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentPage.DocumentPageComponent
 import dev.byjtech.erp.modules.document_management.features.documents.nav.addDocument.AddDocumentComponent
 import dev.byjtech.erp.modules.document_management.features.documents.nav.editDocument.EditDocumentComponent
+import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryComponent
 import kotlinx.coroutines.flow.StateFlow
 
 interface DocumentsFeatureComponent : FeatureComponent {
@@ -18,5 +19,6 @@ interface DocumentsFeatureComponent : FeatureComponent {
         class DocumentPage(val component: DocumentPageComponent) : Child()
         class AddDocument(val component: AddDocumentComponent) : Child()
         class EditDocument(val component: EditDocumentComponent) : Child()
+        class DocumentHistory(val component: DocumentHistoryComponent) : Child()
     }
 }

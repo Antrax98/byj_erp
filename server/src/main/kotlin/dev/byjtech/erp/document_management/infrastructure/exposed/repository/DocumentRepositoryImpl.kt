@@ -31,7 +31,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
     }
 
     override fun findAll(): List<Document> = transaction(database) {
-        DocumentsTable.selectAll()
+        DocumentsTable.selectAll().where { DocumentsTable.active eq true }
             .map { it.toDomain() }
     }
 

@@ -18,10 +18,10 @@ fun DocumentEntity.toModel(): Document {
         taxAmount = this.taxAmount.toDouble(),
         totalAmount = this.totalAmount.toDouble(),
         fileUrl = this.fileUrl,
-        createdBy = this.createdBy.id.value,
+        createdBy = this.createdBy,
         createdAt = this.createdAt.toKotlinLocalDateTime(),
         updatedAt = this.updatedAt.toKotlinLocalDateTime(),
         active = this.active,
-        companyId = this.companyId.id.value
+        companyId = this.companyId
     )
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -70,6 +71,26 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                     fileUrl = document.fileUrl,
                     status = document.status.name
                 )
+                
+                // Validar después de cargar los datos
+                val today = DateUtils.today()
+                val minValidDate = if (document.issueDate != null) {
+                    if (document.issueDate > today) document.issueDate else today
+                } else {
+                    today
+                }
+                
+                val dueDate = document.dueDate
+                val isDueDateValid = dueDate == null || dueDate >= minValidDate
+                
+                state = state.copy(
+                    isValid = document.type != null &&
+                            document.documentNumber.isNotBlank() &&
+                            document.issueDate != null &&
+                            document.netAmount.toString().isNotBlank() &&
+                            document.netAmount.toString().toDoubleOrNull() != null &&
+                            isDueDateValid
+                )
             } else {
                 state = state.copy(
                     isLoading = false,
@@ -87,18 +108,19 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
     // Validar formulario
     LaunchedEffect(state.selectedDocumentType, state.documentNumber, state.issueDate, state.dueDate, state.netAmount) {
         val today = DateUtils.today() // Fecha actual
-        val minValidDate = if (state.issueDate != null) {
-            if (state.issueDate!! > today) state.issueDate!! else today
-        } else {
-            today
-        }
+        val issueDate = state.issueDate
+        val dueDate = state.dueDate
         
-        val isDueDateValid = state.dueDate == null || state.dueDate!! >= minValidDate
+        val minValidDate = issueDate?.let { issue ->
+            if (issue > today) issue else today
+        } ?: today
+        
+        val isDueDateValid = dueDate == null || dueDate >= minValidDate
         
         state = state.copy(
             isValid = state.selectedDocumentType != null &&
                     state.documentNumber.isNotBlank() &&
-                    state.issueDate != null &&
+                    issueDate != null &&
                     state.netAmount.isNotBlank() &&
                     state.netAmount.toDoubleOrNull() != null &&
                     isDueDateValid // Agregar validación de fechas (incluyendo fecha actual)
@@ -125,6 +147,11 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                     }
                 },
                 actions = {
+                    IconButton(onClick = { 
+                        component.navTo(DocumentsFeatureComponentImpl.Config.DocumentHistory(component.documentId))
+                    }) {
+                        Icon(Icons.Default.History, contentDescription = "Ver Historial")
+                    }
                     IconButton(onClick = { state = state.copy(showDeleteDialog = true) }) {
                         Icon(Icons.Default.Delete, contentDescription = "Eliminar")
                     }
@@ -177,6 +204,74 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                         .verticalScroll(scrollState),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    
+                    // TEST: Botones movidos hacia arriba para probar visibilidad
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain) },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Cancelar")
+                        }
+
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    state = state.copy(isLoading = true, error = null)
+                                    try {
+                                        val request = UpdateDocumentRequest(
+                                            type = state.selectedDocumentType,
+                                            documentNumber = state.documentNumber,
+                                            issueDate = state.issueDate ?: return@launch,
+                                            dueDate = state.dueDate,
+                                            status = state.status,
+                                            currency = state.currency,
+                                            netAmount = state.netAmount.toDouble(),
+                                            taxAmount = state.taxAmount.toDoubleOrNull() ?: 0.0,
+                                            totalAmount = state.totalAmount.toDouble(),
+                                            fileUrl = state.fileUrl
+                                        )
+
+                                        val result = component.apiClient.documentManagement.updateDocument(
+                                            component.documentId,
+                                            request
+                                        )
+                                        if (result != null) {
+                                            // Navegar de vuelta a la lista
+                                            component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain)
+                                        } else {
+                                            state = state.copy(
+                                                isLoading = false,
+                                                error = "Error al actualizar el documento"
+                                            )
+                                        }
+                                    } catch (e: Exception) {
+                                        state = state.copy(
+                                            isLoading = false,
+                                            error = "Error: ${e.message}"
+                                        )
+                                    }
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            enabled = true // Temporalmente forzamos true para probar
+                        ) {
+                            if (state.isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            } else {
+                                Text("Guardar")
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     // Información del documento
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -261,16 +356,15 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                         value = state.dueDate,
                         onValueChange = { 
                             val today = DateUtils.today() // Fecha actual
-                            val minValidDate = if (state.issueDate != null) {
-                                if (state.issueDate!! > today) state.issueDate!! else today
-                            } else {
-                                today
-                            }
+                            val issueDate = state.issueDate
+                            val minValidDate = issueDate?.let { issue ->
+                                if (issue > today) issue else today
+                            } ?: today
                             
                             // Validar que la fecha de vencimiento no sea anterior a la fecha de emisión ni a hoy
                             if (it != null && it < minValidDate) {
                                 val errorMessage = when {
-                                    state.issueDate != null && it < state.issueDate!! -> 
+                                    issueDate != null && it < issueDate -> 
                                         "La fecha de vencimiento no puede ser anterior a la fecha de emisión"
                                     it < today -> 
                                         "La fecha de vencimiento no puede ser anterior a la fecha actual"
@@ -285,39 +379,37 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                         modifier = Modifier.fillMaxWidth(),
                         minDate = run {
                             val today = DateUtils.today() // Fecha actual
-                            if (state.issueDate != null) {
-                                if (state.issueDate!! > today) state.issueDate!! else today
-                            } else {
-                                today
-                            }
+                            val issueDate = state.issueDate
+                            issueDate?.let { issue ->
+                                if (issue > today) issue else today
+                            } ?: today
                         },
                         supportingText = if (state.dueDate != null) {
                             val today = DateUtils.today()
-                            val minValidDate = if (state.issueDate != null) {
-                                if (state.issueDate!! > today) state.issueDate!! else today
-                            } else {
-                                today
-                            }
+                            val issueDate = state.issueDate
+                            val dueDate = state.dueDate
+                            val minValidDate = issueDate?.let { issue ->
+                                if (issue > today) issue else today
+                            } ?: today
                             
                             when {
-                                state.dueDate!! < minValidDate && state.issueDate != null && state.dueDate!! < state.issueDate!! -> {
+                                dueDate != null && dueDate < minValidDate && issueDate != null && dueDate < issueDate -> {
                                     { Text("La fecha de vencimiento no puede ser anterior a la fecha de emisión", color = MaterialTheme.colorScheme.error) }
                                 }
-                                state.dueDate!! < today -> {
+                                dueDate != null && dueDate < today -> {
                                     { Text("La fecha de vencimiento no puede ser anterior a la fecha actual", color = MaterialTheme.colorScheme.error) }
                                 }
                                 else -> null
                             }
                         } else null,
-                        isError = state.dueDate != null && run {
+                        isError = state.dueDate?.let { dueDate ->
                             val today = DateUtils.today()
-                            val minValidDate = if (state.issueDate != null) {
-                                if (state.issueDate!! > today) state.issueDate!! else today
-                            } else {
-                                today
-                            }
-                            state.dueDate!! < minValidDate
-                        }
+                            val issueDate = state.issueDate
+                            val minValidDate = issueDate?.let { issue ->
+                                if (issue > today) issue else today
+                            } ?: today
+                            dueDate < minValidDate
+                        } ?: false
                     )
 
                     // Moneda
@@ -427,7 +519,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                                         val request = UpdateDocumentRequest(
                                             type = state.selectedDocumentType,
                                             documentNumber = state.documentNumber,
-                                            issueDate = state.issueDate!!,
+                                            issueDate = state.issueDate ?: return@launch,
                                             dueDate = state.dueDate,
                                             status = state.status,
                                             currency = state.currency,
@@ -459,7 +551,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                                 }
                             },
                             modifier = Modifier.weight(1f),
-                                                        enabled = state.isValid && !state.isLoading && state.document?.type != DocumentType.INVOICE
+                            enabled = true // Temporalmente forzamos true para probar
                         ) {
                             if (state.isLoading) {
                                 CircularProgressIndicator(

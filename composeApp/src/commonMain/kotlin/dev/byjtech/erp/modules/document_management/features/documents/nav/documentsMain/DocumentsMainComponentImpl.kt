@@ -100,6 +100,19 @@ class DocumentsMainComponentImpl(
         navTo(DocumentsFeatureComponentImpl.Config.AddDocument)
     }
 
+    override fun onEditDocumentClick(documentId: String) {
+        navTo(DocumentsFeatureComponentImpl.Config.EditDocument(documentId))
+    }
+
+    override fun onViewHistoryClick(documentId: String) {
+        navTo(DocumentsFeatureComponentImpl.Config.DocumentHistory(documentId))
+    }
+
+    override fun onDeleteDocumentClick(documentId: String) {
+        // TODO: Implementar confirmación y eliminación
+        println("Eliminar documento: $documentId")
+    }
+
     init {
         coroutineScope.launch {
             loadDocuments()

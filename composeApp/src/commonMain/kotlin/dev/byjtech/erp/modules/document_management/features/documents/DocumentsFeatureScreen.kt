@@ -12,6 +12,7 @@ import dev.byjtech.erp.modules.document_management.features.documents.nav.docume
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentPage.DocumentPageScreen
 import dev.byjtech.erp.modules.document_management.features.documents.nav.addDocument.AddDocumentScreen
 import dev.byjtech.erp.modules.document_management.features.documents.nav.editDocument.EditDocumentScreen
+import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryScreen
 
 @Composable
 fun DocumentsFeatureScreen(component: DocumentsFeatureComponent) {
@@ -28,6 +29,7 @@ fun DocumentsFeatureScreen(component: DocumentsFeatureComponent) {
                 is DocumentsFeatureComponent.Child.DocumentPage -> DocumentPageScreen(child.component)
                 is DocumentsFeatureComponent.Child.AddDocument -> AddDocumentScreen(child.component)
                 is DocumentsFeatureComponent.Child.EditDocument -> EditDocumentScreen(child.component)
+                is DocumentsFeatureComponent.Child.DocumentHistory -> DocumentHistoryScreen(child.component)
             }
         }
     }

@@ -15,6 +15,8 @@ import dev.byjtech.erp.modules.document_management.features.documents.nav.addDoc
 import dev.byjtech.erp.modules.document_management.features.documents.nav.addDocument.AddDocumentComponentImpl
 import dev.byjtech.erp.modules.document_management.features.documents.nav.editDocument.EditDocumentComponent
 import dev.byjtech.erp.modules.document_management.features.documents.nav.editDocument.EditDocumentComponentImpl
+import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryComponent
+import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryComponentImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
@@ -55,6 +57,8 @@ class DocumentsFeatureComponentImpl(
         data object AddDocument : Config()
         @Serializable
         data class EditDocument(val documentId: String) : Config()
+        @Serializable
+        data class DocumentHistory(val documentId: String) : Config()
     }
 
     private val navigation = StackNavigation<Config>()
@@ -105,12 +109,26 @@ class DocumentsFeatureComponentImpl(
                     documentId = config.documentId
                 )
             )
+            is Config.DocumentHistory -> DocumentsFeatureComponent.Child.DocumentHistory(
+                DocumentHistoryComponentImpl(
+                    componentContext = componentContext,
+                    userPermissions = userPermissions,
+                    apiClient = apiClient,
+                    documentId = config.documentId,
+                    onNavigateBack = { 
+                        navigation.pop {
+                            val newConfig = childStack.active.configuration
+                            changeTitle(newConfig)
+                        }
+                    }
+                )
+            )
         }
 
     private fun navigateTo(target: Config) {
         val current = childStack.value.active.configuration
         if (current != target) {
-            navigation.replaceCurrent(target)
+            navigation.push(target)
             changeTitle(target)
         }
     }
@@ -121,6 +139,7 @@ class DocumentsFeatureComponentImpl(
             is Config.DocumentPage -> "Detalle de Documento"
             Config.AddDocument -> "Nuevo Documento"
             is Config.EditDocument -> "Editar Documento"
+            is Config.DocumentHistory -> "Historial de Edición"
         }
         updateTitle(title)
     }

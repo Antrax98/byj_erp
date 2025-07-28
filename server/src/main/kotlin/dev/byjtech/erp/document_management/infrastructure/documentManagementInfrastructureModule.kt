@@ -4,6 +4,7 @@ import dev.byjtech.erp.document_management.infrastructure.auth.DocumentManagemen
 import dev.byjtech.erp.document_management.infrastructure.exposed.repository.*
 import dev.byjtech.erp.document_management.infrastructure.api.DocumentManagementRoutesInstaller
 import dev.byjtech.erp.document_management.infrastructure.api.controllers.DocumentRoutesInstaller
+import dev.byjtech.erp.document_management.infrastructure.api.controllers.DocumentEditHistoryRoutesInstaller
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -29,10 +30,18 @@ val documentManagementInfrastructureModule = module {
         )
     }
 
+    single<DocumentEditHistoryRoutesInstaller> {
+        DocumentEditHistoryRoutesInstaller(
+            documentEditHistoryService = get(),
+            authWrapper = get()
+        )
+    }
+
     single<DocumentManagementRoutesInstaller> {
         DocumentManagementRoutesInstaller(
             setOf(
-                get<DocumentRoutesInstaller>()
+                get<DocumentRoutesInstaller>(),
+                get<DocumentEditHistoryRoutesInstaller>()
             )
         )
     }

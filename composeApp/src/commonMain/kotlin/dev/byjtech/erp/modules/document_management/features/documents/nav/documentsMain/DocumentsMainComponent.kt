@@ -20,5 +20,8 @@ interface DocumentsMainComponent {
     fun onPageChange(page: Int)
     fun onDocumentClick(documentId: String)
     fun onAddDocumentClick()
+    fun onEditDocumentClick(documentId: String)
+    fun onViewHistoryClick(documentId: String)
+    fun onDeleteDocumentClick(documentId: String)
     fun toggleSearchMode()
 }

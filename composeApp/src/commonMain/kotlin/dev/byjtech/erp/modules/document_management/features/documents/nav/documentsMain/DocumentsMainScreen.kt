@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +21,7 @@ import dev.byjtech.erp.modules.document_management.utils.getStatusDisplayName
 import dev.byjtech.erp.modules.document_management.features.documents.components.DocumentSearchFilters
 import dev.byjtech.erp.modules.document_management.features.documents.components.DocumentPagination
 import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +57,20 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
                     Icon(
                         imageVector = if (state.isSearchMode) Icons.Default.List else Icons.Default.Search,
                         contentDescription = if (state.isSearchMode) "Ver todos" else "Buscar"
+                    )
+                }
+                
+                // Botón recargar
+                IconButton(
+                    onClick = { 
+                        scope.launch {
+                            component.loadDocuments()
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Recargar"
                     )
                 }
                 
