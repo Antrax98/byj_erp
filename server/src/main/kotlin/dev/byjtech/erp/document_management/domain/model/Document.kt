@@ -33,4 +33,18 @@ data class Document(
             throw IllegalStateException("Las facturas no se pueden editar")
         }
     }
+    
+    /**
+     * Valida si el documento puede ser desactivado según las reglas de negocio.
+     * Solo se pueden desactivar documentos en estado UPLOADED o REJECTED.
+     */
+    fun validateCanBeDeactivated() {
+        if (status != DocumentStatus.UPLOADED && status != DocumentStatus.REJECTED) {
+            throw IllegalStateException("Solo se pueden desactivar documentos en estado UPLOADED o REJECTED. Estado actual: ${status.name}")
+        }
+        
+        if (!active) {
+            throw IllegalStateException("El documento ya está desactivado")
+        }
+    }
 }

@@ -82,7 +82,7 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
             TopAppBar(
                 title = { Text("Agregar Documento") },
                 navigationIcon = {
-                    IconButton(onClick = { component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain) }) {
+                    IconButton(onClick = { component.onNavigateBack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
                 },
@@ -304,7 +304,7 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedButton(
-                    onClick = { component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain) },
+                    onClick = { component.onNavigateBack() },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Cancelar")
@@ -331,7 +331,7 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
                                 val result = component.apiClient.documentManagement.createDocument(request)
                                 if (result != null) {
                                     // Navegar de vuelta a la lista
-                                    component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain)
+                                    component.onNavigateBack()
                                 } else {
                                     state = state.copy(
                                         isLoading = false,

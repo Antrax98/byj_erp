@@ -11,5 +11,6 @@ class EditDocumentComponentImpl(
     override val userPermissions: StateFlow<Set<PermissionKey>>,
     override val apiClient: ApiClient,
     override val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit,
-    override val documentId: String
+    override val documentId: String,
+    override val onNavigateBack: () -> Unit
 ) : EditDocumentComponent

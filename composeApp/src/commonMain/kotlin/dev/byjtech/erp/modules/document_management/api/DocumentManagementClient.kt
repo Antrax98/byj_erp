@@ -5,8 +5,11 @@ import dev.byjtech.erp.document_management.dto.DocumentAuditLogDTO
 import dev.byjtech.erp.document_management.dto.DocumentEditHistoryDTO
 import dev.byjtech.erp.document_management.request.CreateDocumentRequest
 import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
+import dev.byjtech.erp.document_management.request.DeactivateDocumentRequest
+import dev.byjtech.erp.document_management.response.DeactivateDocumentResponse
 import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
 import dev.byjtech.erp.modules.document_management.dto.DocumentSearchResponse
+import dev.byjtech.erp.common.ApiResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -137,6 +140,19 @@ class DocumentManagementClient(private val client: HttpClient) {
             client.get(urlString = "api/document_management/documents/$documentId/audit-logs").body()
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+
+    // Deactivate document endpoint
+    suspend fun deactivateDocument(documentId: String, request: DeactivateDocumentRequest): ApiResponse<DeactivateDocumentResponse, String> {
+        return try {
+            val response = client.patch(urlString = "api/document_management/documents/$documentId/deactivate") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+            ApiResponse.Success(response.body())
+        } catch (e: Exception) {
+            ApiResponse.Error("Error al desactivar documento", e.message ?: "Error desconocido")
         }
     }
 }

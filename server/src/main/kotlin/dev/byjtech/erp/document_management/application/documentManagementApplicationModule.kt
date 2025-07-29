@@ -7,6 +7,6 @@ import org.koin.dsl.module
 
 val documentManagementApplicationModule = module {
     single { DocumentEditHistoryService(get()) }
-    single { DocumentService(get(), get(), get()) }
-    single { DocumentAuditLogService() }
+    single { DocumentAuditLogService(get()) }
+    single { DocumentService(get(), get(), get(), get()) }
 }

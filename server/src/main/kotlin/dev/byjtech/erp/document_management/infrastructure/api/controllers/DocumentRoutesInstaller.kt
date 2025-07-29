@@ -9,6 +9,8 @@ import dev.byjtech.erp.document_management.infrastructure.exposed.extensions.toD
 import dev.byjtech.erp.document_management.infrastructure.exposed.extensions.applyUpdate
 import dev.byjtech.erp.document_management.request.CreateDocumentRequest
 import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
+import dev.byjtech.erp.document_management.request.DeactivateDocumentRequest
+import dev.byjtech.erp.document_management.response.DeactivateDocumentResponse
 import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
 import dev.byjtech.erp.shared.routing.RoutesInstaller
 import io.ktor.http.HttpStatusCode
@@ -375,6 +377,74 @@ fun Route.documentsRoutes(
             call.respond(HttpStatusCode.BadRequest, e.message ?: "Validation error")
         } catch (e: Exception) {
             call.respond(HttpStatusCode.InternalServerError, "Error updating document status: ${e.message}")
+        }
+    }
+    
+    patch("/{documentId}/deactivate") {
+        try {
+            // 1. Validar sesión y autorización
+            val session = authWrapper.authorizeOrThrow(
+                call,
+                requiredAnyPermissions = setOf(
+                    DocumentManagementDefinition.Documents.Disable.key
+                )
+            )
+            
+            // 2. Verificar contexto de empresa
+            val companyId = session.companyId
+            if (companyId == null) {
+                call.respond(HttpStatusCode.BadRequest, "User must be associated with a company")
+                return@patch
+            }
+            
+            // 3. Obtener ID del documento
+            val documentIdParam = call.parameters["documentId"]
+            if (documentIdParam == null) {
+                call.respond(HttpStatusCode.BadRequest, "Document ID is required")
+                return@patch
+            }
+            
+            val documentId = try {
+                UUID.fromString(documentIdParam)
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid document ID format")
+                return@patch
+            }
+            
+            // 4. Recibir request de desactivación
+            val deactivateRequest = call.receive<DeactivateDocumentRequest>()
+            
+            // 5. Validar confirmación
+            if (!deactivateRequest.confirm) {
+                call.respond(HttpStatusCode.BadRequest, "Confirmation is required to deactivate document")
+                return@patch
+            }
+            
+            // 6. Desactivar documento
+            val deactivatedDocument = documentService.deactivateDocument(
+                documentId = documentId,
+                companyId = companyId,
+                userId = session.userId,
+                reason = deactivateRequest.reason
+            )
+            
+            if (deactivatedDocument != null) {
+                val response = DeactivateDocumentResponse(
+                    document = deactivatedDocument,
+                    message = "Documento desactivado exitosamente",
+                    deactivatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                )
+                call.respond(HttpStatusCode.OK, response)
+            } else {
+                call.respond(HttpStatusCode.NotFound, "Document not found")
+            }
+            
+        } catch (e: IllegalStateException) {
+            call.respond(HttpStatusCode.BadRequest, e.message ?: "Cannot deactivate document")
+        } catch (e: IllegalArgumentException) {
+            call.respond(HttpStatusCode.BadRequest, e.message ?: "Validation error")
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, "Error deactivating document: ${e.message}")
         }
     }
 }

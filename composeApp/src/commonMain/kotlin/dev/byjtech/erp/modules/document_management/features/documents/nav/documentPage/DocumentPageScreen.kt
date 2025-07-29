@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,14 +25,19 @@ import dev.byjtech.erp.modules.document_management.domain.model.getDocumentTypeD
 import dev.byjtech.erp.modules.document_management.utils.getAvailableActions
 import dev.byjtech.erp.modules.document_management.utils.getStatusDisplayName
 import dev.byjtech.erp.modules.document_management.utils.DocumentActions
+import dev.byjtech.erp.modules.document_management.utils.canBeDeactivated
+import dev.byjtech.erp.modules.document_management.utils.getDeactivationRestrictionMessage
 import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponentImpl
+import dev.byjtech.erp.document_management.request.DeactivateDocumentRequest
+import dev.byjtech.erp.common.ApiResponse
 import kotlinx.coroutines.launch
 
 data class DocumentPageState(
     val isLoading: Boolean = false,
     val document: DocumentDTO? = null,
     val error: String? = null,
-    val showDeleteDialog: Boolean = false
+    val showDeactivateDialog: Boolean = false,
+    val deactivateReason: String = ""
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +47,20 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val uriHandler = LocalUriHandler.current
+
+    // Estados de tooltip para evitar recomposiciones innecesarias
+    val backTooltipState = rememberTooltipState()
+    val sendTooltipState = rememberTooltipState()
+    val approveTooltipState = rememberTooltipState()
+    val rejectTooltipState = rememberTooltipState()
+    val editTooltipState = rememberTooltipState()
+    val deactivateTooltipState = rememberTooltipState()
+    val openFileTooltipState = rememberTooltipState()
+    val errorBackTooltipState = rememberTooltipState()
+    val editButtonTooltipState = rememberTooltipState()
+    val viewFileButtonTooltipState = rememberTooltipState()
+    val confirmTooltipState = rememberTooltipState()
+    val cancelTooltipState = rememberTooltipState()
 
     // Cargar documento al inicializar
     LaunchedEffect(component.documentId) {
@@ -71,8 +91,18 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
             TopAppBar(
                 title = { Text("Detalles del Documento") },
                 navigationIcon = {
-                    IconButton(onClick = { component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain) }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                        tooltip = {
+                            PlainTooltip {
+                                Text("Volver")
+                            }
+                        },
+                        state = backTooltipState
+                    ) {
+                        IconButton(onClick = { component.onNavigateBack() }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        }
                     }
                 },
                 actions = {
@@ -81,97 +111,157 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
                         
                         // Botón para enviar (UPLOADED -> SENT)
                         if (actions.canSend) {
-                            IconButton(
-                                onClick = { 
-                                    scope.launch {
-                                        state = state.copy(isLoading = true)
-                                        val result = component.apiClient.documentManagement.changeDocumentStatus(
-                                            document.id, 
-                                            "SENT"
-                                        )
-                                        if (result != null) {
-                                            state = state.copy(document = result, isLoading = false)
-                                        } else {
-                                            state = state.copy(
-                                                isLoading = false, 
-                                                error = "Error al enviar documento"
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                                tooltip = {
+                                    PlainTooltip {
+                                        Text("Enviar documento")
+                                    }
+                                },
+                                state = sendTooltipState
+                            ) {
+                                IconButton(
+                                    onClick = { 
+                                        scope.launch {
+                                            state = state.copy(isLoading = true)
+                                            val result = component.apiClient.documentManagement.changeDocumentStatus(
+                                                document.id, 
+                                                "SENT"
                                             )
+                                            if (result != null) {
+                                                state = state.copy(document = result, isLoading = false)
+                                            } else {
+                                                state = state.copy(
+                                                    isLoading = false, 
+                                                    error = "Error al enviar documento"
+                                                )
+                                            }
                                         }
                                     }
+                                ) {
+                                    Icon(Icons.Default.Send, contentDescription = "Enviar")
                                 }
-                            ) {
-                                Icon(Icons.Default.Send, contentDescription = "Enviar")
                             }
                         }
                         
                         // Botón para aprobar (SENT -> APPROVED)
                         if (actions.canApprove) {
-                            IconButton(
-                                onClick = { 
-                                    scope.launch {
-                                        state = state.copy(isLoading = true)
-                                        val result = component.apiClient.documentManagement.changeDocumentStatus(
-                                            document.id, 
-                                            "APPROVED"
-                                        )
-                                        if (result != null) {
-                                            state = state.copy(document = result, isLoading = false)
-                                        } else {
-                                            state = state.copy(
-                                                isLoading = false, 
-                                                error = "Error al aprobar documento"
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                                tooltip = {
+                                    PlainTooltip {
+                                        Text("Aprobar documento")
+                                    }
+                                },
+                                state = approveTooltipState
+                            ) {
+                                IconButton(
+                                    onClick = { 
+                                        scope.launch {
+                                            state = state.copy(isLoading = true)
+                                            val result = component.apiClient.documentManagement.changeDocumentStatus(
+                                                document.id, 
+                                                "APPROVED"
                                             )
+                                            if (result != null) {
+                                                state = state.copy(document = result, isLoading = false)
+                                            } else {
+                                                state = state.copy(
+                                                    isLoading = false, 
+                                                    error = "Error al aprobar documento"
+                                                )
+                                            }
                                         }
                                     }
+                                ) {
+                                    Icon(Icons.Default.Check, contentDescription = "Aprobar")
                                 }
-                            ) {
-                                Icon(Icons.Default.Check, contentDescription = "Aprobar")
                             }
                         }
                         
                         // Botón para rechazar (SENT -> REJECTED)
                         if (actions.canReject) {
-                            IconButton(
-                                onClick = { 
-                                    scope.launch {
-                                        state = state.copy(isLoading = true)
-                                        val result = component.apiClient.documentManagement.changeDocumentStatus(
-                                            document.id, 
-                                            "REJECTED"
-                                        )
-                                        if (result != null) {
-                                            state = state.copy(document = result, isLoading = false)
-                                        } else {
-                                            state = state.copy(
-                                                isLoading = false, 
-                                                error = "Error al rechazar documento"
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                                tooltip = {
+                                    PlainTooltip {
+                                        Text("Rechazar documento")
+                                    }
+                                },
+                                state = rejectTooltipState
+                            ) {
+                                IconButton(
+                                    onClick = { 
+                                        scope.launch {
+                                            state = state.copy(isLoading = true)
+                                            val result = component.apiClient.documentManagement.changeDocumentStatus(
+                                                document.id, 
+                                                "REJECTED"
                                             )
+                                            if (result != null) {
+                                                state = state.copy(document = result, isLoading = false)
+                                            } else {
+                                                state = state.copy(
+                                                    isLoading = false, 
+                                                    error = "Error al rechazar documento"
+                                                )
+                                            }
                                         }
                                     }
+                                ) {
+                                    Icon(Icons.Default.Close, contentDescription = "Rechazar")
                                 }
-                            ) {
-                                Icon(Icons.Default.Close, contentDescription = "Rechazar")
                             }
                         }
                         
                         // Botón para editar (solo si se puede editar)
                         if (actions.canEdit) {
-                            IconButton(onClick = { component.onEditDocument(document.id) }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Editar")
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                                tooltip = {
+                                    PlainTooltip {
+                                        Text("Editar documento")
+                                    }
+                                },
+                                state = editTooltipState
+                            ) {
+                                IconButton(onClick = { component.onEditDocument(document.id) }) {
+                                    Icon(Icons.Default.Edit, contentDescription = "Editar")
+                                }
                             }
                         }
                         
-                        // Botón para eliminar (solo si se puede eliminar)
-                        if (actions.canDelete) {
-                            IconButton(onClick = { state = state.copy(showDeleteDialog = true) }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+                        // Botón para desactivar (solo si se puede desactivar)
+                        if (canBeDeactivated(document.status)) {
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                                tooltip = {
+                                    PlainTooltip {
+                                        Text("Desactivar documento")
+                                    }
+                                },
+                                state = deactivateTooltipState
+                            ) {
+                                IconButton(onClick = { state = state.copy(showDeactivateDialog = true) }) {
+                                    Icon(Icons.Default.RemoveCircle, contentDescription = "Desactivar")
+                                }
                             }
                         }
                         
                         // Botón para abrir archivo (si existe URL)
                         if (document.fileUrl.isNotBlank()) {
-                            IconButton(onClick = { uriHandler.openUri(document.fileUrl) }) {
-                                Icon(Icons.Default.OpenInBrowser, contentDescription = "Abrir archivo")
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                                tooltip = {
+                                    PlainTooltip {
+                                        Text("Abrir archivo")
+                                    }
+                                },
+                                state = openFileTooltipState
+                            ) {
+                                IconButton(onClick = { uriHandler.openUri(document.fileUrl) }) {
+                                    Icon(Icons.Default.OpenInBrowser, contentDescription = "Abrir archivo")
+                                }
                             }
                         }
                     }
@@ -210,8 +300,18 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain) }) {
-                        Text("Volver")
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                        tooltip = {
+                            PlainTooltip {
+                                Text("Volver a la lista de documentos")
+                            }
+                        },
+                        state = errorBackTooltipState
+                    ) {
+                        Button(onClick = { component.onNavigateBack() }) {
+                            Text("Volver")
+                        }
                     }
                 }
             }
@@ -329,23 +429,43 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        OutlinedButton(
-                            onClick = { component.onEditDocument(document.id) },
-                            modifier = Modifier.weight(1f)
+                        TooltipBox(
+                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                            tooltip = {
+                                PlainTooltip {
+                                    Text("Editar documento")
+                                }
+                            },
+                            state = editButtonTooltipState
                         ) {
-                            Icon(Icons.Default.Edit, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Editar")
+                            OutlinedButton(
+                                onClick = { component.onEditDocument(document.id) },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Edit, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Editar")
+                            }
                         }
                         
                         if (document.fileUrl.isNotBlank()) {
-                            Button(
-                                onClick = { uriHandler.openUri(document.fileUrl) },
-                                modifier = Modifier.weight(1f)
+                            TooltipBox(
+                                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                                tooltip = {
+                                    PlainTooltip {
+                                        Text("Abrir archivo en el navegador")
+                                    }
+                                },
+                                state = viewFileButtonTooltipState
                             ) {
-                                Icon(Icons.Default.OpenInBrowser, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Ver Archivo")
+                                Button(
+                                    onClick = { uriHandler.openUri(document.fileUrl) },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(Icons.Default.OpenInBrowser, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Ver Archivo")
+                                }
                             }
                         }
                     }
@@ -353,44 +473,94 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
             }
         }
     }
-
-    // Diálogo de confirmación para eliminar
-    if (state.showDeleteDialog) {
+    
+    // Diálogo de confirmación para desactivar
+    if (state.showDeactivateDialog) {
         AlertDialog(
-            onDismissRequest = { state = state.copy(showDeleteDialog = false) },
-            title = { Text("Confirmar eliminación") },
-            text = { Text("¿Está seguro de que desea eliminar este documento? Esta acción no se puede deshacer.") },
+            onDismissRequest = { state = state.copy(showDeactivateDialog = false, deactivateReason = "") },
+            title = { Text("Confirmar desactivación") },
+            text = { 
+                Column {
+                    Text("¿Está seguro de que desea desactivar este documento?")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "El documento será marcado como inactivo pero se mantendrá en el sistema para auditoría. Esta acción se puede revertir.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = state.deactivateReason,
+                        onValueChange = { state = state.copy(deactivateReason = it) },
+                        label = { Text("Razón de desactivación (opcional)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 3
+                    )
+                }
+            },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        scope.launch {
-                            state = state.copy(showDeleteDialog = false, isLoading = true)
+                TooltipBox(
+                    positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                    tooltip = {
+                        PlainTooltip {
+                            Text("Confirmar desactivación del documento")
+                        }
+                    },
+                    state = confirmTooltipState
+                ) {
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                            state = state.copy(showDeactivateDialog = false, isLoading = true)
                             try {
-                                val success = component.apiClient.documentManagement.deleteDocument(component.documentId)
-                                if (success) {
-                                    // Navegar de vuelta a la lista
-                                    component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain)
-                                } else {
-                                    state = state.copy(
-                                        isLoading = false,
-                                        error = "Error al eliminar el documento"
-                                    )
+                                val deactivateRequest = DeactivateDocumentRequest(
+                                    confirm = true,
+                                    reason = state.deactivateReason.takeIf { it.isNotBlank() }
+                                )
+                                val result = component.apiClient.documentManagement.deactivateDocument(
+                                    component.documentId, 
+                                    deactivateRequest
+                                )
+                                when (result) {
+                                    is ApiResponse.Success -> {
+                                        // Navegar de vuelta a la lista y recargarla
+                                        component.onDocumentDeactivated()
+                                    }
+                                    is ApiResponse.Error -> {
+                                        state = state.copy(
+                                            isLoading = false,
+                                            error = result.code ?: "Error al desactivar el documento",
+                                            deactivateReason = ""
+                                        )
+                                    }
                                 }
                             } catch (e: Exception) {
                                 state = state.copy(
                                     isLoading = false,
-                                    error = "Error: ${e.message}"
+                                    error = "Error: ${e.message}",
+                                    deactivateReason = ""
                                 )
                             }
                         }
                     }
                 ) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                    Text("Desactivar", color = MaterialTheme.colorScheme.error)
+                }
                 }
             },
             dismissButton = {
-                TextButton(onClick = { state = state.copy(showDeleteDialog = false) }) {
-                    Text("Cancelar")
+                TooltipBox(
+                    positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                    tooltip = {
+                        PlainTooltip {
+                            Text("Cancelar desactivación")
+                        }
+                    },
+                    state = cancelTooltipState
+                ) {
+                    TextButton(onClick = { state = state.copy(showDeactivateDialog = false, deactivateReason = "") }) {
+                        Text("Cancelar")
+                    }
                 }
             }
         )

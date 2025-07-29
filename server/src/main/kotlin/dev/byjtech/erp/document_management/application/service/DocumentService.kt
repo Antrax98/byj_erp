@@ -14,7 +14,8 @@ import java.util.UUID
 class DocumentService(
     private val documentRepository: DocumentRepository,
     private val companyValidationRepository: CompanyValidationRepository,
-    private val documentEditHistoryService: DocumentEditHistoryService
+    private val documentEditHistoryService: DocumentEditHistoryService,
+    private val documentAuditLogService: DocumentAuditLogService
 ) {
     
     // Método para SuperAdmins: obtener TODOS los documentos sin filtro por compañía
@@ -93,6 +94,43 @@ class DocumentService(
         
         documentRepository.delete(documentId)
         return true
+    }
+    
+    fun deactivateDocument(documentId: UUID, companyId: UUID, userId: UUID, reason: String? = null): DocumentDTO? {
+        val existingDocument = documentRepository.findById(documentId)
+        
+        // Validar que el documento existe y pertenece a la compañía
+        if (existingDocument == null || existingDocument.companyId != companyId) {
+            return null
+        }
+        
+        // Validar reglas de negocio para desactivación
+        existingDocument.validateCanBeDeactivated()
+        
+        // Crear documento con estado inactivo
+        val deactivatedDocument = existingDocument.copy(
+            active = false,
+            updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        )
+        
+        // Registrar cambio en el historial de edición
+        documentEditHistoryService.recordDocumentChanges(
+            oldDocument = existingDocument,
+            newDocument = deactivatedDocument,
+            userId = userId
+        )
+        
+        // Guardar documento actualizado
+        val savedDocument = documentRepository.update(deactivatedDocument)
+        
+        // Registrar evento de auditoría
+        documentAuditLogService.logDocumentDeactivated(
+            documentId = documentId,
+            userId = userId,
+            reason = reason
+        )
+        
+        return savedDocument.toDTO()
     }
     
     // Lógica de negocio: Validaciones

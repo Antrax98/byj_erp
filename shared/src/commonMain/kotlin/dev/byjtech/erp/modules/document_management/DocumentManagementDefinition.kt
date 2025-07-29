@@ -13,6 +13,7 @@ public object DocumentManagementDefinition : ModuleDefinition {
         val View = permission("view", "Ver documentos")
         val Update = permission("update", "Actualizar un documento")
         val Delete = permission("delete", "Desactivar o anular un documento")
+        val Disable = permission("disable", "Desactivar documento")
     }
 
     object AuditLogs : CategoryBase("audit_logs", "Bitácora de auditoría", DocumentManagementDefinition) {

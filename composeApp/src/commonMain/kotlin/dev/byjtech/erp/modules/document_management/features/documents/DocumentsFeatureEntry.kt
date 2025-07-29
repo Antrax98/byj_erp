@@ -14,7 +14,8 @@ val DocumentsFeatureEntry: FeatureEntry = FeatureEntry(
         DocumentManagementDefinition.Documents.View.key,
         DocumentManagementDefinition.Documents.Create.key,
         DocumentManagementDefinition.Documents.Update.key,
-        DocumentManagementDefinition.Documents.Delete.key
+        DocumentManagementDefinition.Documents.Delete.key,
+        DocumentManagementDefinition.Documents.Disable.key
     ),
     factory = { context, userPermissions, apiClient, toHome, updateTitle ->
         DocumentsFeatureComponentImpl(

@@ -14,4 +14,6 @@ interface DocumentPageComponent {
     val documentId: String
     
     fun onEditDocument(documentId: String)
+    fun onNavigateBack()
+    fun onDocumentDeactivated()
 }

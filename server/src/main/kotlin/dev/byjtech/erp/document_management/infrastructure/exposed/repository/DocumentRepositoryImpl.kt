@@ -36,8 +36,29 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
     }
 
     override fun findByCompanyId(companyId: UUID): List<Document> = transaction(database) {
-        DocumentsTable.selectAll().where { DocumentsTable.companyId eq companyId }
-            .map { it.toDomain() }
+        DocumentsTable.selectAll().where { 
+            DocumentsTable.companyId eq companyId and (DocumentsTable.active eq true)
+        }.map { it.toDomain() }
+    }
+    
+    fun findByCompanyId(companyId: UUID, includeInactive: Boolean): List<Document> = transaction(database) {
+        val query = if (includeInactive) {
+            DocumentsTable.selectAll().where { DocumentsTable.companyId eq companyId }
+        } else {
+            DocumentsTable.selectAll().where { 
+                DocumentsTable.companyId eq companyId and (DocumentsTable.active eq true)
+            }
+        }
+        query.map { it.toDomain() }
+    }
+    
+    fun findAll(includeInactive: Boolean): List<Document> = transaction(database) {
+        val query = if (includeInactive) {
+            DocumentsTable.selectAll()
+        } else {
+            DocumentsTable.selectAll().where { DocumentsTable.active eq true }
+        }
+        query.map { it.toDomain() }
     }
 
     override fun search(companyId: UUID, searchRequest: DocumentSearchRequest): SearchResult = transaction(database) {

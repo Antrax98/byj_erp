@@ -11,10 +11,20 @@ class DocumentPageComponentImpl(
     override val userPermissions: StateFlow<Set<PermissionKey>>,
     override val apiClient: ApiClient,
     override val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit,
-    override val documentId: String
+    override val documentId: String,
+    private val onNavigateBackCallback: () -> Unit,
+    private val onDocumentDeactivatedCallback: () -> Unit
 ) : DocumentPageComponent {
 
     override fun onEditDocument(documentId: String) {
         navTo(DocumentsFeatureComponentImpl.Config.EditDocument(documentId))
+    }
+
+    override fun onNavigateBack() {
+        onNavigateBackCallback()
+    }
+
+    override fun onDocumentDeactivated() {
+        onDocumentDeactivatedCallback()
     }
 }

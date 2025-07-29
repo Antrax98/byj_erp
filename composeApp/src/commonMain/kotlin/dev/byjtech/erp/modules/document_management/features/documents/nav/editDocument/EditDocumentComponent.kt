@@ -12,4 +12,5 @@ interface EditDocumentComponent {
     val apiClient: ApiClient
     val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit
     val documentId: String
+    val onNavigateBack: () -> Unit
 }

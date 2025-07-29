@@ -142,7 +142,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
             TopAppBar(
                 title = { Text("Editar Documento") },
                 navigationIcon = {
-                    IconButton(onClick = { component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain) }) {
+                    IconButton(onClick = { component.onNavigateBack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
                 },
@@ -190,7 +190,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain) }) {
+                    Button(onClick = { component.onNavigateBack() }) {
                         Text("Volver")
                     }
                 }
@@ -211,7 +211,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         OutlinedButton(
-                            onClick = { component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain) },
+                            onClick = { component.onNavigateBack() },
                             modifier = Modifier.weight(1f)
                         ) {
                             Text("Cancelar")
@@ -241,7 +241,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                                         )
                                         if (result != null) {
                                             // Navegar de vuelta a la lista
-                                            component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain)
+                                            component.onNavigateBack()
                                         } else {
                                             state = state.copy(
                                                 isLoading = false,
@@ -505,7 +505,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         OutlinedButton(
-                            onClick = { component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain) },
+                            onClick = { component.onNavigateBack() },
                             modifier = Modifier.weight(1f)
                         ) {
                             Text("Cancelar")
@@ -535,7 +535,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                                         )
                                         if (result != null) {
                                             // Navegar de vuelta a la lista
-                                            component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain)
+                                            component.onNavigateBack()
                                         } else {
                                             state = state.copy(
                                                 isLoading = false,
@@ -582,7 +582,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                                     val success = component.apiClient.documentManagement.deleteDocument(component.documentId)
                                     if (success) {
                                         // Navegar de vuelta a la lista
-                                        component.navTo(DocumentsFeatureComponentImpl.Config.DocumentsMain)
+                                        component.onNavigateBack()
                                     } else {
                                         state = state.copy(
                                             isLoading = false,

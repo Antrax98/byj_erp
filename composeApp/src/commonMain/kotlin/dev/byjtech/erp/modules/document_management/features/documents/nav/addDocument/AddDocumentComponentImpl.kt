@@ -10,5 +10,6 @@ class AddDocumentComponentImpl(
     override val componentContext: ComponentContext,
     override val userPermissions: StateFlow<Set<PermissionKey>>,
     override val apiClient: ApiClient,
-    override val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit
+    override val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit,
+    override val onNavigateBack: () -> Unit
 ) : AddDocumentComponent

@@ -67,3 +67,21 @@ fun getAvailableActions(status: DocumentStatus, userRole: String = "USER"): Docu
         )
     }
 }
+
+/**
+ * Verifica si un documento puede ser desactivado según su estado
+ */
+fun canBeDeactivated(status: DocumentStatus): Boolean {
+    return status == DocumentStatus.UPLOADED || status == DocumentStatus.REJECTED
+}
+
+/**
+ * Obtiene el mensaje de explicación de por qué un documento no puede ser desactivado
+ */
+fun getDeactivationRestrictionMessage(status: DocumentStatus): String? {
+    return when (status) {
+        DocumentStatus.UPLOADED, DocumentStatus.REJECTED -> null
+        DocumentStatus.SENT -> "No se pueden desactivar documentos enviados"
+        DocumentStatus.APPROVED -> "No se pueden desactivar documentos aprobados"
+    }
+}

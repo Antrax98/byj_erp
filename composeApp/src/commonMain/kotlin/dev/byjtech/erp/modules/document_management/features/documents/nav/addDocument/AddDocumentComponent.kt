@@ -11,4 +11,5 @@ interface AddDocumentComponent {
     val userPermissions: StateFlow<Set<PermissionKey>>
     val apiClient: ApiClient
     val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit
+    val onNavigateBack: () -> Unit
 }

@@ -19,6 +19,7 @@ import dev.byjtech.erp.modules.document_management.features.documents.nav.docume
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryComponentImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 class DocumentsFeatureComponentImpl(
@@ -89,7 +90,28 @@ class DocumentsFeatureComponentImpl(
                     userPermissions = userPermissions,
                     apiClient = apiClient,
                     navTo = ::navigateTo,
-                    documentId = config.documentId
+                    documentId = config.documentId,
+                    onNavigateBackCallback = { 
+                        navigation.pop {
+                            val newConfig = childStack.active.configuration
+                            changeTitle(newConfig)
+                        }
+                    },
+                    onDocumentDeactivatedCallback = {
+                        navigation.pop {
+                            val newConfig = childStack.active.configuration
+                            changeTitle(newConfig)
+                            // Recargar documentos si estamos en DocumentsMain
+                            if (newConfig is Config.DocumentsMain) {
+                                val documentsMain = (childStack.active.instance as? DocumentsFeatureComponent.Child.DocumentsMain)?.component
+                                documentsMain?.let {
+                                    coroutineScope.launch {
+                                        it.loadDocuments()
+                                    }
+                                }
+                            }
+                        }
+                    }
                 )
             )
             is Config.AddDocument -> DocumentsFeatureComponent.Child.AddDocument(
@@ -97,7 +119,13 @@ class DocumentsFeatureComponentImpl(
                     componentContext = componentContext,
                     userPermissions = userPermissions,
                     apiClient = apiClient,
-                    navTo = ::navigateTo
+                    navTo = ::navigateTo,
+                    onNavigateBack = { 
+                        navigation.pop {
+                            val newConfig = childStack.active.configuration
+                            changeTitle(newConfig)
+                        }
+                    }
                 )
             )
             is Config.EditDocument -> DocumentsFeatureComponent.Child.EditDocument(
@@ -106,7 +134,13 @@ class DocumentsFeatureComponentImpl(
                     userPermissions = userPermissions,
                     apiClient = apiClient,
                     navTo = ::navigateTo,
-                    documentId = config.documentId
+                    documentId = config.documentId,
+                    onNavigateBack = { 
+                        navigation.pop {
+                            val newConfig = childStack.active.configuration
+                            changeTitle(newConfig)
+                        }
+                    }
                 )
             )
             is Config.DocumentHistory -> DocumentsFeatureComponent.Child.DocumentHistory(
