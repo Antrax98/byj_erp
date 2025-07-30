@@ -31,13 +31,13 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
     }
 
     override fun findAll(): List<Document> = transaction(database) {
-        DocumentsTable.selectAll().where { DocumentsTable.active eq true }
+        DocumentsTable.selectAll().where { DocumentsTable.status neq DocumentStatus.DEACTIVATED }
             .map { it.toDomain() }
     }
 
     override fun findByCompanyId(companyId: UUID): List<Document> = transaction(database) {
         DocumentsTable.selectAll().where { 
-            DocumentsTable.companyId eq companyId and (DocumentsTable.active eq true)
+            DocumentsTable.companyId eq companyId and (DocumentsTable.status neq DocumentStatus.DEACTIVATED)
         }.map { it.toDomain() }
     }
     
@@ -46,7 +46,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
             DocumentsTable.selectAll().where { DocumentsTable.companyId eq companyId }
         } else {
             DocumentsTable.selectAll().where { 
-                DocumentsTable.companyId eq companyId and (DocumentsTable.active eq true)
+                DocumentsTable.companyId eq companyId and (DocumentsTable.status neq DocumentStatus.DEACTIVATED)
             }
         }
         query.map { it.toDomain() }
@@ -56,14 +56,24 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         val query = if (includeInactive) {
             DocumentsTable.selectAll()
         } else {
-            DocumentsTable.selectAll().where { DocumentsTable.active eq true }
+            DocumentsTable.selectAll().where { DocumentsTable.status neq DocumentStatus.DEACTIVATED }
         }
         query.map { it.toDomain() }
     }
 
     override fun search(companyId: UUID, searchRequest: DocumentSearchRequest): SearchResult = transaction(database) {
-        val baseQuery = DocumentsTable.selectAll().where { 
-            DocumentsTable.companyId eq companyId and (DocumentsTable.active eq true)
+        // Definir la consulta base con filtro de compañía
+        val shouldIncludeInactive = searchRequest.includeInactive == true || 
+                                    searchRequest.status == DocumentStatus.DEACTIVATED
+        
+        val baseQuery = if (shouldIncludeInactive) {
+            // Incluir documentos con cualquier estado (incluidos DEACTIVATED)
+            DocumentsTable.selectAll().where { DocumentsTable.companyId eq companyId }
+        } else {
+            // Excluir documentos DEACTIVATED
+            DocumentsTable.selectAll().where { 
+                DocumentsTable.companyId eq companyId and (DocumentsTable.status neq DocumentStatus.DEACTIVATED)
+            }
         }
         
         // Aplicar filtros

@@ -43,7 +43,7 @@ data class Document(
             throw IllegalStateException("Solo se pueden desactivar documentos en estado UPLOADED o REJECTED. Estado actual: ${status.name}")
         }
         
-        if (!active) {
+        if (status == DocumentStatus.DEACTIVATED) {
             throw IllegalStateException("El documento ya está desactivado")
         }
     }

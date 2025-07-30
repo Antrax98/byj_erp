@@ -60,4 +60,12 @@ class DocumentAuditLogService(
         return documentAuditLogRepository.findByDocumentId(documentId)
             .map { it.toDTO() }
     }
+    
+    /**
+     * Obtiene todos los logs de auditoría por compañía (para la página principal)
+     */
+    fun getAllAuditLogs(companyId: UUID): List<DocumentAuditLogDTO> {
+        return documentAuditLogRepository.findByCompanyId(companyId)
+            .map { it.toDTO() }
+    }
 }

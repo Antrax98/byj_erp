@@ -444,6 +444,8 @@ fun Route.documentsRoutes(
         } catch (e: IllegalArgumentException) {
             call.respond(HttpStatusCode.BadRequest, e.message ?: "Validation error")
         } catch (e: Exception) {
+            // Log the full exception for debugging
+            e.printStackTrace()
             call.respond(HttpStatusCode.InternalServerError, "Error deactivating document: ${e.message}")
         }
     }

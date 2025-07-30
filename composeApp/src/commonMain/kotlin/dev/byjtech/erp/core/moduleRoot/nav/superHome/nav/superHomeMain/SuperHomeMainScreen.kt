@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -104,9 +105,29 @@ fun SuperHomeMainScreen(component: SuperHomeMainComponent) {
 
             item {
                 NavigationCard(
+                    title = "Historial Ediciones",
+                    subtitle = "Ver historial de cambios en documentos",
+                    icon = Icons.Default.History
+                ) {
+                    component.navTo(Config.EditHistoryFeature)
+                }
+            }
+
+            item {
+                NavigationCard(
+                    title = "Auditoría Log",
+                    subtitle = "Ver logs de auditoría del sistema",
+                    icon = Icons.Default.Security
+                ) {
+                    component.navTo(Config.AuditLogsFeature)
+                }
+            }
+
+            item {
+                NavigationCard(
                     title = "Test de roles",
                     subtitle = "Pantalla para probar roles",
-                    icon = Icons.Default.Security
+                    icon = Icons.Default.Explore
                 ) {
                     println("Test Roles")
                 }
@@ -116,7 +137,7 @@ fun SuperHomeMainScreen(component: SuperHomeMainComponent) {
                 NavigationCard(
                     title = "Test de permisos",
                     subtitle = "Pantalla para probar permisos",
-                    icon = Icons.Default.Settings
+                    icon = Icons.Default.Explore
                 ) {
                     println("Test Permisos")
                 }
@@ -134,8 +155,6 @@ fun SuperHomeMainScreen(component: SuperHomeMainComponent) {
         }
     }
 }
-
-
 
 //@Composable
 //fun NavigationCard(

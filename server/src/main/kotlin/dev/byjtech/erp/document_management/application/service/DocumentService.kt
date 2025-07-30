@@ -107,9 +107,9 @@ class DocumentService(
         // Validar reglas de negocio para desactivación
         existingDocument.validateCanBeDeactivated()
         
-        // Crear documento con estado inactivo
+        // Crear documento con estado DEACTIVATED
         val deactivatedDocument = existingDocument.copy(
-            active = false,
+            status = DocumentStatus.DEACTIVATED,
             updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         )
         

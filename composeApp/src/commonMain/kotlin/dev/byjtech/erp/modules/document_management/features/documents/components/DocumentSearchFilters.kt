@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
 import dev.byjtech.erp.modules.document_management.request.SortDirection
+import dev.byjtech.erp.modules.document_management.utils.getStatusDisplayName
 import kotlinx.datetime.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,18 +67,6 @@ fun DocumentSearchFilters(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     item {
-                        // Tipo de documento
-                        OutlinedTextField(
-                            value = searchRequest.documentType ?: "",
-                            onValueChange = { type ->
-                                onSearchRequestChange(searchRequest.copy(documentType = type.takeIf { it.isNotBlank() }))
-                            },
-                            label = { Text("Tipo") },
-                            modifier = Modifier.width(150.dp)
-                        )
-                    }
-                    
-                    item {
                         // Número de documento
                         OutlinedTextField(
                             value = searchRequest.documentNumber ?: "",
@@ -98,7 +87,7 @@ fun DocumentSearchFilters(
                             modifier = Modifier.width(150.dp)
                         ) {
                             OutlinedTextField(
-                                value = searchRequest.status?.name ?: "Todos",
+                                value = searchRequest.status?.let { getStatusDisplayName(it) } ?: "Todos",
                                 onValueChange = { },
                                 readOnly = true,
                                 label = { Text("Estado") },
@@ -122,7 +111,7 @@ fun DocumentSearchFilters(
                                             onSearchRequestChange(searchRequest.copy(status = status))
                                             statusExpanded = false
                                         },
-                                        text = { Text(status.name) }
+                                        text = { Text(getStatusDisplayName(status)) }
                                     )
                                 }
                             }
@@ -187,6 +176,21 @@ fun DocumentSearchFilters(
                         )
                         Text(
                             text = "Solo documentos vencidos",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = searchRequest.includeInactive == true,
+                            onCheckedChange = { checked ->
+                                onSearchRequestChange(searchRequest.copy(includeInactive = if (checked) true else null))
+                            }
+                        )
+                        Text(
+                            text = "Incluir documentos desactivados",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }

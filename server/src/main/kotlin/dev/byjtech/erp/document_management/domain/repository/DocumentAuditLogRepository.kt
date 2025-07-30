@@ -5,6 +5,7 @@ import java.util.UUID
 
 interface DocumentAuditLogRepository {
     fun findByDocumentId(documentId: UUID): List<DocumentAuditLog>
+    fun findByCompanyId(companyId: UUID): List<DocumentAuditLog>
     fun create(log: DocumentAuditLog): DocumentAuditLog
     fun deleteById(id: UUID): Boolean
 }

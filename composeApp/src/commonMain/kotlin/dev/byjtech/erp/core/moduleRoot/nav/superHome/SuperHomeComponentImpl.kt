@@ -28,6 +28,10 @@ import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.superHomeMain.SuperHome
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.superHomeMain.SuperHomeMainComponentImpl
 import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponent
 import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponentImpl
+import dev.byjtech.erp.modules.document_management.features.editHistory.EditHistoryFeatureComponent
+import dev.byjtech.erp.modules.document_management.features.editHistory.EditHistoryFeatureComponentImpl
+import dev.byjtech.erp.modules.document_management.features.auditLogs.AuditLogsFeatureComponent
+import dev.byjtech.erp.modules.document_management.features.auditLogs.AuditLogsFeatureComponentImpl
 import kotlinx.coroutines.launch
 
 class SuperHomeComponentImpl (
@@ -75,6 +79,10 @@ class SuperHomeComponentImpl (
         data class AddSubscription(val company: CompanyDTO, val subModules: Set<ModuleDTO>) : Config()
         @Serializable
         data object DocumentsFeature : Config()
+        @Serializable
+        data object EditHistoryFeature : Config()
+        @Serializable
+        data object AuditLogsFeature : Config()
     }
 
     private val navigation = StackNavigation<Config>()
@@ -117,6 +125,12 @@ class SuperHomeComponentImpl (
     private fun documentsFeatureComponent(componentContext: ComponentContext): DocumentsFeatureComponent =
         DocumentsFeatureComponentImpl(componentContext, userPermissions, api, ::toHome) { _ -> }
 
+    private fun editHistoryFeatureComponent(componentContext: ComponentContext): EditHistoryFeatureComponent =
+        EditHistoryFeatureComponentImpl(componentContext, userPermissions, api, sessionManager, ::toHome) { _ -> }
+
+    private fun auditLogsFeatureComponent(componentContext: ComponentContext): AuditLogsFeatureComponent =
+        AuditLogsFeatureComponentImpl(componentContext, userPermissions, api, sessionManager, ::toHome) { _ -> }
+
     private fun childFactory(config: Config, componentContext: ComponentContext): SuperHomeComponent.Child {
         return when (config) {
             is Config.Companies -> SuperHomeComponent.Child.Companies(companiesComponent(componentContext.childContext("companies")))
@@ -125,6 +139,8 @@ class SuperHomeComponentImpl (
             is Config.CompanyPage -> SuperHomeComponent.Child.CompanyPage(companyPageComponent(componentContext.childContext("company-page"), config.company))
             is Config.AddSubscription -> SuperHomeComponent.Child.AddSubscription(addSubscriptionComponent(componentContext.childContext("add-subscription"), config.company, config.subModules))
             is Config.DocumentsFeature -> SuperHomeComponent.Child.DocumentsFeature(documentsFeatureComponent(componentContext.childContext("documents-feature")))
+            is Config.EditHistoryFeature -> SuperHomeComponent.Child.EditHistoryFeature(editHistoryFeatureComponent(componentContext.childContext("edit-history-feature")))
+            is Config.AuditLogsFeature -> SuperHomeComponent.Child.AuditLogsFeature(auditLogsFeatureComponent(componentContext.childContext("audit-logs-feature")))
         }
     }
 

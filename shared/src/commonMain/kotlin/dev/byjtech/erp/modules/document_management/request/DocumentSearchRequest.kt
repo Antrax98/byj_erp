@@ -46,6 +46,9 @@ data class DocumentSearchRequest(
     @SerialName("is_overdue")
     val isOverdue: Boolean? = null, // Filtrar documentos vencidos
     
+    @SerialName("include_inactive")
+    val includeInactive: Boolean? = null, // Incluir documentos desactivados
+    
     @SerialName("page")
     val page: Int = 1,
     

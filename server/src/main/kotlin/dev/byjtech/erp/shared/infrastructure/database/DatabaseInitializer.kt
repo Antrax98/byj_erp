@@ -170,33 +170,38 @@ class DatabaseInitializer (private val database: Database) {
                         .firstOrNull()
                     
                     if (documentsCategory != null) {
-                        val viewPermission = PermissionEntity
-                            .find((PermissionsTable.name eq "view") and (PermissionsTable.categoryId eq documentsCategory.id))
-                            .firstOrNull()
+                        // Lista de permisos a asignar para testing completo
+                        val permissionsToAssign = listOf("view", "create", "update", "delete", "disable")
                         
-                        if (viewPermission != null) {
-                            // Asignar permiso a superadmins para testing
-                            val superAdminEmails = listOf(
-                                "usuariotesttesttester@gmail.com",
-                                "minepoker.lol@gmail.com", 
-                                "anaysmr21@gmail.com"
-                            )
+                        permissionsToAssign.forEach { permissionName ->
+                            val permission = PermissionEntity
+                                .find((PermissionsTable.name eq permissionName) and (PermissionsTable.categoryId eq documentsCategory.id))
+                                .firstOrNull()
                             
-                            superAdminEmails.forEach { email ->
-                                val superAdminUser = UserEntity.find { UsersTable.email eq email }.firstOrNull()
-                                if (superAdminUser != null) {
-                                    // Verificar si ya tiene el permiso
-                                    val existingPermission = UserPermissionEntity.find {
-                                        (UserPermissionTable.userId eq superAdminUser.id) and 
-                                        (UserPermissionTable.permissionId eq viewPermission.id)
-                                    }.firstOrNull()
-                                    
-                                    if (existingPermission == null) {
-                                        UserPermissionEntity.new {
-                                            user = superAdminUser
-                                            permission = viewPermission
+                            if (permission != null) {
+                                // Asignar permiso a superadmins para testing
+                                val superAdminEmails = listOf(
+                                    "usuariotesttesttester@gmail.com",
+                                    "minepoker.lol@gmail.com", 
+                                    "anaysmr21@gmail.com"
+                                )
+                                
+                                superAdminEmails.forEach { email ->
+                                    val superAdminUser = UserEntity.find { UsersTable.email eq email }.firstOrNull()
+                                    if (superAdminUser != null) {
+                                        // Verificar si ya tiene el permiso
+                                        val existingPermission = UserPermissionEntity.find {
+                                            (UserPermissionTable.userId eq superAdminUser.id) and 
+                                            (UserPermissionTable.permissionId eq permission.id)
+                                        }.firstOrNull()
+                                        
+                                        if (existingPermission == null) {
+                                            UserPermissionEntity.new {
+                                                user = superAdminUser
+                                                this.permission = permission
+                                            }
+                                            println("Asignado permiso document_management:documents:$permissionName a $email")
                                         }
-                                        println("Asignado permiso document_management:documents:view a $email")
                                     }
                                 }
                             }

@@ -49,6 +49,14 @@ class DocumentEditHistoryService(
     }
     
     /**
+     * Obtiene todo el historial de ediciones (para la página principal)
+     */
+    fun getAllEditHistory(companyId: UUID): List<DocumentEditHistoryDTO> {
+        return documentEditHistoryRepository.findByCompanyId(companyId)
+            .map { it.toDTO() }
+    }
+    
+    /**
      * Detecta cambios entre dos versiones de un documento
      */
     private fun detectChanges(oldDoc: Document, newDoc: Document): List<FieldChange> {

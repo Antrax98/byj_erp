@@ -12,6 +12,7 @@ fun getStatusDisplayName(status: DocumentStatus): String {
         DocumentStatus.SENT -> "Enviado"
         DocumentStatus.APPROVED -> "Aprobado"
         DocumentStatus.REJECTED -> "Rechazado"
+        DocumentStatus.DEACTIVATED -> "Desactivado"
     }
 }
 
@@ -65,6 +66,9 @@ fun getAvailableActions(status: DocumentStatus, userRole: String = "USER"): Docu
             canView = true,
             canSend = true // Puede reenviar después de editar
         )
+        DocumentStatus.DEACTIVATED -> DocumentActions(
+            canView = true // Solo puede visualizar documentos desactivados
+        )
     }
 }
 
@@ -72,7 +76,7 @@ fun getAvailableActions(status: DocumentStatus, userRole: String = "USER"): Docu
  * Verifica si un documento puede ser desactivado según su estado
  */
 fun canBeDeactivated(status: DocumentStatus): Boolean {
-    return status == DocumentStatus.UPLOADED || status == DocumentStatus.REJECTED
+    return status != DocumentStatus.DEACTIVATED // No puede desactivar un documento ya desactivado
 }
 
 /**
@@ -83,5 +87,6 @@ fun getDeactivationRestrictionMessage(status: DocumentStatus): String? {
         DocumentStatus.UPLOADED, DocumentStatus.REJECTED -> null
         DocumentStatus.SENT -> "No se pueden desactivar documentos enviados"
         DocumentStatus.APPROVED -> "No se pueden desactivar documentos aprobados"
+        DocumentStatus.DEACTIVATED -> "El documento ya está desactivado"
     }
 }

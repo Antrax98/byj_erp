@@ -142,6 +142,23 @@ class DocumentManagementClient(private val client: HttpClient) {
             emptyList()
         }
     }
+    
+    // Global endpoints for main page
+    suspend fun getAllEditHistory(): List<DocumentEditHistoryDTO> {
+        return try {
+            client.get(urlString = "api/document_management/edit-history/all").body()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+    
+    suspend fun getAllAuditLogs(): List<DocumentAuditLogDTO> {
+        return try {
+            client.get(urlString = "api/document_management/audit-logs/all").body()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
 
     // Deactivate document endpoint
     suspend fun deactivateDocument(documentId: String, request: DeactivateDocumentRequest): ApiResponse<DeactivateDocumentResponse, String> {

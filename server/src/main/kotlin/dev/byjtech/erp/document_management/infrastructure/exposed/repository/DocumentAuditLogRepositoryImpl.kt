@@ -6,7 +6,9 @@ import dev.byjtech.erp.document_management.domain.repository.DocumentAuditLogRep
 import dev.byjtech.erp.document_management.infrastructure.exposed.entities.DocumentAuditLogEntity
 import dev.byjtech.erp.document_management.infrastructure.exposed.entities.DocumentEntity
 import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentAuditLogTable
-import org.jetbrains.exposed.sql.Database
+import dev.byjtech.erp.document_management.infrastructure.exposed.tables.DocumentsTable
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
 import kotlinx.datetime.toJavaLocalDateTime
@@ -28,6 +30,16 @@ class DocumentAuditLogRepositoryImpl(
 
     override fun findByDocumentId(documentId: UUID): List<DocumentAuditLog> = transaction(db) {
         DocumentAuditLogEntity.find { DocumentAuditLogTable.documentId eq documentId }
+            .map { it.toDomain() }
+    }
+
+    override fun findByCompanyId(companyId: UUID): List<DocumentAuditLog> = transaction(db) {
+        val documentIds = DocumentsTable.selectAll().where { DocumentsTable.companyId eq companyId }
+            .map { it[DocumentsTable.id] }
+        
+        DocumentAuditLogEntity.find { 
+            DocumentAuditLogTable.documentId inList documentIds
+        }.orderBy(DocumentAuditLogTable.createdAt to SortOrder.DESC)
             .map { it.toDomain() }
     }
 
