@@ -9,6 +9,7 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
+import dev.byjtech.erp.common.session.SessionManager
 import dev.byjtech.erp.core.dto.RoleDTO
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.addUser.AddUserComponent
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.nav.addUser.AddUserComponentImpl
@@ -32,6 +33,7 @@ class UsersFeatureComponentImpl(
     val componentContext: ComponentContext,
     override val userPermissions: StateFlow<Set<PermissionKey>>,
     override val apiClient: ApiClient,
+    override val sessionManagerRef: SessionManager?,
     override val toHome: () -> Unit,
     override val updateTitle: (newTitle: String) -> Unit
 ) : UsersFeatureComponent, ComponentContext by componentContext {
@@ -46,7 +48,10 @@ class UsersFeatureComponentImpl(
         if(childStack.active.configuration==Config.UsersMain){
             return false
         } else{
-            navigation.pop()
+            navigation.pop(){
+                val newConfig = childStack.active.configuration
+                changeTitle(newConfig)
+            }
             return true
         }
     }
@@ -59,9 +64,9 @@ class UsersFeatureComponentImpl(
         @Serializable
         data class UserPage(val userId: String) : Config()
         @Serializable
-        data class AssignRole(val userId: String, val assignableRoles: Set<RoleDTO>) : Config()
+        data class AssignRole(val userId: String, val actUserRoles: Set<RoleDTO>) : Config()
         @Serializable
-        data class AssignSpecialPermission(val userId: String, val assignablePermissions: Set<PermissionKey>) : Config()
+        data class AssignSpecialPermission(val userId: String) : Config()
         @Serializable
         data object AddUser : Config()
     }
@@ -77,7 +82,7 @@ class UsersFeatureComponentImpl(
         childFactory = ::childFactory
     )
 
-    override val childStack: Value<ChildStack<*, UsersFeatureComponent.Child>> = stack
+    override val childStack: Value<ChildStack<Config, UsersFeatureComponent.Child>> = stack
 
     private fun usersMainComponent(componentContext: ComponentContext): UsersMainComponent =
         UsersMainComponentImpl(componentContext, userPermissions, apiClient, ::navigateTo)
@@ -85,16 +90,17 @@ class UsersFeatureComponentImpl(
     private fun userPageComponent(componentContext: ComponentContext, userId: String): UserPageComponent =
         UserPageComponentImpl(componentContext, userPermissions, userId, apiClient, ::navigateTo)
 
-    private fun assignRoleComponent(componentContext: ComponentContext, userId: String, assignableRoles: Set<RoleDTO>): AssignRoleComponent =
+    private fun assignRoleComponent(componentContext: ComponentContext, userId: String, actUserRoles: Set<RoleDTO>): AssignRoleComponent =
         AssignRoleComponentImpl(
             componentContext,
+            apiClient,
             userPermissions,
             userId,
-            assignableRoles
+            actUserRoles
         ){
             assigned ->
             navigation.pop {
-                if (assigned && childStack.active.configuration == Config.UserPage) {
+                if (assigned && childStack.active.configuration is Config.UserPage) {
                     val userPage = (childStack.active.instance as? UsersFeatureComponent.Child.UserPage)?.component
                     userPage?.let {
                         coroutineScope.launch {
@@ -105,15 +111,16 @@ class UsersFeatureComponentImpl(
             }
         }
 
-    private fun assignSpecialPermissionComponent(componentContext: ComponentContext, userId: String, assignablePermissions: Set<PermissionKey>): AssignSpecialPermissionComponent =
+    private fun assignSpecialPermissionComponent(componentContext: ComponentContext, userId: String): AssignSpecialPermissionComponent =
         AssignSpecialPermissionComponentImpl(
             componentContext,
+            apiClient,
             userPermissions,
-            userId,
-            assignablePermissions
+            actModules = sessionManagerRef!!.allowedModules.value,
+            userIdToAssign = userId,
         ) { assigned ->
             navigation.pop {
-                if (assigned && childStack.active.configuration == Config.UserPage) {
+                if (assigned && childStack.active.configuration is Config.UserPage) {
                     val userPage =
                         (childStack.active.instance as? UsersFeatureComponent.Child.UserPage)?.component
                     userPage?.let {
@@ -133,7 +140,7 @@ class UsersFeatureComponentImpl(
         ){
             added ->
             navigation.pop {
-                if (added && childStack.active.configuration == Config.UsersMain) {
+                if (added && childStack.active.configuration is Config.UsersMain) {
                     val usersMain = (childStack.active.instance as? UsersFeatureComponent.Child.UsersMain)?.component
                     usersMain?.let {
                         coroutineScope.launch {
@@ -157,14 +164,13 @@ class UsersFeatureComponentImpl(
                 assignRoleComponent(
                     componentContext.childContext("assignRole"),
                     userId = config.userId,
-                    assignableRoles = config.assignableRoles
+                    actUserRoles = config.actUserRoles
                 )
             )
             is Config.AssignSpecialPermission -> UsersFeatureComponent.Child.AssignSpecialPermission(
                 assignSpecialPermissionComponent(
                     componentContext.childContext("assignSpecialPermission"),
-                    userId = config.userId,
-                    assignablePermissions = config.assignablePermissions
+                    userId = config.userId
                 )
             )
             is Config.AddUser -> UsersFeatureComponent.Child.AddUser(
@@ -176,7 +182,22 @@ class UsersFeatureComponentImpl(
     }
 
     private fun navigateTo(target: Config) {
+        changeTitle(config = target)
         navigation.pushNew(target)
+    }
+
+    private fun changeTitle(config: Config){
+        when(config){
+            is Config.UsersMain -> updateTitle("Usuarios")
+            is Config.UserPage -> updateTitle("Usuario")
+            is Config.AssignRole -> updateTitle("Asignar Rol")
+            is Config.AssignSpecialPermission -> updateTitle("Asignar Permiso")
+            is Config.AddUser -> updateTitle("Añadir Usuario")
+        }
+    }
+
+    init {
+        updateTitle("Usuarios")
     }
 
 }

@@ -51,8 +51,8 @@ class UsersMainComponentImpl(
     }
 
     init {
+        updateIsLoading(true)
         coroutineScope.launch {
-            updateIsLoading(true)
             loadUsers()
             updateIsLoading(false)
         }

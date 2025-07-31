@@ -31,10 +31,14 @@ class AddPermissionComponentImpl(
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _isBusy = MutableStateFlow(false)
+    override val isBusy: StateFlow<Boolean> = _isBusy
+
     override val actPermissions: Set<PermissionKey> = userPermissions.value //son los mismos que userPermissions pero no son StateFlow
 
 
     override fun addPermission(permission: PermissionKey) {
+        _isBusy.value = true
         val requestData = AssignPermissionRoleRequest(
             roleId = roleId,
             permissionKeys = setOf(permission)
@@ -50,7 +54,7 @@ class AddPermissionComponentImpl(
                     //TODO(): mostrar error como popup
                 }
             }
-
+            _isBusy.value = false
         }
     }
 
@@ -59,16 +63,33 @@ class AddPermissionComponentImpl(
         coroutineScope.launch {
             val moduleIdsSet = actModules.map { it.id }.toSet()
             val response = apiClient.rolesT.getModulesPermissionKeys(moduleIdsSet)
+            println(response)
             if (response is dev.byjtech.erp.common.ApiResponse.Success) {
-//                _possiblePermissions.value = response.data.groupBy { it.module }
-//                    .mapValues { (_, categoryList) ->
-//                        categoryList
-//                            .groupBy { it.category }
-//                            .mapValues { (_, actionList) ->
-//                                actionList.associateBy { it.action }
-//                            }
-//                    }
-                _possiblePermissions.value = response.data.groupBy { it.key.module }.mapValues { (_, list) -> list.toSet() }
+                val firstData = response.data
+                val secondResponse = apiClient.rolesT.getPermissionsByRoleId(roleId)
+                var permData: Set<PermissionWithKey> = emptySet()
+                var updatedData = emptySet<PermissionWithKey>()
+                if (secondResponse is dev.byjtech.erp.common.ApiResponse.Success) {
+                    permData = permData.plus(secondResponse.data)
+                    println("secondResponse: ${secondResponse.data}")
+                    if (firstData.isNotEmpty()) {
+                        updatedData = firstData.map { permission ->
+                            if (permData.contains(permission)) {
+                                permission.copy(permission = permission.permission.copy(id = ""))
+                            } else {
+                                permission
+                            }
+                        }.toSet()
+                    }
+                }
+                if (updatedData.isNotEmpty()) {
+                    _possiblePermissions.value = updatedData.groupBy { it.key.module }.mapValues { (_, categoryList) ->
+                        categoryList.toSet()
+                    }
+                } else {
+                    _possiblePermissions.value = response.data.groupBy { it.key.module }.mapValues { (_, list) -> list.toSet() }
+                }
+                println(_possiblePermissions.value)
             }
             _isLoading.value = false
         }

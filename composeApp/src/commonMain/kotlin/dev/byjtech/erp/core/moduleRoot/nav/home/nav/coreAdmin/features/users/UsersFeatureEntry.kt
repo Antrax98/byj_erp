@@ -21,7 +21,8 @@ val UsersFeatureEntry: FeatureEntry = FeatureEntry(
             userPermissions = userPermissions,
             apiClient = apiClient,
             toHome = toHome,
-            updateTitle = updateTitle
+            updateTitle = updateTitle,
+            sessionManagerRef = null
         )
     },
     screen = { component -> UsersFeatureScreen(component as UsersFeatureComponent) },

@@ -22,6 +22,12 @@ class AddRoleComponentImpl(
 
     val coroutineScope = componentContext.coroutineScope()
 
+    private val _isLoading = MutableStateFlow(false)
+    override val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _isBusy = MutableStateFlow(false)
+    override val isBusy: StateFlow<Boolean> = _isBusy
+
     private val _name = MutableStateFlow(TextFieldState())
     override val name: StateFlow<TextFieldState> = _name
 
@@ -37,6 +43,7 @@ class AddRoleComponentImpl(
     }
 
     override fun onSubmitted() {
+
         val name = name.value.value
         val description = description.value.value
 
@@ -50,6 +57,8 @@ class AddRoleComponentImpl(
             _description.value = _description.value.copy(error = "Description is required")
             canSubmit = false
         }
+
+        _isBusy.value = true
 
         if (canSubmit) {
             val newRole = RoleDTO(
@@ -70,6 +79,7 @@ class AddRoleComponentImpl(
                         //etc...
                     }
                 }
+                _isBusy.value = false
             }
 
         } else {

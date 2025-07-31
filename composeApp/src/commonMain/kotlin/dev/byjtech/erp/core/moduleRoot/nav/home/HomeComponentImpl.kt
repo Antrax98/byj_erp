@@ -17,6 +17,7 @@ import dev.byjtech.erp.common.session.SessionManager
 import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.featuresList.FeatureListComponentImpl
 import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.roles.RolesFeatureComponentImpl
+import dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.users.UsersFeatureComponentImpl
 import kotlinx.coroutines.flow.*
 import kotlin.system.exitProcess
 
@@ -97,6 +98,14 @@ class HomeComponentImpl(
                 apiClient = api,
                 toHome = ::toHome,
                 sessionManagerRef=sessionManager,
+                updateTitle = ::updateTitle
+            )
+            ComponentConfig("core", "users") -> UsersFeatureComponentImpl(
+                componentContext.childContext("users"),
+                userPermissions = sessionManager.userPermissions,
+                apiClient = api,
+                sessionManagerRef=sessionManager,
+                toHome = ::toHome,
                 updateTitle = ::updateTitle
             )
 

@@ -1,8 +1,13 @@
+//import com.google.cloud.tools.gradle.appengine.appyaml.AppEngineAppYamlExtension
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlinSerialization)
     application
+    //id("com.gradleup.shadow") version "8.3.6"
+    //id("com.github.johnrengelman.shadow") version "8.1.1"
+    //id("com.google.cloud.tools.appengine") version "2.8.3"
 }
 
 group = "dev.byjtech.erp"
@@ -49,10 +54,39 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    sourceCompatibility = "21"
-    targetCompatibility = "21"
+    sourceCompatibility = "17"
+    targetCompatibility = "17"
 }
+
+tasks {
+    create("stage").dependsOn("shadowJar")
+
+    build {
+        dependsOn(shadowJar)
+    }
+}
+
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+    archiveBaseName.set("server")
+    archiveClassifier.set("all")
+    archiveVersion.set("")
+    manifest {
+        attributes["Main-Class"] = "dev.byjtech.erp.ApplicationKt"
+    }
+}
+
+//
+//configure<AppEngineAppYamlExtension> {
+//    stage {
+//        setArtifact("server/build/libs/server.jar")
+//        //setArtifact("build/libs/${project.name}-all.jar")
+//    }
+//    deploy {
+//        version = "GCLOUD_CONFIG"
+//        projectId = "GCLOUD_CONFIG"
+//    }
+//}

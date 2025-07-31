@@ -7,6 +7,7 @@ import java.util.UUID
 interface SubscriptionRepository {
     fun create(subscription: Subscription): Subscription
     fun update(subscription: Subscription): Subscription
+    fun updateAccessStatus(accessStatus: Boolean, subscriptionId: UUID): Subscription
 //    fun updateBilling(billing:Billing): Billing
 //    fun findBilling(id: UUID): Billing?
 //    fun createBilling(billing: Billing): Billing

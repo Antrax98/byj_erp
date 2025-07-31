@@ -22,7 +22,6 @@ val testFeatureEntry: FeatureEntry = FeatureEntry(
             userPermissions = userPermissions,
             apiClient = apiClient,
             toHome = toHome,
-            usersTenantApi = apiClient.ktorfit.createUsersTenantApi(), //solo para testear si funciona este enfoque
             updateTitle = updateTitle
         )
     },

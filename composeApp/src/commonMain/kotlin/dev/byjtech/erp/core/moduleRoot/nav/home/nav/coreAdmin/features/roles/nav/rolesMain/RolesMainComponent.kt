@@ -11,7 +11,7 @@ interface RolesMainComponent: PermissionAwareComponent {
     val rolesState: StateFlow<Set<RoleDTO>?>
     val isLoading: StateFlow<Boolean>
     fun updateIsLoading(isLoading: Boolean)
-    suspend fun fetchAllRoles()
+    fun fetchAllRoles()
     val apiClient: ApiClient
     val navTo: (Config) -> Unit
     val navToRolePage: (roleId: String) -> Unit

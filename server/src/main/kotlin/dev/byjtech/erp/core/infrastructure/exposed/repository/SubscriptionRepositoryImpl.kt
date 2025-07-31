@@ -37,6 +37,14 @@ class SubscriptionRepositoryImpl(private val db: Database): SubscriptionReposito
         }
     }
 
+    override fun updateAccessStatus(accessStatus: Boolean, subscriptionId: UUID): Subscription {
+        return transaction(db) {
+            val subscriptionEntity = SubscriptionEntity[subscriptionId]
+            subscriptionEntity.isAccessible = accessStatus
+            return@transaction subscriptionEntity.toModel()
+        }
+    }
+
 //    override fun updateBilling(billing: Billing): Billing {
 //        return transaction(db) {
 //            val billingEntity = BillingEntity[billing.id]

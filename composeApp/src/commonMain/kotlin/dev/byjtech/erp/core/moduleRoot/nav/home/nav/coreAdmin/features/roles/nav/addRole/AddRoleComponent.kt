@@ -12,6 +12,8 @@ interface AddRoleComponent: PermissionAwareComponent {
     //estados para el formulario
     val name: StateFlow<TextFieldState>
     val description: StateFlow<TextFieldState>
+    val isBusy: StateFlow<Boolean>
+    val isLoading: StateFlow<Boolean>
     val onFinished: (added: Boolean) -> Unit
     fun onNameChange(value: String)
     fun onDescriptionChange(value: String)

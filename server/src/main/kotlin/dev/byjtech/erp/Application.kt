@@ -26,12 +26,18 @@ import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
 import org.slf4j.LoggerFactory
 
-val dotenv = dotenv{
-    ignoreIfMissing = false
-}
+
 
 fun main() {
-    embeddedServer(Netty, port = dotenv["SERVER_PORT"].toInt(), host = "0.0.0.0", module = Application::module)
+
+    val dotenv = dotenv{
+        ignoreIfMissing = true
+    }
+
+    embeddedServer(Netty,
+        port = System.getenv("PORT")?.toIntOrNull() ?: dotenv.get("SERVER_PORT")?.toIntOrNull() ?: 8080,
+        host = "0.0.0.0",
+        module = Application::module)
         .start(wait = true)
 }
 
@@ -57,15 +63,26 @@ fun Application.module() {
 
     println("Module ${coreInitializer.definition.name} detected")
     println("Initializing ${coreInitializer.definition.name} database...")
-    coreInitializer.database.createTables(coreInitializer.tables.toList())
+    coreInitializer.database!!.createTables(coreInitializer.tables.toList())
     println("${coreInitializer.definition.name} database initialized")
+
+//    allModules.forEach {
+//        println("Module ${it.definition.name} detected")
+//        println("Initializing ${it.definition.name} database...")
+//        it.database.createTables(it.tables.toList())
+//        println("${it.definition.name} database initialized")
+//    }
 
     allModules.forEach {
         println("Module ${it.definition.name} detected")
-        println("Initializing ${it.definition.name} database...")
-        it.database.createTables(it.tables.toList())
-        println("${it.definition.name} database initialized")
+
+        it.database?.let { db ->
+            println("Initializing ${it.definition.name} database...")
+            db.createTables(it.tables.toList())
+            println("${it.definition.name} database initialized")
+        } ?: println("Skipping ${it.definition.name} database initialization (no database found)")
     }
+
 
     val databaseInitializer= DatabaseInitializer(coreInitializer.database)
     println("registering modules...")

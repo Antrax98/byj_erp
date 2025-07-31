@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 class TestFeatureComponentImpl(
     val componentContext: ComponentContext,
     override val userPermissions: StateFlow<Set<PermissionKey>>,
-    override val usersTenantApi: UsersTenantApi,
     override val apiClient: ApiClient, //ojala no usar este de ser posible
     override val toHome: () -> Unit,
     override val updateTitle: (newTitle: String) -> Unit
