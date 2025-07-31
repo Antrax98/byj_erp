@@ -13,6 +13,8 @@ import dev.byjtech.erp.modules.document_management.features.documents.nav.docume
 import dev.byjtech.erp.modules.document_management.features.documents.nav.addDocument.AddDocumentScreen
 import dev.byjtech.erp.modules.document_management.features.documents.nav.editDocument.EditDocumentScreen
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryScreen
+import dev.byjtech.erp.modules.document_management.features.notifications.NotificationsScreenWrapper
+import dev.byjtech.erp.modules.document_management.features.notifications.NotificationSettingsScreenWrapper
 
 @Composable
 fun DocumentsFeatureScreen(component: DocumentsFeatureComponent) {
@@ -30,6 +32,8 @@ fun DocumentsFeatureScreen(component: DocumentsFeatureComponent) {
                 is DocumentsFeatureComponent.Child.AddDocument -> AddDocumentScreen(child.component)
                 is DocumentsFeatureComponent.Child.EditDocument -> EditDocumentScreen(child.component)
                 is DocumentsFeatureComponent.Child.DocumentHistory -> DocumentHistoryScreen(child.component)
+                is DocumentsFeatureComponent.Child.Notifications -> NotificationsScreenWrapper(child.component)
+                is DocumentsFeatureComponent.Child.NotificationSettings -> NotificationSettingsScreenWrapper(child.component)
             }
         }
     }

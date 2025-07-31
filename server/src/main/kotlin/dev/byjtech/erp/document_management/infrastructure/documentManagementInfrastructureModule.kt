@@ -6,6 +6,7 @@ import dev.byjtech.erp.document_management.infrastructure.api.DocumentManagement
 import dev.byjtech.erp.document_management.infrastructure.api.controllers.DocumentRoutesInstaller
 import dev.byjtech.erp.document_management.infrastructure.api.controllers.DocumentEditHistoryRoutesInstaller
 import dev.byjtech.erp.document_management.infrastructure.api.controllers.DocumentHistoryRoutesInstaller
+import dev.byjtech.erp.document_management.infrastructure.api.controllers.NotificationRoutesInstaller
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -14,6 +15,8 @@ val documentManagementInfrastructureModule = module {
     single<DocumentRepository> { DocumentRepositoryImpl(get(named("documentManagementDatabase"))) }
     single<DocumentEditHistoryRepository> { DocumentEditHistoryRepositoryImpl(get(named("documentManagementDatabase"))) }
     single<DocumentAuditLogRepository> { DocumentAuditLogRepositoryImpl(get(named("documentManagementDatabase"))) }
+    single<UserNotificationSettingsRepository> { UserNotificationSettingsRepositoryImpl(get(named("documentManagementDatabase"))) }
+    single<DocumentNotificationRepository> { DocumentNotificationRepositoryImpl(get(named("documentManagementDatabase"))) }
     
     // Repositorio para validar referencias cruzadas con la base de datos core
     single<CompanyValidationRepository> { CompanyValidationRepositoryImpl(get(named("coreDatabase"))) }
@@ -46,12 +49,20 @@ val documentManagementInfrastructureModule = module {
         )
     }
 
+    single<NotificationRoutesInstaller> {
+        NotificationRoutesInstaller(
+            notificationService = get(),
+            authWrapper = get()
+        )
+    }
+
     single<DocumentManagementRoutesInstaller> {
         DocumentManagementRoutesInstaller(
             setOf(
                 get<DocumentRoutesInstaller>(),
                 get<DocumentEditHistoryRoutesInstaller>(),
-                get<DocumentHistoryRoutesInstaller>()
+                get<DocumentHistoryRoutesInstaller>(),
+                get<NotificationRoutesInstaller>()
             )
         )
     }

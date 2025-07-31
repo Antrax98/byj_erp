@@ -17,6 +17,13 @@ import dev.byjtech.erp.modules.document_management.features.documents.nav.editDo
 import dev.byjtech.erp.modules.document_management.features.documents.nav.editDocument.EditDocumentComponentImpl
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryComponent
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryComponentImpl
+import dev.byjtech.erp.modules.document_management.features.notifications.NotificationsViewModel
+import dev.byjtech.erp.modules.document_management.features.notifications.NotificationSettingsViewModel
+import dev.byjtech.erp.modules.document_management.features.notifications.NotificationsComponent
+import dev.byjtech.erp.modules.document_management.features.notifications.NotificationsComponentImpl
+import dev.byjtech.erp.modules.document_management.features.notifications.NotificationSettingsComponent
+import dev.byjtech.erp.modules.document_management.features.notifications.NotificationSettingsComponentImpl
+import dev.byjtech.erp.modules.document_management.api.DocumentManagementClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -34,6 +41,23 @@ class DocumentsFeatureComponentImpl(
 
     private val _state = MutableStateFlow(DocumentsFeatureState())
     override val state: StateFlow<DocumentsFeatureState> = _state
+
+    // Notification ViewModels compartidos
+    private val notificationsViewModel = NotificationsViewModel(
+        DocumentManagementClient(apiClient.clientKtor),
+        coroutineScope
+    )
+    private val notificationSettingsViewModel = NotificationSettingsViewModel(
+        DocumentManagementClient(apiClient.clientKtor),
+        coroutineScope
+    )
+
+    init {
+        // Cargar contador de notificaciones al inicio
+        coroutineScope.launch {
+            notificationsViewModel.loadNotificationCount()
+        }
+    }
 
     override fun onBack(): Boolean {
         if (childStack.active.configuration == Config.DocumentsMain) {
@@ -60,6 +84,10 @@ class DocumentsFeatureComponentImpl(
         data class EditDocument(val documentId: String) : Config()
         @Serializable
         data class DocumentHistory(val documentId: String) : Config()
+        @Serializable
+        data object Notifications : Config()
+        @Serializable
+        data object NotificationSettings : Config()
     }
 
     private val navigation = StackNavigation<Config>()
@@ -81,7 +109,8 @@ class DocumentsFeatureComponentImpl(
                     componentContext = componentContext,
                     userPermissions = userPermissions,
                     apiClient = apiClient,
-                    navTo = ::navigateTo
+                    navTo = ::navigateTo,
+                    notificationCount = notificationsViewModel.notificationCount
                 )
             )
             is Config.DocumentPage -> DocumentsFeatureComponent.Child.DocumentPage(
@@ -157,6 +186,33 @@ class DocumentsFeatureComponentImpl(
                     }
                 )
             )
+            is Config.Notifications -> DocumentsFeatureComponent.Child.Notifications(
+                NotificationsComponentImpl(
+                    componentContext = componentContext,
+                    viewModel = notificationsViewModel,
+                    onNavigateBackCallback = { 
+                        navigation.pop {
+                            val newConfig = childStack.active.configuration
+                            changeTitle(newConfig)
+                        }
+                    },
+                    onNavigateToSettingsCallback = {
+                        navigateTo(Config.NotificationSettings)
+                    }
+                )
+            )
+            is Config.NotificationSettings -> DocumentsFeatureComponent.Child.NotificationSettings(
+                NotificationSettingsComponentImpl(
+                    componentContext = componentContext,
+                    viewModel = notificationSettingsViewModel,
+                    onNavigateBackCallback = { 
+                        navigation.pop {
+                            val newConfig = childStack.active.configuration
+                            changeTitle(newConfig)
+                        }
+                    }
+                )
+            )
         }
 
     private fun navigateTo(target: Config) {
@@ -174,6 +230,8 @@ class DocumentsFeatureComponentImpl(
             Config.AddDocument -> "Nuevo Documento"
             is Config.EditDocument -> "Editar Documento"
             is Config.DocumentHistory -> "Historial de Edición"
+            Config.Notifications -> "Notificaciones"
+            Config.NotificationSettings -> "Configuración de Notificaciones"
         }
         updateTitle(title)
     }

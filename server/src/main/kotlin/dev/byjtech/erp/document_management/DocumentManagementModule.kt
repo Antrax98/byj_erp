@@ -37,7 +37,8 @@ val documentManagementModule = module {
             definition = DocumentManagementDefinition,
             database = get(named("documentManagementDatabase")),
             moduleRoutesInstaller = get<DocumentManagementRoutesInstaller>(),
-            tables = DocumentManagementTables.all
+            tables = DocumentManagementTables.all,
+            scheduler = get()
         )
     }
 

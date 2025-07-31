@@ -13,6 +13,7 @@ interface DocumentsMainComponent {
     val apiClient: ApiClient
     val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit
     val state: StateFlow<DocumentsMainState>
+    val notificationCount: StateFlow<Int>
     
     suspend fun loadDocuments()
     suspend fun searchDocuments(searchRequest: DocumentSearchRequest)
@@ -23,5 +24,7 @@ interface DocumentsMainComponent {
     fun onEditDocumentClick(documentId: String)
     fun onViewHistoryClick(documentId: String)
     fun onDeleteDocumentClick(documentId: String)
+    fun onNotificationsClick()
+    fun onNotificationSettingsClick()
     fun toggleSearchMode()
 }

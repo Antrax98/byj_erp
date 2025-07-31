@@ -14,7 +14,8 @@ class DocumentsMainComponentImpl(
     override val componentContext: ComponentContext,
     override val userPermissions: StateFlow<Set<PermissionKey>>,
     override val apiClient: ApiClient,
-    override val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit
+    override val navTo: (DocumentsFeatureComponentImpl.Config) -> Unit,
+    override val notificationCount: StateFlow<Int>
 ) : DocumentsMainComponent {
 
     private val coroutineScope = componentContext.coroutineScope()
@@ -111,6 +112,14 @@ class DocumentsMainComponentImpl(
     override fun onDeleteDocumentClick(documentId: String) {
         // TODO: Implementar confirmación y eliminación
         println("Eliminar documento: $documentId")
+    }
+
+    override fun onNotificationsClick() {
+        navTo(DocumentsFeatureComponentImpl.Config.Notifications)
+    }
+
+    override fun onNotificationSettingsClick() {
+        navTo(DocumentsFeatureComponentImpl.Config.NotificationSettings)
     }
 
     init {

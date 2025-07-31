@@ -24,5 +24,10 @@ public object DocumentManagementDefinition : ModuleDefinition {
         val View = permission("view", "Ver historial de ediciones")
     }
 
-    override val categories = setOf(Documents, AuditLogs, EditHistory)
+    object Notifications : CategoryBase("notifications", "Notificaciones", DocumentManagementDefinition) {
+        val View = permission("view", "Ver notificaciones")
+        val Configure = permission("configure", "Configurar notificaciones")
+    }
+
+    override val categories = setOf(Documents, AuditLogs, EditHistory, Notifications)
 }

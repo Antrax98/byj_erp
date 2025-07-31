@@ -3,6 +3,14 @@ package dev.byjtech.erp.document_management.domain.repository
 import java.util.UUID
 
 /**
+ * DTO simple para representar una compañía
+ */
+data class CompanyInfo(
+    val id: UUID,
+    val name: String
+)
+
+/**
  * Repository para validar la existencia de companies desde el módulo document_management
  * Accede a la base de datos core para verificar referencias cruzadas
  */
@@ -20,4 +28,10 @@ interface CompanyValidationRepository {
      * @return true si el usuario existe, false en caso contrario
      */
     fun userExistsById(userId: UUID): Boolean
+    
+    /**
+     * Obtiene todas las compañías activas
+     * @return Lista de compañías activas
+     */
+    fun findAllActiveCompanies(): List<CompanyInfo>
 }

@@ -7,6 +7,8 @@ object DocumentManagementTables {
     val all = setOf<Table>(
         DocumentsTable,
         DocumentEditHistoryTable,
-        DocumentAuditLogTable
+        DocumentAuditLogTable,
+        UserNotificationSettingsTable,
+        DocumentNotificationsTable
     )
 }

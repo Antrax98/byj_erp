@@ -3,9 +3,12 @@ package dev.byjtech.erp.modules.document_management.api
 import dev.byjtech.erp.document_management.dto.DocumentDTO
 import dev.byjtech.erp.document_management.dto.DocumentAuditLogDTO
 import dev.byjtech.erp.document_management.dto.DocumentEditHistoryDTO
+import dev.byjtech.erp.document_management.dto.DocumentNotificationDTO
+import dev.byjtech.erp.document_management.dto.UserNotificationSettingsDTO
 import dev.byjtech.erp.document_management.request.CreateDocumentRequest
 import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
 import dev.byjtech.erp.document_management.request.DeactivateDocumentRequest
+import dev.byjtech.erp.document_management.request.UpdateNotificationSettingsRequest
 import dev.byjtech.erp.document_management.response.DeactivateDocumentResponse
 import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
 import dev.byjtech.erp.modules.document_management.dto.DocumentSearchResponse
@@ -170,6 +173,59 @@ class DocumentManagementClient(private val client: HttpClient) {
             ApiResponse.Success(response.body())
         } catch (e: Exception) {
             ApiResponse.Error("Error al desactivar documento", e.message ?: "Error desconocido")
+        }
+    }
+    
+    // Notification endpoints
+    suspend fun getPendingNotifications(): List<DocumentNotificationDTO> {
+        return try {
+            client.get(urlString = "api/document_management/notifications/pending").body()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+    
+    suspend fun getAllNotifications(): List<DocumentNotificationDTO> {
+        return try {
+            client.get(urlString = "api/document_management/notifications/all").body()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+    
+    suspend fun getNotificationCount(): Int {
+        return try {
+            val response: Map<String, Int> = client.get(urlString = "api/document_management/notifications/count").body()
+            response["count"] ?: 0
+        } catch (e: Exception) {
+            0
+        }
+    }
+    
+    suspend fun markNotificationAsRead(notificationId: String): DocumentNotificationDTO? {
+        return try {
+            client.put(urlString = "api/document_management/notifications/$notificationId/read").body()
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
+    suspend fun getNotificationSettings(): UserNotificationSettingsDTO? {
+        return try {
+            client.get(urlString = "api/document_management/notifications/settings").body()
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
+    suspend fun updateNotificationSettings(request: UpdateNotificationSettingsRequest): UserNotificationSettingsDTO? {
+        return try {
+            client.put(urlString = "api/document_management/notifications/settings") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.body()
+        } catch (e: Exception) {
+            null
         }
     }
 }

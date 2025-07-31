@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -51,6 +52,30 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // Botón de notificaciones con badge
+                val notificationCount by component.notificationCount.collectAsState()
+                BadgedBox(
+                    badge = {
+                        if (notificationCount > 0) {
+                            Badge {
+                                Text(
+                                    text = if (notificationCount > 99) "99+" else notificationCount.toString(),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                        }
+                    }
+                ) {
+                    IconButton(
+                        onClick = { component.onNotificationsClick() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "Notificaciones"
+                        )
+                    }
+                }
+                
                 // Botón para alternar modo búsqueda
                 IconButton(
                     onClick = { component.toggleSearchMode() }
