@@ -51,6 +51,10 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.identity.jvm)
     implementation(libs.auth0.jwt)
+    
+    // Email dependencies
+    implementation("org.simplejavamail:simple-java-mail:8.3.1")
+    implementation("org.simplejavamail:batch-module:8.3.1")
 }
 
 kotlin {

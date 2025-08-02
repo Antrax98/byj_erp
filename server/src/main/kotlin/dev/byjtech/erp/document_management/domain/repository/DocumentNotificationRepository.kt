@@ -18,4 +18,5 @@ interface DocumentNotificationRepository {
         notificationType: NotificationType
     ): DocumentNotification?
     fun countPendingByUserId(userId: UUID): Int
+    fun markAsSent(notificationId: UUID): DocumentNotification?
 }

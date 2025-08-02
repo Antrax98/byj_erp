@@ -88,4 +88,12 @@ class DocumentNotificationRepositoryImpl(
             (DocumentNotificationsTable.status eq NotificationStatus.PENDING)
         }.count().toInt()
     }
+
+    override fun markAsSent(notificationId: UUID): DocumentNotification? = transaction(database) {
+        val entity = DocumentNotificationEntity.findById(notificationId)
+        entity?.let {
+            it.sentAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime()
+            it.toDomain()
+        }
+    }
 }

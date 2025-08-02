@@ -2,6 +2,8 @@ package dev.byjtech.erp.document_management.application.service
 
 import dev.byjtech.erp.document_management.domain.model.*
 import dev.byjtech.erp.document_management.domain.repository.*
+import dev.byjtech.erp.document_management.infrastructure.service.EmailService
+import dev.byjtech.erp.core.domain.repository.UserRepository
 import kotlinx.datetime.*
 import java.util.UUID
 
@@ -11,8 +13,11 @@ import java.util.UUID
 class NotificationService(
     private val documentNotificationRepository: DocumentNotificationRepository,
     private val userNotificationSettingsRepository: UserNotificationSettingsRepository,
-    private val documentRepository: DocumentRepository
+    private val documentRepository: DocumentRepository,
+    private val userRepository: UserRepository
 ) {
+    
+    private val emailService = EmailService()
 
     /**
      * Verifica documentos próximos a vencer y genera notificaciones
@@ -32,6 +37,14 @@ class NotificationService(
         for (settings in allSettings) {
             if (!settings.systemEnabled) {
                 continue
+            }
+
+            // Procesar notificaciones PENDING existentes si el email está habilitado
+            if (settings.emailEnabled) {
+                println("DEBUG: Email habilitado para usuario ${settings.userId}, procesando notificaciones PENDING...")
+                processPendingNotifications(settings.userId)
+            } else {
+                println("DEBUG: Email NO habilitado para usuario ${settings.userId}")
             }
 
             for (document in documents) {
@@ -69,6 +82,14 @@ class NotificationService(
             return
         }
 
+        // Calcular días hasta vencimiento
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val daysUntilExpiration = if (document.dueDate != null) {
+            (document.dueDate.toEpochDays() - today.toEpochDays()).toInt()
+        } else {
+            0
+        }
+
         val notification = DocumentNotification(
             id = UUID.randomUUID(),
             documentId = document.id,
@@ -80,6 +101,14 @@ class NotificationService(
         )
 
         documentNotificationRepository.save(notification)
+        
+        // Enviar email si está habilitado
+        if (settings.emailEnabled) {
+            val user = userRepository.find(settings.userId)
+            if (user != null) {
+                emailService.sendDocumentExpirationNotification(user, document, daysUntilExpiration)
+            }
+        }
     }
 
     /**
@@ -97,6 +126,14 @@ class NotificationService(
             return
         }
 
+        // Calcular días hasta vencimiento (será negativo para documentos vencidos)
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val daysUntilExpiration = if (document.dueDate != null) {
+            (document.dueDate.toEpochDays() - today.toEpochDays()).toInt()
+        } else {
+            0
+        }
+
         val notification = DocumentNotification(
             id = UUID.randomUUID(),
             documentId = document.id,
@@ -108,6 +145,14 @@ class NotificationService(
         )
 
         documentNotificationRepository.save(notification)
+        
+        // Enviar email si está habilitado
+        if (settings.emailEnabled) {
+            val user = userRepository.find(settings.userId)
+            if (user != null) {
+                emailService.sendDocumentExpirationNotification(user, document, daysUntilExpiration)
+            }
+        }
     }
 
     /**
@@ -154,5 +199,50 @@ class NotificationService(
             updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         )
         return userNotificationSettingsRepository.save(updatedSettings)
+    }
+
+    /**
+     * Procesa notificaciones PENDING existentes y envía emails si están habilitadas
+     */
+    private fun processPendingNotifications(userId: UUID) {
+        println("DEBUG: Iniciando processPendingNotifications para usuario $userId")
+        val pendingNotifications = documentNotificationRepository.findPendingByUserId(userId)
+        val user = userRepository.find(userId)
+        
+        println("DEBUG: Encontradas ${pendingNotifications.size} notificaciones PENDING")
+        
+        if (user == null || pendingNotifications.isEmpty()) {
+            println("DEBUG: Usuario es null: ${user == null}, notificaciones vacías: ${pendingNotifications.isEmpty()}")
+            return
+        }
+
+        for (notification in pendingNotifications) {
+            println("DEBUG: Procesando notificación ${notification.id}, sent_at: ${notification.sentAt}")
+            // Solo procesar notificaciones que no han sido enviadas por email
+            if (notification.sentAt == null) {
+                val document = documentRepository.findById(notification.documentId)
+                if (document != null) {
+                    // Calcular días hasta vencimiento
+                    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    val daysUntilExpiration = if (document.dueDate != null) {
+                        (document.dueDate.toEpochDays() - today.toEpochDays()).toInt()
+                    } else {
+                        0
+                    }
+                    
+                    println("DEBUG: Enviando email para documento ${document.documentNumber}")
+                    // Enviar email
+                    emailService.sendDocumentExpirationNotification(user, document, daysUntilExpiration)
+                    
+                    // Marcar como enviado
+                    println("DEBUG: Marcando notificación como enviada")
+                    documentNotificationRepository.markAsSent(notification.id)
+                } else {
+                    println("DEBUG: Documento no encontrado para notificación ${notification.id}")
+                }
+            } else {
+                println("DEBUG: Notificación ${notification.id} ya fue enviada")
+            }
+        }
     }
 }

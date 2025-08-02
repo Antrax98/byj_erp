@@ -28,14 +28,30 @@ class UserNotificationSettingsRepositoryImpl(
     }
 
     override fun save(settings: UserNotificationSettings): UserNotificationSettings = transaction(database) {
-        val entity = UserNotificationSettingsEntity.new {
-            userId = settings.userId
-            companyId = settings.companyId
-            daysBeforeExpiration = settings.daysBeforeExpiration
-            emailEnabled = settings.emailEnabled
-            systemEnabled = settings.systemEnabled
-            createdAt = settings.createdAt.toJavaLocalDateTime()
-            updatedAt = settings.updatedAt.toJavaLocalDateTime()
+        // Buscar si ya existe configuración para este usuario
+        val existingEntity = UserNotificationSettingsEntity.find { 
+            UserNotificationSettingsTable.userId eq settings.userId 
+        }.singleOrNull()
+        
+        val entity = if (existingEntity != null) {
+            // Actualizar existente
+            existingEntity.apply {
+                daysBeforeExpiration = settings.daysBeforeExpiration
+                emailEnabled = settings.emailEnabled
+                systemEnabled = settings.systemEnabled
+                updatedAt = settings.updatedAt.toJavaLocalDateTime()
+            }
+        } else {
+            // Crear nuevo
+            UserNotificationSettingsEntity.new {
+                userId = settings.userId
+                companyId = settings.companyId
+                daysBeforeExpiration = settings.daysBeforeExpiration
+                emailEnabled = settings.emailEnabled
+                systemEnabled = settings.systemEnabled
+                createdAt = settings.createdAt.toJavaLocalDateTime()
+                updatedAt = settings.updatedAt.toJavaLocalDateTime()
+            }
         }
         entity.toDomain()
     }
@@ -50,6 +66,12 @@ class UserNotificationSettingsRepositoryImpl(
     }
 
     override fun createDefaultSettings(userId: UUID, companyId: UUID): UserNotificationSettings = transaction(database) {
+        // Verificar si ya existe configuración para este usuario
+        val existingSettings = findByUserId(userId)
+        if (existingSettings != null) {
+            return@transaction existingSettings
+        }
+        
         val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         
         val settings = UserNotificationSettings(

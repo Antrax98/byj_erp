@@ -11,6 +11,6 @@ val documentManagementApplicationModule = module {
     single { DocumentEditHistoryService(get()) }
     single { DocumentAuditLogService(get()) }
     single { DocumentService(get(), get(), get(), get()) }
-    single { NotificationService(get(), get(), get()) }
+    single { NotificationService(get(), get(), get(), get()) }
     single { DocumentExpirationScheduler(get(), get()) }
 }
