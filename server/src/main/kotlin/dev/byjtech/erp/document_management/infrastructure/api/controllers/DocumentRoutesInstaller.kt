@@ -12,6 +12,7 @@ import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
 import dev.byjtech.erp.document_management.request.DeactivateDocumentRequest
 import dev.byjtech.erp.document_management.response.DeactivateDocumentResponse
 import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
+import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 import dev.byjtech.erp.shared.routing.RoutesInstaller
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
@@ -342,32 +343,16 @@ fun Route.documentsRoutes(
                 return@patch
             }
             
-            // Obtener documento existente
-            val existingDocumentDTO = documentService.getDocumentById(documentId, companyId)
-            if (existingDocumentDTO == null) {
-                call.respond(HttpStatusCode.NotFound, "Document not found")
+            // Validar que el nuevo estado es válido
+            val newStatus = try {
+                DocumentStatus.valueOf(statusRequest.newStatus.uppercase())
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid status: ${statusRequest.newStatus}")
                 return@patch
             }
             
-            // Crear request de actualización solo para el estado
-            val updateRequest = UpdateDocumentRequest(
-                type = null,
-                documentNumber = null,
-                issueDate = null,
-                dueDate = null,
-                status = statusRequest.newStatus,
-                currency = null,
-                netAmount = null,
-                taxAmount = null,
-                totalAmount = null,
-                fileUrl = null
-            )
-            
-            // Aplicar cambios
-            val existingDocument = existingDocumentDTO.toDomain()
-            val updatedDocument = existingDocument.applyUpdate(updateRequest)
-            
-            val documentDTO = documentService.updateDocument(documentId, updatedDocument, companyId, userId)
+            // Usar el método específico para cambio de estado (no valida edición)
+            val documentDTO = documentService.updateDocumentStatus(documentId, newStatus, companyId, userId)
             if (documentDTO != null) {
                 call.respond(HttpStatusCode.OK, documentDTO)
             } else {

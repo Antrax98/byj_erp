@@ -82,6 +82,34 @@ class DocumentService(
         return savedDocument.toDTO()
     }
     
+    /**
+     * Actualiza solo el estado del documento sin validar las reglas de edición
+     * Esto permite cambiar el estado de facturas que no pueden ser editadas
+     */
+    fun updateDocumentStatus(documentId: UUID, newStatus: DocumentStatus, companyId: UUID, userId: UUID): DocumentDTO? {
+        val existingDocument = documentRepository.findById(documentId)
+        
+        if (existingDocument == null || existingDocument.companyId != companyId) {
+            return null
+        }
+        
+        // Crear documento actualizado solo con el nuevo estado
+        val updatedDocument = existingDocument.copy(
+            status = newStatus,
+            updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        )
+        
+        // Registrar historial de cambios ANTES de actualizar
+        documentEditHistoryService.recordDocumentChanges(
+            oldDocument = existingDocument,
+            newDocument = updatedDocument,
+            userId = userId
+        )
+        
+        val savedDocument = documentRepository.update(updatedDocument)
+        return savedDocument.toDTO()
+    }
+    
     fun deleteDocument(documentId: UUID, companyId: UUID): Boolean {
         val existingDocument = documentRepository.findById(documentId)
         

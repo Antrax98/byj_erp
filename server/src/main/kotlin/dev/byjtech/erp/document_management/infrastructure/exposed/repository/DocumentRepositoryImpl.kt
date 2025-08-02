@@ -8,6 +8,7 @@ import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
 import dev.byjtech.erp.modules.document_management.request.SortDirection
 import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 import dev.byjtech.erp.modules.document_management.domain.model.DocumentType
+import dev.byjtech.erp.modules.document_management.domain.model.getDocumentTypeDisplayName
 import kotlinx.datetime.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -87,9 +88,10 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
                 val documentType = DocumentType.valueOf(type.uppercase())
                 conditions.add(DocumentsTable.type eq documentType)
             } catch (e: IllegalArgumentException) {
-                // Si no es un valor de enum válido, buscar en el nombre del enum como string
-                val matchingTypes = DocumentType.entries.filter { 
-                    it.name.contains(type, ignoreCase = true) 
+                // Si no es un valor de enum válido, buscar tanto en el nombre del enum como en el nombre para mostrar
+                val matchingTypes = DocumentType.entries.filter { docType ->
+                    docType.name.contains(type, ignoreCase = true) ||
+                    getDocumentTypeDisplayName(docType).contains(type, ignoreCase = true)
                 }
                 if (matchingTypes.isNotEmpty()) {
                     conditions.add(DocumentsTable.type inList matchingTypes)
@@ -139,9 +141,12 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         
         // Búsqueda de texto general
         searchRequest.searchText?.let { searchText ->
-            // Para la búsqueda de texto, buscar en tipos de documento que contengan el texto en sus nombres
-            val matchingTypes = DocumentType.entries.filter { 
-                it.name.contains(searchText, ignoreCase = true) 
+            // Para la búsqueda de texto, buscar tanto en nombres de enum como en nombres para mostrar
+            val matchingTypes = DocumentType.entries.filter { type ->
+                // Buscar en el nombre del enum (INVOICE, CREDIT_NOTE, etc.)
+                type.name.contains(searchText, ignoreCase = true) ||
+                // Buscar en el nombre para mostrar (Factura, Nota de Crédito, etc.)
+                getDocumentTypeDisplayName(type).contains(searchText, ignoreCase = true)
             }
             
             val textSearchCondition = if (matchingTypes.isNotEmpty()) {
