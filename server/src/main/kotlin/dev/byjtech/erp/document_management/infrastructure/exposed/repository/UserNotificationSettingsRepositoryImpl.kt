@@ -28,13 +28,11 @@ class UserNotificationSettingsRepositoryImpl(
     }
 
     override fun save(settings: UserNotificationSettings): UserNotificationSettings = transaction(database) {
-        // Buscar si ya existe configuración para este usuario
         val existingEntity = UserNotificationSettingsEntity.find { 
             UserNotificationSettingsTable.userId eq settings.userId 
         }.singleOrNull()
         
         val entity = if (existingEntity != null) {
-            // Actualizar existente
             existingEntity.apply {
                 daysBeforeExpiration = settings.daysBeforeExpiration
                 emailEnabled = settings.emailEnabled
@@ -42,7 +40,6 @@ class UserNotificationSettingsRepositoryImpl(
                 updatedAt = settings.updatedAt.toJavaLocalDateTime()
             }
         } else {
-            // Crear nuevo
             UserNotificationSettingsEntity.new {
                 userId = settings.userId
                 companyId = settings.companyId
@@ -66,7 +63,6 @@ class UserNotificationSettingsRepositoryImpl(
     }
 
     override fun createDefaultSettings(userId: UUID, companyId: UUID): UserNotificationSettings = transaction(database) {
-        // Verificar si ya existe configuración para este usuario
         val existingSettings = findByUserId(userId)
         if (existingSettings != null) {
             return@transaction existingSettings
@@ -78,7 +74,7 @@ class UserNotificationSettingsRepositoryImpl(
             id = UUID.randomUUID(),
             userId = userId,
             companyId = companyId,
-            daysBeforeExpiration = 7, // Por defecto 7 días
+            daysBeforeExpiration = 7,
             emailEnabled = true,
             systemEnabled = true,
             createdAt = currentTime,

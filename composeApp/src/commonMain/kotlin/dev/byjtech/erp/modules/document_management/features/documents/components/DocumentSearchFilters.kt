@@ -32,7 +32,7 @@ fun DocumentSearchFilters(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Búsqueda básica
+            //se muestra campo de búsqueda básica
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -61,13 +61,13 @@ fun DocumentSearchFilters(
                 }
             }
             
-            // Filtros avanzados
+            //se muestran filtros avanzados cuando están expandidos
             if (isExpanded) {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     item {
-                        // Número de documento
+                        //se muestra filtro de número de documento
                         OutlinedTextField(
                             value = searchRequest.documentNumber ?: "",
                             onValueChange = { number ->
@@ -79,7 +79,7 @@ fun DocumentSearchFilters(
                     }
                     
                     item {
-                        // Estado
+                        //se muestra filtro de estado
                         var statusExpanded by remember { mutableStateOf(false) }
                         ExposedDropdownMenuBox(
                             expanded = statusExpanded,

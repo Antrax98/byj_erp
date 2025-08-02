@@ -38,7 +38,6 @@ class EmailService {
             val email = createDocumentExpirationEmail(user, document, daysUntilExpiration)
             mailer.sendMail(email)
         } catch (e: Exception) {
-            // Log error silently - production behavior
             e.printStackTrace()
         }
     }

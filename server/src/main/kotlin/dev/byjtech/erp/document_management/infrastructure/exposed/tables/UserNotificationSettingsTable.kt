@@ -13,7 +13,6 @@ object UserNotificationSettingsTable : UUIDTable("user_notification_settings") {
     val updatedAt = datetime("updated_at")
 
     init {
-        // Un usuario solo puede tener una configuración por compañía
         uniqueIndex(userId, companyId)
     }
 }

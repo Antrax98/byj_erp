@@ -51,7 +51,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
-    // Cargar documento al inicializar
+    //se carga el documento al inicializar la pantalla
     LaunchedEffect(component.documentId) {
         state = state.copy(isLoading = true)
         try {
@@ -72,12 +72,11 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                     status = document.status.name
                 )
                 
-                // Validar después de cargar los datos
+                //se valida después de cargar los datos
                 val today = DateUtils.today()
                 val minValidDate = if (document.issueDate != null) {
                     if (document.issueDate > today) document.issueDate else today
                 } else {
-                    today
                 }
                 
                 val dueDate = document.dueDate
@@ -105,9 +104,9 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
         }
     }
 
-    // Validar formulario
+    //se valida el formulario automáticamente
     LaunchedEffect(state.selectedDocumentType, state.documentNumber, state.issueDate, state.dueDate, state.netAmount) {
-        val today = DateUtils.today() // Fecha actual
+        val today = DateUtils.today()
         val issueDate = state.issueDate
         val dueDate = state.dueDate
         
@@ -123,11 +122,11 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                     issueDate != null &&
                     state.netAmount.isNotBlank() &&
                     state.netAmount.toDoubleOrNull() != null &&
-                    isDueDateValid // Agregar validación de fechas (incluyendo fecha actual)
+                    isDueDateValid
         )
     }
 
-    // Calcular total automáticamente
+    //se calcula el total automáticamente cuando cambian los montos
     LaunchedEffect(state.netAmount, state.taxAmount) {
         val net = state.netAmount.toDoubleOrNull() ?: 0.0
         val tax = state.taxAmount.toDoubleOrNull() ?: 0.0

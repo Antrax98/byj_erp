@@ -5,9 +5,7 @@ import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-/**
- * Scheduler que ejecuta la verificación de documentos próximos a vencer diariamente
- */
+
 class DocumentExpirationScheduler(
     private val notificationService: NotificationService,
     private val companyValidationRepository: CompanyValidationRepository
@@ -16,14 +14,10 @@ class DocumentExpirationScheduler(
     private val schedulerExecutor = Executors.newScheduledThreadPool(1)
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
-    // Configuración de intervalos (cambiar isTestingMode para alternar)
     private val isTestingMode = true // Cambiar a false para producción
     private val testingIntervalMinutes = 1L // Cambiado a 1 minuto
     private val productionIntervalHours = 24L
     
-    /**
-     * Inicia el scheduler con configuración automática según modo
-     */
     fun start() {
         // Ejecutar inmediatamente al iniciar
         runExpirationCheck()
@@ -37,7 +31,7 @@ class DocumentExpirationScheduler(
                 TimeUnit.MINUTES
             )
         } else {
-            // Modo producción: cada 24 horas
+            // Modo produccion: cada 24 horas
             schedulerExecutor.scheduleAtFixedRate(
                 ::runExpirationCheck,
                 productionIntervalHours,
@@ -46,18 +40,13 @@ class DocumentExpirationScheduler(
             )
         }
     }
-    
-    /**
-     * Detiene el scheduler
-     */
+
     fun stop() {
         scope.cancel()
         schedulerExecutor.shutdown()
     }
     
-    /**
-     * Ejecuta la verificación de documentos próximos a vencer para todas las compañías
-     */
+
     private fun runExpirationCheck() {
         scope.launch {
             try {
@@ -70,19 +59,14 @@ class DocumentExpirationScheduler(
                     try {
                         notificationService.checkExpiringDocuments(company.id)
                     } catch (e: Exception) {
-                        // Log error silently
                     }
                 }
                 
             } catch (e: Exception) {
-                // Log error silently
             }
         }
     }
-    
-    /**
-     * Ejecuta manualmente la verificación (útil para testing)
-     */
+
     fun runManualCheck() {
         runExpirationCheck()
     }

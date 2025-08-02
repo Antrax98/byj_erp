@@ -12,7 +12,6 @@ import java.util.UUID
 fun CreateDocumentRequest.toDomain(companyId: UUID, userId: UUID): Document {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
-    // Validar el status manualmente con mensaje claro
     val documentStatus = try {
         DocumentStatus.valueOf(this.status.uppercase())
     } catch (e: IllegalArgumentException) {
@@ -42,7 +41,6 @@ fun CreateDocumentRequest.toDomain(companyId: UUID, userId: UUID): Document {
     )
 }
 
-// Extensión para aplicar UpdateDocumentRequest a Document existente
 fun Document.applyUpdate(request: UpdateDocumentRequest): Document {
     return this.copy(
         type = request.type ?: this.type,

@@ -41,8 +41,8 @@ fun Route.documentsRoutes(
     authWrapper: DocumentManagementAuthWrapper
 ) {
     
+    //se obtienen todos los documentos de la empresa
     get("/all") {
-        // 1. Validar sesión y autorización
         val session = authWrapper.authorizeOrThrow(
             call,
             requiredAnyPermissions = setOf(
@@ -50,15 +50,14 @@ fun Route.documentsRoutes(
             )
         )
         
-        // 2. Verificar contexto de empresa
+        //se valida que el usuario tenga una empresa asociada
         if (session.companyId == null) {
             call.respond(HttpStatusCode.BadRequest, "User has no company")
             return@get
         }
         
-        val companyId = session.companyId // Ya sabemos que no es null por la validación anterior
+        val companyId = session.companyId
         
-        // 3. Usar service para obtener documentos por compañía
         try {
             val documentsDTO = documentService.getAllDocumentsByCompany(companyId)
             call.respond(HttpStatusCode.OK, documentsDTO)
@@ -68,8 +67,8 @@ fun Route.documentsRoutes(
         }
     }
     
+    //se realiza búsqueda de documentos con filtros
     post("/search") {
-        // 1. Validar sesión y autorización
         val session = authWrapper.authorizeOrThrow(
             call,
             requiredAnyPermissions = setOf(
@@ -77,13 +76,13 @@ fun Route.documentsRoutes(
             )
         )
         
-        // 2. Verificar contexto de empresa
+        //se verifica contexto de empresa
         if (session.companyId == null) {
             call.respond(HttpStatusCode.BadRequest, "User has no company")
             return@post
         }
         
-        // 3. Recibir parámetros de búsqueda
+        //se reciben parámetros de búsqueda
         val searchRequest = try {
             call.receive<DocumentSearchRequest>()
         } catch (e: Exception) {
@@ -91,17 +90,17 @@ fun Route.documentsRoutes(
             return@post
         }
         
-        // 4. Realizar búsqueda
+        //se realiza búsqueda
         try {
             val searchResponse = documentService.searchDocuments(session.companyId, searchRequest)
             call.respond(HttpStatusCode.OK, searchResponse)
         } catch (e: Exception) {
             call.respond(HttpStatusCode.InternalServerError, "Error performing search: ${e.message}")
         }
-    }
     
+    //se obtiene un documento específico por ID
     get("/{documentId}") {
-        // 1. Validar sesión y autorización
+        //se valida sesión y autorización
         val session = authWrapper.authorizeOrThrow(
             call,
             requiredAnyPermissions = setOf(
@@ -109,7 +108,7 @@ fun Route.documentsRoutes(
             )
         )
         
-        // 2. Extraer y validar parámetros
+        //se extrae y valida parámetros
         val documentIdString = call.parameters["documentId"]
         if (documentIdString == null) {
             call.respond(HttpStatusCode.BadRequest, "Missing document ID")
@@ -123,15 +122,15 @@ fun Route.documentsRoutes(
             return@get
         }
         
-        // 3. Verificar contexto de empresa
+        //se verifica contexto de empresa
         if (session.companyId == null) {
             call.respond(HttpStatusCode.BadRequest, "User has no company")
             return@get
         }
         
-        val companyId = session.companyId // Ya sabemos que no es null por la validación anterior
+        val companyId = session.companyId
         
-        // 4. Usar service para obtener documento (con lógica de negocio)
+        //se obtiene documento mediante el servicio
         try {
             val documentDTO = documentService.getDocumentById(documentId, companyId)
             if (documentDTO != null) {
@@ -144,8 +143,9 @@ fun Route.documentsRoutes(
         }
     }
     
+    //se crea un nuevo documento
     post {
-        // 1. Validar sesión y autorización
+        //se valida sesión y autorización
         val session = authWrapper.authorizeOrThrow(
             call,
             requiredAnyPermissions = setOf(
@@ -153,15 +153,15 @@ fun Route.documentsRoutes(
             )
         )
         
-        // 2. Verificar contexto de empresa
+        //se verifica contexto de empresa
         if (session.companyId == null) {
             call.respond(HttpStatusCode.BadRequest, "User has no company")
             return@post
         }
         
-        val companyId = session.companyId // Ya sabemos que no es null por la validación anterior
+        val companyId = session.companyId
         
-        // 3. Recibir y validar datos
+        //se recibe y valida datos del nuevo documento
         val createRequest = try {
             val request = call.receive<CreateDocumentRequest>()
             request
@@ -171,7 +171,7 @@ fun Route.documentsRoutes(
             return@post
         }
         
-        // 4. Usar service para crear documento (con lógica de negocio)
+        //se crea documento mediante el servicio
         try {
             val document = createRequest.toDomain(companyId, session.userId)
             val documentDTO = documentService.createDocument(document)
@@ -184,8 +184,9 @@ fun Route.documentsRoutes(
         }
     }
     
+    //se actualiza un documento existente
     put("/{documentId}") {
-        // 1. Validar sesión y autorización
+        //se valida sesión y autorización
         val session = authWrapper.authorizeOrThrow(
             call,
             requiredAnyPermissions = setOf(
@@ -193,7 +194,7 @@ fun Route.documentsRoutes(
             )
         )
         
-        // 2. Extraer y validar parámetros
+        //se extrae y valida parámetros
         val documentIdString = call.parameters["documentId"]
         if (documentIdString == null) {
             call.respond(HttpStatusCode.BadRequest, "Missing document ID")
@@ -255,8 +256,9 @@ fun Route.documentsRoutes(
         }
     }
     
+    //se elimina definitivamente un documento
     delete("/{documentId}") {
-        // 1. Validar sesión y autorización
+        //se valida sesión y autorización
         val session = authWrapper.authorizeOrThrow(
             call,
             requiredAnyPermissions = setOf(
@@ -264,7 +266,7 @@ fun Route.documentsRoutes(
             )
         )
         
-        // 2. Extraer y validar parámetros
+        //se extrae y valida parámetros
         val documentIdString = call.parameters["documentId"]
         if (documentIdString == null) {
             call.respond(HttpStatusCode.BadRequest, "Missing document ID")
@@ -278,15 +280,15 @@ fun Route.documentsRoutes(
             return@delete
         }
         
-        // 3. Verificar contexto de empresa
+        //se verifica contexto de empresa
         if (session.companyId == null) {
             call.respond(HttpStatusCode.BadRequest, "User has no company")
             return@delete
         }
         
-        val companyId = session.companyId // Ya sabemos que no es null por la validación anterior
+        val companyId = session.companyId
         
-        // 4. Usar service para eliminar documento (con lógica de negocio)
+        //se elimina documento mediante el servicio
         try {
             val deleted = documentService.deleteDocument(documentId, companyId)
             if (deleted) {
@@ -301,9 +303,9 @@ fun Route.documentsRoutes(
         }
     }
     
-    // Endpoint para cambiar estado de documento
+    //se cambia el estado de un documento
     patch("/{documentId}/status") {
-        // 1. Validar sesión y autorización
+        //se valida sesión y autorización
         val session = authWrapper.authorizeOrThrow(
             call,
             requiredAnyPermissions = setOf(
@@ -311,7 +313,7 @@ fun Route.documentsRoutes(
             )
         )
         
-        // 2. Extraer y validar parámetros
+        //se extrae y valida parámetros
         val documentIdString = call.parameters["documentId"]
         if (documentIdString == null) {
             call.respond(HttpStatusCode.BadRequest, "Missing document ID")
@@ -325,7 +327,7 @@ fun Route.documentsRoutes(
             return@patch
         }
         
-        // 3. Recibir request
+        //se recibe el request del cambio de estado
         val statusRequest = try {
             call.receive<ChangeStatusRequest>()
         } catch (e: Exception) {
@@ -333,17 +335,17 @@ fun Route.documentsRoutes(
             return@patch
         }
         
-        // 4. Usar service para cambiar estado
+        //se cambia estado mediante el servicio
         try {
-            // Validar que session tenga companyId (usuarios normales necesitan estar asociados a una compañía)
+            //se valida que la sesión tenga empresa asociada
             val companyId = session.companyId
-            val userId = session.userId // Extraemos también el userId de la sesión
+            val userId = session.userId
             if (companyId == null) {
                 call.respond(HttpStatusCode.BadRequest, "User must be associated with a company")
                 return@patch
             }
             
-            // Validar que el nuevo estado es válido
+            //se valida que el nuevo estado es válido
             val newStatus = try {
                 DocumentStatus.valueOf(statusRequest.newStatus.uppercase())
             } catch (e: IllegalArgumentException) {
@@ -351,7 +353,7 @@ fun Route.documentsRoutes(
                 return@patch
             }
             
-            // Usar el método específico para cambio de estado (no valida edición)
+            //se actualiza el estado mediante el servicio específico
             val documentDTO = documentService.updateDocumentStatus(documentId, newStatus, companyId, userId)
             if (documentDTO != null) {
                 call.respond(HttpStatusCode.OK, documentDTO)
@@ -365,9 +367,10 @@ fun Route.documentsRoutes(
         }
     }
     
+    //se desactiva un documento (soft delete)
     patch("/{documentId}/deactivate") {
         try {
-            // 1. Validar sesión y autorización
+            //se valida sesión y autorización
             val session = authWrapper.authorizeOrThrow(
                 call,
                 requiredAnyPermissions = setOf(
@@ -375,14 +378,14 @@ fun Route.documentsRoutes(
                 )
             )
             
-            // 2. Verificar contexto de empresa
+            //se verifica contexto de empresa
             val companyId = session.companyId
             if (companyId == null) {
                 call.respond(HttpStatusCode.BadRequest, "User must be associated with a company")
                 return@patch
             }
             
-            // 3. Obtener ID del documento
+            //se obtiene ID del documento
             val documentIdParam = call.parameters["documentId"]
             if (documentIdParam == null) {
                 call.respond(HttpStatusCode.BadRequest, "Document ID is required")

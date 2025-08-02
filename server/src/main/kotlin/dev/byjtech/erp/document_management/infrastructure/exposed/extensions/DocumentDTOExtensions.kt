@@ -12,7 +12,6 @@ import dev.byjtech.erp.document_management.dto.DocumentNotificationDTO
 import dev.byjtech.erp.document_management.dto.UserNotificationSettingsDTO
 import dev.byjtech.erp.modules.document_management.domain.model.DocumentStatus
 
-// Extensión para convertir Document (modelo de dominio) a DocumentDTO
 fun Document.toDTO(): DocumentDTO {
     return DocumentDTO(
         id = this.id.toString(),
@@ -34,7 +33,6 @@ fun Document.toDTO(): DocumentDTO {
     )
 }
 
-// Extensión para convertir DocumentEditHistory a DocumentEditHistoryDTO
 fun DocumentEditHistory.toDTO(): DocumentEditHistoryDTO {
     return DocumentEditHistoryDTO(
         id = this.id.toString(),
@@ -47,7 +45,6 @@ fun DocumentEditHistory.toDTO(): DocumentEditHistoryDTO {
     )
 }
 
-// Extensión para convertir DocumentAuditLog a DocumentAuditLogDTO  
 fun DocumentAuditLog.toDTO(): DocumentAuditLogDTO {
     return DocumentAuditLogDTO(
         id = this.id.toString(),
@@ -59,7 +56,6 @@ fun DocumentAuditLog.toDTO(): DocumentAuditLogDTO {
     )
 }
 
-// Extensión para convertir DocumentDTO a Document (modelo de dominio)
 fun DocumentDTO.toDomain(): dev.byjtech.erp.document_management.domain.model.Document {
     return dev.byjtech.erp.document_management.domain.model.Document(
         id = java.util.UUID.fromString(this.id),
@@ -81,7 +77,6 @@ fun DocumentDTO.toDomain(): dev.byjtech.erp.document_management.domain.model.Doc
     )
 }
 
-// Extensión para convertir DocumentNotification a DocumentNotificationDTO
 fun DocumentNotification.toDTO(): DocumentNotificationDTO {
     return DocumentNotificationDTO(
         id = this.id.toString(),
@@ -96,7 +91,6 @@ fun DocumentNotification.toDTO(): DocumentNotificationDTO {
     )
 }
 
-// Extensión para convertir UserNotificationSettings a UserNotificationSettingsDTO
 fun UserNotificationSettings.toDTO(): UserNotificationSettingsDTO {
     return UserNotificationSettingsDTO(
         id = this.id.toString(),

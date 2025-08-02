@@ -48,7 +48,7 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
     val scrollState = rememberScrollState()
     val uriHandler = LocalUriHandler.current
 
-    // Estados de tooltip para evitar recomposiciones innecesarias
+    //se crean estados de tooltip
     val backTooltipState = rememberTooltipState()
     val sendTooltipState = rememberTooltipState()
     val approveTooltipState = rememberTooltipState()
@@ -62,7 +62,7 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
     val confirmTooltipState = rememberTooltipState()
     val cancelTooltipState = rememberTooltipState()
 
-    // Cargar documento al inicializar
+    //se carga el documento al inicializar la pantalla
     LaunchedEffect(component.documentId) {
         state = state.copy(isLoading = true)
         try {
@@ -77,7 +77,6 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
                     isLoading = false,
                     error = "Documento no encontrado"
                 )
-            }
         } catch (e: Exception) {
             state = state.copy(
                 isLoading = false,
@@ -107,9 +106,9 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
                 },
                 actions = {
                     state.document?.let { document ->
-                        val actions = getAvailableActions(document.status, "USER") // Por ahora asumimos USER
+                        val actions = getAvailableActions(document.status, "USER")
                         
-                        // Botón para enviar (UPLOADED -> SENT)
+                        //se muestra botón para enviar documento
                         if (actions.canSend) {
                             TooltipBox(
                                 positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),

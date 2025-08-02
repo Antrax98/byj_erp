@@ -36,7 +36,7 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Header con título y botones de acción
+        //se muestra header con título y botones de acción
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -47,12 +47,11 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
             Text(
                 text = "Documentos",
                 style = MaterialTheme.typography.headlineMedium
-            )
             
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Botón de notificaciones con badge
+                //se muestra botón de notificaciones con badge
                 val notificationCount by component.notificationCount.collectAsState()
                 BadgedBox(
                     badge = {
@@ -76,7 +75,7 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
                     }
                 }
                 
-                // Botón para alternar modo búsqueda
+                //se muestra botón para alternar modo búsqueda
                 IconButton(
                     onClick = { component.toggleSearchMode() }
                 ) {
@@ -86,7 +85,7 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
                     )
                 }
                 
-                // Botón recargar
+                //se muestra botón recargar
                 IconButton(
                     onClick = { 
                         scope.launch {
@@ -100,7 +99,7 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
                     )
                 }
                 
-                // Botón agregar documento
+                //se muestra botón agregar documento
                 FloatingActionButton(
                     onClick = { component.onAddDocumentClick() }
                 ) {
@@ -109,7 +108,7 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
             }
         }
 
-        // Filtros de búsqueda (solo en modo búsqueda)
+        //se muestran filtros de búsqueda solo en modo búsqueda
         if (state.isSearchMode) {
             DocumentSearchFilters(
                 searchRequest = state.currentSearchRequest,
@@ -126,6 +125,7 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
         }
 
         when {
+            //se muestra indicador de carga
             state.isLoading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -135,6 +135,7 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
                 }
             }
             
+            //se muestra mensaje de error
             state.error != null -> {
                 Card(
                     modifier = Modifier
@@ -146,7 +147,6 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
                         Text(
                             text = "Error",
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = state.error ?: "Error desconocido",
@@ -170,6 +170,7 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
                 }
             }
             
+            //se muestra mensaje cuando no hay documentos
             state.documents.isEmpty() -> {
                 Card(
                     modifier = Modifier
@@ -196,8 +197,9 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
                 }
             }
             
+            //se muestra lista de documentos
             else -> {
-                // Lista de documentos
+                //se muestra lista de documentos en lazy column
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -211,7 +213,7 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
                     }
                 }
                 
-                // Paginación (solo en modo búsqueda)
+                //se muestra paginación solo en modo búsqueda
                 state.searchResponse?.let { searchResponse ->
                     DocumentPagination(
                         searchResponse = searchResponse,
@@ -224,6 +226,7 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
     }
 }
 
+//se define tarjeta de documento individual
 @Composable
 fun DocumentCard(
     document: DocumentDTO,

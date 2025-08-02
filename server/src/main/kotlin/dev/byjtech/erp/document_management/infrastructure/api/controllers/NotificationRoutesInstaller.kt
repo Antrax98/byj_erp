@@ -29,7 +29,6 @@ fun Route.notificationRoutes(
     authWrapper: DocumentManagementAuthWrapper
 ) {
     
-    // Obtener notificaciones pendientes del usuario
     get("/pending") {
         val session = authWrapper.authorizeOrThrow(
             call,
@@ -42,7 +41,6 @@ fun Route.notificationRoutes(
         call.respond(HttpStatusCode.OK, notifications.map { it.toDTO() })
     }
     
-    // Obtener todas las notificaciones del usuario
     get("/all") {
         val session = authWrapper.authorizeOrThrow(
             call,
@@ -55,7 +53,6 @@ fun Route.notificationRoutes(
         call.respond(HttpStatusCode.OK, notifications.map { it.toDTO() })
     }
     
-    // Contar notificaciones pendientes
     get("/count") {
         val session = authWrapper.authorizeOrThrow(
             call,
@@ -68,7 +65,6 @@ fun Route.notificationRoutes(
         call.respond(HttpStatusCode.OK, mapOf("count" to count))
     }
     
-    // Marcar notificación como leída
     put("/{id}/read") {
         val session = authWrapper.authorizeOrThrow(
             call,
@@ -88,7 +84,6 @@ fun Route.notificationRoutes(
         }
     }
     
-    // Obtener configuraciones de notificación del usuario
     get("/settings") {
         val session = authWrapper.authorizeOrThrow(
             call,
@@ -104,7 +99,6 @@ fun Route.notificationRoutes(
         call.respond(HttpStatusCode.OK, settings.toDTO())
     }
     
-    // Actualizar configuraciones de notificación del usuario
     put("/settings") {
         val session = authWrapper.authorizeOrThrow(
             call,
@@ -115,7 +109,6 @@ fun Route.notificationRoutes(
         
         val request = call.receive<UpdateNotificationSettingsRequest>()
         
-        // Validar que los días sean positivos
         if (request.daysBeforeExpiration < 1 || request.daysBeforeExpiration > 365) {
             return@put call.respond(
                 HttpStatusCode.BadRequest, 

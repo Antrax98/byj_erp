@@ -18,15 +18,12 @@ val documentManagementInfrastructureModule = module {
     single<UserNotificationSettingsRepository> { UserNotificationSettingsRepositoryImpl(get(named("documentManagementDatabase"))) }
     single<DocumentNotificationRepository> { DocumentNotificationRepositoryImpl(get(named("documentManagementDatabase"))) }
     
-    // Repositorio para validar referencias cruzadas con la base de datos core
     single<CompanyValidationRepository> { CompanyValidationRepositoryImpl(get(named("coreDatabase"))) }
 
-    // Auth wrapper para el módulo
     single<DocumentManagementAuthWrapper> {
         DocumentManagementAuthWrapper(get())
     }
 
-    // Controladores de rutas
     single<DocumentRoutesInstaller> {
         DocumentRoutesInstaller(
             documentService = get(),

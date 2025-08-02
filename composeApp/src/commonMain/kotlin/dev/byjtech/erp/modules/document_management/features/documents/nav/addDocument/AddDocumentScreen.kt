@@ -46,9 +46,9 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
-    // Validar formulario
+    //se valida el formulario automáticamente
     LaunchedEffect(state.selectedDocumentType, state.documentNumber, state.issueDate, state.dueDate, state.netAmount) {
-        val today = DateUtils.today() // Fecha actual
+        val today = DateUtils.today()
         val minValidDate = if (state.issueDate != null) {
             if (state.issueDate!! > today) state.issueDate!! else today
         } else {
@@ -63,16 +63,15 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
                     state.issueDate != null &&
                     state.netAmount.isNotBlank() &&
                     state.netAmount.toDoubleOrNull() != null &&
-                    isDueDateValid // Agregar validación de fechas (incluyendo fecha actual)
+                    isDueDateValid
         )
     }
 
-    // Calcular total automáticamente
+    //se calcula el total automáticamente cuando cambian los montos
     LaunchedEffect(state.netAmount, state.taxAmount) {
         val net = state.netAmount.toDoubleOrNull() ?: 0.0
         val tax = state.taxAmount.toDoubleOrNull() ?: 0.0
         val total = net + tax
-        // Redondear a 2 decimales para evitar problemas de precisión
         val roundedTotal = kotlin.math.round(total * 100) / 100
         state = state.copy(totalAmount = String.format("%.2f", roundedTotal))
     }
@@ -100,7 +99,7 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Tipo de documento - Dropdown
+            //se muestra selector de tipo de documento
             ExposedDropdownMenuBox(
                 expanded = state.isDropdownExpanded,
                 onExpandedChange = { state = state.copy(isDropdownExpanded = it) }
@@ -138,7 +137,7 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
                 }
             }
 
-            // Número de documento
+            //se muestra campo de número de documento
             OutlinedTextField(
                 value = state.documentNumber,
                 onValueChange = { state = state.copy(documentNumber = it) },
@@ -148,7 +147,7 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
                 isError = state.documentNumber.isBlank() && state.error != null
             )
 
-            // Fecha de emisión
+            //se muestra selector de fecha de emisión
             DatePickerField(
                 value = state.issueDate,
                 onValueChange = { state = state.copy(issueDate = it) },
@@ -158,21 +157,21 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
                 supportingText = if (state.issueDate == null && state.error != null) {
                     { Text("La fecha de emisión es obligatoria", color = MaterialTheme.colorScheme.error) }
                 } else null,
-                maxDate = DateUtils.today() // No permitir fechas futuras más allá de hoy
+                maxDate = DateUtils.today()
             )
 
-            // Fecha de vencimiento (opcional)
+            //se muestra selector de fecha de vencimiento opcional
             DatePickerField(
                 value = state.dueDate,
                 onValueChange = { 
-                    val today = DateUtils.today() // Fecha actual
+                    val today = DateUtils.today()
                     val minValidDate = if (state.issueDate != null) {
                         if (state.issueDate!! > today) state.issueDate!! else today
                     } else {
                         today
                     }
                     
-                    // Validar que la fecha de vencimiento no sea anterior a la fecha de emisión ni a hoy
+                    //se valida que la fecha de vencimiento no sea anterior a la fecha de emisión ni a hoy
                     if (it != null && it < minValidDate) {
                         val errorMessage = when {
                             state.issueDate != null && it < state.issueDate!! -> 

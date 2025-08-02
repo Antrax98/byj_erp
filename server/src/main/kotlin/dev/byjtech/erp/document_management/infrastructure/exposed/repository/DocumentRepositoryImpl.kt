@@ -25,23 +25,27 @@ import java.util.UUID
 
 class DocumentRepositoryImpl(private val database: Database) : DocumentRepository {
 
+    //se obtiene un documento específico por su ID
     override fun findById(id: UUID): Document? = transaction(database) {
         DocumentsTable.selectAll().where { DocumentsTable.id eq id }
             .map { it.toDomain() }
             .singleOrNull()
     }
 
+    //se obtienen todos los documentos activos
     override fun findAll(): List<Document> = transaction(database) {
         DocumentsTable.selectAll().where { DocumentsTable.status neq DocumentStatus.DEACTIVATED }
             .map { it.toDomain() }
     }
 
+    //se obtienen documentos por ID de empresa, solo activos
     override fun findByCompanyId(companyId: UUID): List<Document> = transaction(database) {
         DocumentsTable.selectAll().where { 
             DocumentsTable.companyId eq companyId and (DocumentsTable.status neq DocumentStatus.DEACTIVATED)
         }.map { it.toDomain() }
     }
     
+    //se obtienen documentos por ID de empresa con opción de incluir inactivos
     fun findByCompanyId(companyId: UUID, includeInactive: Boolean): List<Document> = transaction(database) {
         val query = if (includeInactive) {
             DocumentsTable.selectAll().where { DocumentsTable.companyId eq companyId }
@@ -53,6 +57,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         query.map { it.toDomain() }
     }
     
+    //se obtienen todos los documentos con opción de incluir inactivos
     fun findAll(includeInactive: Boolean): List<Document> = transaction(database) {
         val query = if (includeInactive) {
             DocumentsTable.selectAll()
@@ -62,33 +67,28 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         query.map { it.toDomain() }
     }
 
+    //se realiza búsqueda de documentos con filtros y paginación
     override fun search(companyId: UUID, searchRequest: DocumentSearchRequest): SearchResult = transaction(database) {
-        // Definir la consulta base con filtro de compañía
         val shouldIncludeInactive = searchRequest.includeInactive == true || 
                                     searchRequest.status == DocumentStatus.DEACTIVATED
         
+        //se configura la consulta base según si incluir documentos inactivos
         val baseQuery = if (shouldIncludeInactive) {
-            // Incluir documentos con cualquier estado (incluidos DEACTIVATED)
             DocumentsTable.selectAll().where { DocumentsTable.companyId eq companyId }
         } else {
-            // Excluir documentos DEACTIVATED
             DocumentsTable.selectAll().where { 
                 DocumentsTable.companyId eq companyId and (DocumentsTable.status neq DocumentStatus.DEACTIVATED)
             }
         }
-        
-        // Aplicar filtros
         var query = baseQuery
         val conditions = mutableListOf<Op<Boolean>>()
         
-        // Filtros específicos
+        //se aplica el filtro de tipo de documento
         searchRequest.documentType?.let { type ->
-            // Para enums, buscar por coincidencia exacta o convertir el enum name a string para búsqueda parcial
             try {
                 val documentType = DocumentType.valueOf(type.uppercase())
                 conditions.add(DocumentsTable.type eq documentType)
             } catch (e: IllegalArgumentException) {
-                // Si no es un valor de enum válido, buscar tanto en el nombre del enum como en el nombre para mostrar
                 val matchingTypes = DocumentType.entries.filter { docType ->
                     docType.name.contains(type, ignoreCase = true) ||
                     getDocumentTypeDisplayName(docType).contains(type, ignoreCase = true)
@@ -99,53 +99,60 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
             }
         }
         
+        //se aplica el filtro de número de documento
         searchRequest.documentNumber?.let { number ->
             conditions.add(DocumentsTable.documentNumber like "%$number%")
         }
         
+        //se aplica el filtro de estado de documento
         searchRequest.status?.let { status ->
             conditions.add(DocumentsTable.status eq status)
         }
         
+        //se aplica el filtro de moneda
         searchRequest.currency?.let { currency ->
             conditions.add(DocumentsTable.currency like "%$currency%")
         }
         
+        //se aplica el filtro de fecha de emisión desde
         searchRequest.issueDateFrom?.let { dateFrom ->
             conditions.add(DocumentsTable.issueDate greaterEq dateFrom.toJavaLocalDate())
         }
         
+        //se aplica el filtro de fecha de emisión hasta
         searchRequest.issueDateTo?.let { dateTo ->
             conditions.add(DocumentsTable.issueDate lessEq dateTo.toJavaLocalDate())
         }
         
+        //se aplica el filtro de fecha de vencimiento desde
         searchRequest.dueDateFrom?.let { dateFrom ->
             conditions.add(DocumentsTable.dueDate greaterEq dateFrom.toJavaLocalDate())
         }
         
+        //se aplica el filtro de fecha de vencimiento hasta
         searchRequest.dueDateTo?.let { dateTo ->
             conditions.add(DocumentsTable.dueDate lessEq dateTo.toJavaLocalDate())
         }
         
+        //se aplica el filtro de monto mínimo
         searchRequest.minAmount?.let { minAmount ->
             conditions.add(DocumentsTable.totalAmount greaterEq minAmount.toBigDecimal())
         }
         
+        //se aplica el filtro de monto máximo
         searchRequest.maxAmount?.let { maxAmount ->
             conditions.add(DocumentsTable.totalAmount lessEq maxAmount.toBigDecimal())
         }
         
+        //se aplica el filtro de creador del documento
         searchRequest.createdBy?.let { createdBy ->
             conditions.add(DocumentsTable.createdBy eq UUID.fromString(createdBy))
         }
         
-        // Búsqueda de texto general
+        //se aplica el filtro de búsqueda de texto general
         searchRequest.searchText?.let { searchText ->
-            // Para la búsqueda de texto, buscar tanto en nombres de enum como en nombres para mostrar
             val matchingTypes = DocumentType.entries.filter { type ->
-                // Buscar en el nombre del enum (INVOICE, CREDIT_NOTE, etc.)
                 type.name.contains(searchText, ignoreCase = true) ||
-                // Buscar en el nombre para mostrar (Factura, Nota de Crédito, etc.)
                 getDocumentTypeDisplayName(type).contains(searchText, ignoreCase = true)
             }
             
@@ -160,7 +167,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
             conditions.add(textSearchCondition)
         }
         
-        // Filtro de documentos vencidos
+        //se aplica el filtro de documentos vencidos
         searchRequest.isOverdue?.let { isOverdue ->
             if (isOverdue) {
                 val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -171,15 +178,15 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
             }
         }
         
-        // Aplicar todas las condiciones
+        //se aplican todas las condiciones de filtrado
         if (conditions.isNotEmpty()) {
             query = query.andWhere { conditions.reduce { acc, condition -> acc and condition } }
         }
         
-        // Contar total de resultados
+        //se obtiene el total de documentos
         val totalCount = query.count()
         
-        // Aplicar ordenamiento
+        //se configura el ordenamiento de resultados
         val sortColumn = when (searchRequest.sortBy) {
             "document_type" -> DocumentsTable.type
             "document_number" -> DocumentsTable.documentNumber
@@ -191,12 +198,13 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
             else -> DocumentsTable.createdAt
         }
         
+        //se aplica la dirección de ordenamiento
         query = when (searchRequest.sortDirection) {
             SortDirection.ASC -> query.orderBy(sortColumn to SortOrder.ASC)
             SortDirection.DESC -> query.orderBy(sortColumn to SortOrder.DESC)
         }
         
-        // Aplicar paginación
+        //se aplica la paginación de resultados
         val offset = (searchRequest.page - 1) * searchRequest.pageSize
         val documents = query
             .drop(offset)
@@ -206,6 +214,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         return@transaction SearchResult(documents, totalCount)
     }
 
+    //se guarda un nuevo documento en la base de datos
     override fun save(document: Document): Document = transaction(database) {
         val insertedId = DocumentsTable.insertAndGetId { row ->
             row[type] = document.type
@@ -228,6 +237,7 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         return@transaction findById(insertedId) ?: throw IllegalStateException("Failed to retrieve saved document with ID: $insertedId")
     }
 
+    //se actualiza un documento existente
     override fun update(document: Document): Document = transaction(database) {
         DocumentsTable.update({ DocumentsTable.id eq document.id }) { row ->
             row[type] = document.type
@@ -249,10 +259,12 @@ class DocumentRepositoryImpl(private val database: Database) : DocumentRepositor
         findById(document.id)!!
     }
 
+    //se elimina definitivamente un documento
     override fun delete(id: UUID): Unit = transaction(database) {
         DocumentsTable.deleteWhere { DocumentsTable.id eq id }
     }
 
+    //se convierte un registro de base de datos a objeto de dominio
     private fun ResultRow.toDomain(): Document = Document(
         id = this[DocumentsTable.id].value,
         type = this[DocumentsTable.type],
