@@ -47,6 +47,9 @@ class DocumentService(
     fun getDocumentById(documentId: UUID, companyId: UUID): DocumentDTO? {
         val document = documentRepository.findById(documentId)
         return if (document != null && document.companyId == companyId) {
+            document.toDTO()
+        } else {
+            null
         }
     }
     
@@ -97,6 +100,8 @@ class DocumentService(
         //se registra el cambio de estado en el historial
         documentEditHistoryService.recordDocumentChanges(
             oldDocument = existingDocument,
+            newDocument = updatedDocument,
+            userId = UUID.randomUUID() // TODO: Obtener del contexto de sesión
         )
         
         val savedDocument = documentRepository.update(updatedDocument)

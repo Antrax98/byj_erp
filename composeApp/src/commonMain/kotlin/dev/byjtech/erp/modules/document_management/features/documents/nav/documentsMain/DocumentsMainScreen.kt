@@ -47,6 +47,7 @@ fun DocumentsMainScreen(component: DocumentsMainComponent) {
             Text(
                 text = "Documentos",
                 style = MaterialTheme.typography.headlineMedium
+            )
             
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)

@@ -97,6 +97,7 @@ fun Route.documentsRoutes(
         } catch (e: Exception) {
             call.respond(HttpStatusCode.InternalServerError, "Error performing search: ${e.message}")
         }
+    }
     
     //se obtiene un documento específico por ID
     get("/{documentId}") {

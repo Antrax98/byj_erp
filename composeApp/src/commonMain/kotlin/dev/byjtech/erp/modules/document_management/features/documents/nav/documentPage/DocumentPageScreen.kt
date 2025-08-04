@@ -77,6 +77,7 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
                     isLoading = false,
                     error = "Documento no encontrado"
                 )
+            }
         } catch (e: Exception) {
             state = state.copy(
                 isLoading = false,

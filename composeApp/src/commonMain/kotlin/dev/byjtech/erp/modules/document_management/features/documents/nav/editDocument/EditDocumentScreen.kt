@@ -77,6 +77,7 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                 val minValidDate = if (document.issueDate != null) {
                     if (document.issueDate > today) document.issueDate else today
                 } else {
+                    today
                 }
                 
                 val dueDate = document.dueDate
