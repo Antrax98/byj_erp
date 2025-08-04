@@ -7,4 +7,5 @@ import org.koin.dsl.module
 val sharedModule = module {
     single<CoreDefinition>{ CoreDefinition }
     single<TestDefinition>{ TestDefinition }
+    single<MachineryDefinition>{ MachineryDefinition }
 }
