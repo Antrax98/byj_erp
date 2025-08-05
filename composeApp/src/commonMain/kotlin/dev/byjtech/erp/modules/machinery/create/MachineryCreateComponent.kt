@@ -31,10 +31,12 @@ interface MachineryCreateComponent : FeatureComponent {
     
     fun onSave()
     fun onCancel()
+    fun clearMessages()
 }
 
 data class MachineryCreateState(
     val isLoading: Boolean = false,
     val error: String? = null,
+    val successMessage: String? = null,
     val isSuccess: Boolean = false
 )

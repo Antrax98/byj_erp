@@ -5,6 +5,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,35 +31,56 @@ fun MachineryCreateScreen(component: MachineryCreateComponent) {
     val licensePlate by component.licensePlate.collectAsState()
     val location by component.location.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Header
-        Text(
-            text = "Crear Nueva Maquinaria",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
+    // Capturar los valores para evitar problemas de smart cast
+    val successMessage = state.successMessage
+    val errorMessage = state.error
+    
+    // Logs para debug
+    println("MachineryCreateScreen - successMessage: $successMessage")
+    println("MachineryCreateScreen - errorMessage: $errorMessage")
+    println("MachineryCreateScreen - isLoading: ${state.isLoading}")
 
-        // Error message
-        if (state.error != null) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = state.error!!,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    modifier = Modifier.padding(16.dp)
+    // Estado para el Snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Manejar mensajes con Snackbar
+    LaunchedEffect(successMessage, errorMessage) {
+        when {
+            successMessage != null -> {
+                snackbarHostState.showSnackbar(
+                    message = "✅ $successMessage",
+                    duration = SnackbarDuration.Long
                 )
+                component.clearMessages()
+            }
+            errorMessage != null -> {
+                snackbarHostState.showSnackbar(
+                    message = "❌ $errorMessage",
+                    actionLabel = "Cerrar",
+                    duration = SnackbarDuration.Long
+                )
+                // No limpiar automáticamente los errores, dejar que el usuario los cierre
             }
         }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header
+            Text(
+                text = "Crear Nueva Maquinaria",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
 
         // Form fields
         OutlinedTextField(
@@ -187,5 +211,6 @@ fun MachineryCreateScreen(component: MachineryCreateComponent) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        }
     }
 }

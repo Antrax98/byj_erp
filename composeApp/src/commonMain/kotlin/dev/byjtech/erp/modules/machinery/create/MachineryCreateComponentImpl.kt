@@ -61,45 +61,54 @@ class MachineryCreateComponentImpl(
 
     override fun onCodeChange(value: String) {
         _code.value = value
+        clearMessagesIfNeeded()
     }
 
     override fun onNameChange(value: String) {
         _name.value = value
+        clearMessagesIfNeeded()
     }
 
     override fun onDescriptionChange(value: String) {
         _description.value = value
+        clearMessagesIfNeeded()
     }
 
     override fun onBrandChange(value: String) {
         _brand.value = value
+        clearMessagesIfNeeded()
     }
 
     override fun onModelChange(value: String) {
         _model.value = value
+        clearMessagesIfNeeded()
     }
 
     override fun onYearChange(value: String) {
         _year.value = value
+        clearMessagesIfNeeded()
     }
 
     override fun onSerialNumberChange(value: String) {
         _serialNumber.value = value
+        clearMessagesIfNeeded()
     }
 
     override fun onLicensePlateChange(value: String) {
         _licensePlate.value = value
+        clearMessagesIfNeeded()
     }
 
     override fun onLocationChange(value: String) {
         _location.value = value
+        clearMessagesIfNeeded()
     }
 
     override fun onSave() {
         if (!validateForm()) return
 
         coroutineScope.launch {
-            _state.value = _state.value.copy(isLoading = true, error = null)
+            _state.value = _state.value.copy(isLoading = true, error = null, successMessage = null)
 
             try {
                 // Obtener el company ID del usuario autenticado
@@ -109,7 +118,8 @@ class MachineryCreateComponentImpl(
                 if (companyId == null) {
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        error = "No se pudo obtener la información de la compañía del usuario"
+                        error = "No se pudo obtener la información de la compañía del usuario",
+                        successMessage = null
                     )
                     return@launch
                 }
@@ -130,24 +140,51 @@ class MachineryCreateComponentImpl(
 
                 val result = machineryApi.createMachinery(request)
                 result.fold(
-                    onSuccess = {
+                    onSuccess = { machinery ->
+                        println("Maquinaria creada exitosamente: ${machinery.name}")
                         _state.value = _state.value.copy(
                             isLoading = false,
-                            isSuccess = true
+                            isSuccess = true,
+                            successMessage = "¡Maquinaria '${machinery.name}' creada exitosamente!",
+                            error = null
                         )
+                        // Navegar después de un delay para mostrar el mensaje
+                        kotlinx.coroutines.delay(3000)
                         onMachineryCreated()
                     },
                     onFailure = { error ->
+                        println("Error al crear maquinaria: ${error.message}")
+                        val errorMessage = when {
+                            error.message?.contains("duplicate", ignoreCase = true) == true -> 
+                                "Ya existe una maquinaria con ese código"
+                            error.message?.contains("network", ignoreCase = true) == true -> 
+                                "Error de conexión. Verifique su conexión a internet"
+                            error.message?.contains("unauthorized", ignoreCase = true) == true -> 
+                                "No tiene permisos para crear maquinarias"
+                            error.message?.contains("validation", ignoreCase = true) == true -> 
+                                "Datos inválidos. Verifique los campos requeridos"
+                            else -> "Error al crear la maquinaria: ${error.message ?: "Error desconocido"}"
+                        }
                         _state.value = _state.value.copy(
                             isLoading = false,
-                            error = error.message ?: "Error al crear la maquinaria"
+                            error = errorMessage,
+                            successMessage = null
                         )
                     }
                 )
             } catch (e: Exception) {
+                println("Excepción capturada: ${e.message}")
+                e.printStackTrace()
+                val errorMessage = when (e) {
+                    is java.net.ConnectException -> "Error de conexión con el servidor"
+                    is java.net.UnknownHostException -> "No se pudo conectar al servidor"
+                    is kotlinx.coroutines.CancellationException -> "Operación cancelada"
+                    else -> "Error inesperado: ${e.message ?: "Error desconocido"}"
+                }
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    error = e.message ?: "Error inesperado"
+                    error = errorMessage,
+                    successMessage = null
                 )
             }
         }
@@ -157,11 +194,23 @@ class MachineryCreateComponentImpl(
         toHome()
     }
 
+    override fun clearMessages() {
+        _state.value = _state.value.copy(
+            error = null,
+            successMessage = null
+        )
+    }
+
     override fun onBack(): Boolean {
         return false // Let parent handle
     }
 
     private fun validateForm(): Boolean {
+        // Limpiar mensajes anteriores antes de validar
+        if (_state.value.successMessage != null) {
+            _state.value = _state.value.copy(successMessage = null)
+        }
+        
         val errors = mutableListOf<String>()
 
         if (_code.value.trim().isEmpty()) {
@@ -178,12 +227,21 @@ class MachineryCreateComponentImpl(
         }
 
         if (errors.isNotEmpty()) {
+            val errorMsg = errors.joinToString(", ")
+            println("Errores de validación: $errorMsg")
             _state.value = _state.value.copy(
-                error = errors.joinToString(", ")
+                error = errorMsg,
+                successMessage = null
             )
             return false
         }
 
         return true
+    }
+
+    private fun clearMessagesIfNeeded() {
+        if (_state.value.error != null || _state.value.successMessage != null) {
+            clearMessages()
+        }
     }
 }
