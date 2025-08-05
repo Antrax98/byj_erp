@@ -2,11 +2,14 @@ package dev.byjtech.erp.machinery.infrastructure.api.machinery
 
 import dev.byjtech.erp.machinery.application.service.MachineryService
 import dev.byjtech.erp.machinery.infrastructure.extensions.toDTO
+import dev.byjtech.erp.modules.machinery.request.CreateMachineryRequest
 import dev.byjtech.erp.shared.routing.RoutesInstaller
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import java.util.UUID
 
@@ -24,6 +27,19 @@ class MachineryApiRoutesInstaller(
                 call.respond(HttpStatusCode.OK, machineries.toDTO())
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to fetch machineries: ${e.message}"))
+            }
+        }
+        
+        // Ruta para crear una nueva maquinaria
+        post("/create") {
+            try {
+                val request = call.receive<CreateMachineryRequest>()
+                val createdMachinery = machineryService.createMachinery(request)
+                call.respond(HttpStatusCode.Created, createdMachinery.toDTO())
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to create machinery: ${e.message}"))
             }
         }
         
