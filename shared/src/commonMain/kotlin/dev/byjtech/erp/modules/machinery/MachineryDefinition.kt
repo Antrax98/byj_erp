@@ -1,4 +1,4 @@
-package dev.byjtech.erp.machinery
+package dev.byjtech.erp.modules.machinery
 
 import dev.byjtech.erp.common.CategoryBase
 import dev.byjtech.erp.common.ModuleDefinition

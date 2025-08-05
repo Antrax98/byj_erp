@@ -7,6 +7,7 @@ import dev.byjtech.erp.machinery.infrastructure.exposed.extensions.fromModel
 import dev.byjtech.erp.machinery.infrastructure.exposed.extensions.toModel
 import dev.byjtech.erp.machinery.infrastructure.exposed.tables.MachineriesTable
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 import java.util.UUID

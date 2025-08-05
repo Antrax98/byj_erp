@@ -14,7 +14,6 @@ import kotlinx.datetime.toJavaLocalDateTime
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.like
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
 
@@ -153,9 +152,10 @@ class MachineryNotificationRepositoryImpl(private val db: Database) : MachineryN
 
     override fun findByUserToNotify(userId: UUID): List<MachineryNotification> {
         return transaction(db) {
-            MachineryNotificationEntity.find { 
-                MachineryNotificationsTable.notifyUsers like "%$userId%"
-            }.orderBy(MachineryNotificationsTable.createdAt to SortOrder.DESC)
+            // Búsqueda simple sin LIKE para evitar problemas de compilación
+            MachineryNotificationEntity.all()
+                .filter { it.notifyUsers.contains(userId.toString()) }
+                .sortedByDescending { it.createdAt }
                 .map { it.toModel() }
         }
     }
