@@ -180,14 +180,12 @@ fun PermissionCard(permission: PermissionWithKey, onClick: () -> Unit) {
             Spacer(modifier = Modifier.weight(1f))
 
             if (isAssigned) {
-                //asignado= mostrar icono check
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = "Ya asignado",
                     tint = Color.Green
                 )
             } else {
-                //no asignado= mostrar boton de agregar
                 IconButton(onClick = onClick) {
                     Icon(
                         imageVector = Icons.Default.Add,

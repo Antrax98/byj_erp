@@ -45,7 +45,6 @@ import dev.byjtech.erp.common.UnderConstructionScreen
 fun AssignSpecialPermissionScreen(component: AssignSpecialPermissionComponent) {
     val possiblePermissions by component.possiblePermissions.collectAsState()
 
-    //estados de las expanciones
     val expandedModules = remember { mutableStateMapOf<String, Boolean>() }
     val expandedCategories = remember { mutableStateMapOf<Pair<String, String>, Boolean>() }
 

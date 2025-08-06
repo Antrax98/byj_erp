@@ -15,7 +15,6 @@ class TestFeatureComponentImpl(
     override val updateTitle: (newTitle: String) -> Unit
 ): TestFeatureComponent, ComponentContext by componentContext {
 
-    //si el feature tiene navegacion nesteada, no usar state en si mismo, solo en sus hijos????
     private val _state = MutableStateFlow(TestFeatureState())
     override val state: StateFlow<TestFeatureState> = _state.asStateFlow()
 

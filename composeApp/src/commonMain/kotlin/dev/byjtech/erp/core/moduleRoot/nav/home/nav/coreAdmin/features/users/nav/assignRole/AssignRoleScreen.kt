@@ -101,7 +101,6 @@ fun RoleCard(role: RoleDTO, onClick: () -> Unit = {}) {
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Ícono circular decorativo
             Icon(
                 imageVector = Icons.Default.Badge,
                 contentDescription = "Role Icon",

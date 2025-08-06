@@ -78,7 +78,6 @@ class RolesFeatureComponentImpl(
                 println(childStack.active.configuration)
                 if (added && childStack.active.configuration is Config.RolePage) {
                     val rolePage = (childStack.active.instance as? Child.RolePage)?.component
-                    println("a punto de cargar permisos (funcion desde el rolesFeature)")
                     rolePage?.fetchRolePermissions()
                 }
             }

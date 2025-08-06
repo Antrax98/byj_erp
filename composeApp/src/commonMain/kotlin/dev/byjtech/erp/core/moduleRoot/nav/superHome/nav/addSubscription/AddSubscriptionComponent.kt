@@ -13,5 +13,4 @@ interface AddSubscriptionComponent {
     val onFinished: (added: Boolean) -> Unit
     fun loadModules()
     fun addModule(module: ModuleDTO)
-    //val modules: StateFlow<List<ModuleDTO>>
 }

@@ -51,7 +51,7 @@ class SettingsCookieStorage(
     }
 
     override fun close() {
-        // Podrías guardar un timestamp, hacer sync, etc.
+        // ....
     }
 
     suspend fun clearAll() {

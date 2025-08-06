@@ -10,11 +10,9 @@ class SplashComponentImpl(
     private val sessionManager: SessionManager
 ) : SplashComponent, ComponentContext by componentContext {
 
-    // Crea un CoroutineScope dentro del componente
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     init {
-        // Lanza la coroutine de manera adecuada
         scope.launch {
             val sessionJob = async {sessionManager.loadSession()}
             sessionJob.await()

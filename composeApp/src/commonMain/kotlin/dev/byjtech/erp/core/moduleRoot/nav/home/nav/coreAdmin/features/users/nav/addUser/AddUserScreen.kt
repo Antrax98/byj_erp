@@ -34,63 +34,6 @@ import dev.byjtech.erp.common.BusyOverlay
 import dev.byjtech.erp.common.UnderConstructionScreen
 
 @Composable
-fun AddUserScreenOld(component: AddUserComponent){
-    val userName by component.username.collectAsState()
-    val email by component.email.collectAsState()
-    val isBusy by component.isBusy.collectAsState()
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            modifier = Modifier
-                .padding(24.dp)
-                .fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(8.dp),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                OutlinedTextField(
-                    value = userName.value,
-                    onValueChange = { component.onUsernameChange(it) },
-                    label = { Text("Username") },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = userName.error != null,
-                    supportingText = { userName.error?.let { Text(it, color = MaterialTheme.colorScheme.error) } }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = email.value,
-                    onValueChange = { component.onEmailChange(it) },
-                    label = { Text("Email") },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = email.error != null,
-                    supportingText = { email.error?.let { Text(it, color = MaterialTheme.colorScheme.error) } }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { component.onSubmitted() },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Crear")
-                }
-
-            }
-        }
-    }
-    BusyOverlay(isBusy)
-}
-
-@Composable
 fun AddUserScreen(component: AddUserComponent) {
     val userName by component.username.collectAsState()
     val email by component.email.collectAsState()
@@ -116,7 +59,6 @@ fun AddUserScreen(component: AddUserComponent) {
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-                // Label + TextField para Username
                 Text(
                     text = "Nombre de usuario",
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
@@ -134,7 +76,6 @@ fun AddUserScreen(component: AddUserComponent) {
                     singleLine = true,
                 )
 
-                // Label + TextField para Email
                 Text(
                     text = "Correo electrónico",
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),

@@ -22,9 +22,6 @@ class AddPermissionComponentImpl(
 
     val coroutineScope = componentContext.coroutineScope()
 
-//    private val _possiblePermissions = MutableStateFlow<Map<String,Map<String,Map<String,PermissionKey>>>>(emptyMap())
-//    override val possiblePermissions: StateFlow<Map<String,Map<String,Map<String,PermissionKey>>>> = _possiblePermissions
-
     private val _possiblePermissions = MutableStateFlow<Map<String,Set<PermissionWithKey>>>(emptyMap())
     override val possiblePermissions: StateFlow<Map<String,Set<PermissionWithKey>>> = _possiblePermissions
 
