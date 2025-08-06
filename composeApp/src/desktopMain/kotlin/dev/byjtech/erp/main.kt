@@ -28,13 +28,11 @@ fun main() {
             basePort = dotenv["BASE_PORT"]?.toIntOrNull(),
             settings = settings,
             dispatcher = Dispatchers.IO,
-            //onNavigationRequired = {}
         )
 
         val lifecycle = LifecycleRegistry()
 
         val sessionManager = SessionManager(apiClient, settings, null) {
-            // Añadir navegacion aqui si no se hace en el commonMain
         }
 
         val googleLoginHandler = DesktopGoogleLoginHandler(settings) { session ->
@@ -53,7 +51,7 @@ fun main() {
             googleLoginHandler.stopServer()
             lifecycle.destroy()
             exitApplication()
-        }, title = "Mi ERP Desktop") {
+        }, title = "ByJ ERP Desktop") {
             App(root)
         }
     }

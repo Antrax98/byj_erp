@@ -1,11 +1,19 @@
 package dev.byjtech.erp.core.api
 
-import de.jensklingenberg.ktorfit.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.expectSuccess
+import io.ktor.client.request.get
 
-interface CoreApi {
-
-    //opciones "superadmin" o "tenant"
-    @GET("api/core/users/me/type")
-    suspend fun getMyType(): String
-
+class CoreApi(private val client: HttpClient) {
+    suspend fun getMyType(): String {
+        return try {
+            val response = client.get("api/core/users/me/type"){
+                expectSuccess = false
+            }
+            response.body()
+        } catch (e: Exception) {
+            ""
+        }
+    }
 }
