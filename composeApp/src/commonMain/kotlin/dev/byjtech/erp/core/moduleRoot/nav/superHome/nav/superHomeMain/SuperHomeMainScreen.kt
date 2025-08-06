@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -36,36 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.SuperHomeComponentImpl.Config
-
-//@Composable
-//fun SuperHomeMainScreen(component: SuperHomeMainComponent) {
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(16.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        LazyVerticalGrid(
-//            columns = GridCells.Fixed(2),
-//            modifier = Modifier.fillMaxSize(),
-//            verticalArrangement = Arrangement.spacedBy(12.dp),
-//            horizontalArrangement = Arrangement.spacedBy(12.dp),
-//            contentPadding = PaddingValues(bottom = 100.dp)
-//        ) {
-//            item {
-//                NavigationCard("Empresas", "Ver listado de empresas") {
-//                    component.navTo(Config.Companies)
-//                }
-//            }
-//
-//            items((1..3).toList()) { i ->
-//                NavigationCard("Test $i", "Boton de prueba $i") {
-//                    println("Test $i pressed")
-//                }
-//            }
-//        }
-//    }
-//}
 
 @Composable
 fun SuperHomeMainScreen(component: SuperHomeMainComponent) {
@@ -95,39 +64,9 @@ fun SuperHomeMainScreen(component: SuperHomeMainComponent) {
 
             item {
                 NavigationCard(
-                    title = "Gestión Documentos", 
-                    subtitle = "Administrar documentos del sistema",
-                    icon = Icons.Default.Settings
-                ) {
-                    component.navTo(Config.DocumentsFeature)
-                }
-            }
-
-            item {
-                NavigationCard(
-                    title = "Historial Ediciones",
-                    subtitle = "Ver historial de cambios en documentos",
-                    icon = Icons.Default.History
-                ) {
-                    component.navTo(Config.EditHistoryFeature)
-                }
-            }
-
-            item {
-                NavigationCard(
-                    title = "Auditoría Log",
-                    subtitle = "Ver logs de auditoría del sistema",
-                    icon = Icons.Default.Security
-                ) {
-                    component.navTo(Config.AuditLogsFeature)
-                }
-            }
-
-            item {
-                NavigationCard(
                     title = "Test de roles",
                     subtitle = "Pantalla para probar roles",
-                    icon = Icons.Default.Explore
+                    icon = Icons.Default.Security
                 ) {
                     println("Test Roles")
                 }
@@ -137,7 +76,7 @@ fun SuperHomeMainScreen(component: SuperHomeMainComponent) {
                 NavigationCard(
                     title = "Test de permisos",
                     subtitle = "Pantalla para probar permisos",
-                    icon = Icons.Default.Explore
+                    icon = Icons.Default.Settings
                 ) {
                     println("Test Permisos")
                 }
@@ -155,46 +94,6 @@ fun SuperHomeMainScreen(component: SuperHomeMainComponent) {
         }
     }
 }
-
-//@Composable
-//fun NavigationCard(
-//    title: String,
-//    subtitle: String? = null,
-//    onClick: () -> Unit
-//) {
-//    Card(
-//        onClick = onClick,
-//        shape = RoundedCornerShape(16.dp),
-//        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-//        modifier = Modifier.fillMaxWidth()
-//    ) {
-//        Row(
-//            modifier = Modifier
-//                .padding(16.dp),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Column(modifier = Modifier.weight(1f)) {
-//                Text(
-//                    text = title,
-//                    style = MaterialTheme.typography.titleMedium
-//                )
-//                if (subtitle != null) {
-//                    Spacer(modifier = Modifier.height(4.dp))
-//                    Text(
-//                        text = subtitle,
-//                        style = MaterialTheme.typography.bodyMedium,
-//                        color = MaterialTheme.colorScheme.onSurfaceVariant
-//                    )
-//                }
-//            }
-//            Icon(
-//                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-//                contentDescription = "Ir",
-//                tint = MaterialTheme.colorScheme.primary
-//            )
-//        }
-//    }
-//}
 
 @Composable
 fun NavigationCard(

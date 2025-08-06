@@ -7,9 +7,6 @@ import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addSubscription.AddSubs
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companies.CompaniesComponent
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companyPage.CompanyPageComponent
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.superHomeMain.SuperHomeMainComponent
-import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponent
-import dev.byjtech.erp.modules.document_management.features.editHistory.EditHistoryFeatureComponent
-import dev.byjtech.erp.modules.document_management.features.auditLogs.AuditLogsFeatureComponent
 import kotlinx.coroutines.flow.StateFlow
 
 interface SuperHomeComponent {
@@ -25,9 +22,6 @@ interface SuperHomeComponent {
         class Main(val component: SuperHomeMainComponent) : Child()
         class AddCompany(val component: AddCompanyComponent) : Child()
         class CompanyPage(val component: CompanyPageComponent) : Child()
-        class DocumentsFeature(val component: DocumentsFeatureComponent) : Child()
-        class EditHistoryFeature(val component: EditHistoryFeatureComponent) : Child()
-        class AuditLogsFeature(val component: AuditLogsFeatureComponent) : Child()
         class AddSubscription(val component: AddSubscriptionComponent) : Child()
     }
 }

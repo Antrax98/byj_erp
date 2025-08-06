@@ -131,6 +131,8 @@ class DatabaseInitializer (private val database: Database) {
             //el codigo siguiente se asegura de darle el permiso all al rol admin del core especificamente
             //al momento de subscribir modulos a las compañias, se le asignara el permiso all al rol admin del modulo, (manualmente o automatico)
             val coreModule = ModuleEntity.find(ModulesTable.name eq "core").firstOrNull()
+//            val adminPermission = PermissionEntity.find((PermissionsTable.name eq "all")and (PermissionsTable.categoryId eq CategoryEntity.find((CategoriesTable.name eq "admin")and (CategoriesTable.moduleId eq coreModule?.id?.value)).firstOrNull()?.id?.value)).firstOrNull()
+//                ?: throw Exception("No se encontro el permiso all para admin en modulo core")
             //Obtener el módulo core
             val moduleId = coreModule?.id?.value
             if (moduleId == null) throw Exception("coreModule es null")
@@ -141,11 +143,11 @@ class DatabaseInitializer (private val database: Database) {
                 .firstOrNull()
             if (adminCategory == null) throw Exception("No se encontró la categoría 'admin' en el módulo core")
 
-            //Buscar el permiso "all" 
+            //Buscar el permiso "all" dentro de esa categoría
             val adminPermission = PermissionEntity
-                .find(PermissionsTable.name eq "all")
+                .find((PermissionsTable.name eq "all") and (PermissionsTable.categoryId eq adminCategory.id.value))
                 .firstOrNull()
-            if (adminPermission == null) throw Exception("No se encontró el permiso 'all'")
+            if (adminPermission == null) throw Exception("No se encontró el permiso 'all' para la categoría 'admin' en el módulo core")
 
 
             //asignar permiso especial
@@ -161,70 +163,6 @@ class DatabaseInitializer (private val database: Database) {
                     ?: throw Exception("No se encontro el modulo core")
             }
 
-            // Asignar permiso de document_management:documents:view a los superadmins para testing
-            try {
-                val documentManagementModule = ModuleEntity.find(ModulesTable.name eq "document_management").firstOrNull()
-                if (documentManagementModule != null) {
-                    val documentsCategory = CategoryEntity
-                        .find((CategoriesTable.name eq "documents") and (CategoriesTable.moduleId eq documentManagementModule.id.value))
-                        .firstOrNull()
-                    
-                    if (documentsCategory != null) {
-                        // Lista de permisos a asignar para testing completo
-                        val permissionsToAssign = listOf("view", "create", "update", "delete", "disable")
-                        
-                        permissionsToAssign.forEach { permissionName ->
-                            val permission = PermissionEntity
-                                .find((PermissionsTable.name eq permissionName) and (PermissionsTable.categoryId eq documentsCategory.id))
-                                .firstOrNull()
-                            
-                            if (permission != null) {
-                                // Asignar permiso a superadmins para testing
-                                val superAdminEmails = listOf(
-                                    "usuariotesttesttester@gmail.com",
-                                    "minepoker.lol@gmail.com", 
-                                    "anaysmr21@gmail.com"
-                                )
-                                
-                                superAdminEmails.forEach { email ->
-                                    val superAdminUser = UserEntity.find { UsersTable.email eq email }.firstOrNull()
-                                    if (superAdminUser != null) {
-                                        // Verificar si ya tiene el permiso
-                                        val existingPermission = UserPermissionEntity.find {
-                                            (UserPermissionTable.userId eq superAdminUser.id) and 
-                                            (UserPermissionTable.permissionId eq permission.id)
-                                        }.firstOrNull()
-                                        
-                                        if (existingPermission == null) {
-                                            UserPermissionEntity.new {
-                                                user = superAdminUser
-                                                this.permission = permission
-                                            }
-                                            println("Asignado permiso document_management:documents:$permissionName a $email")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    // También crear subscripción para document_management
-                    val existingDocumentSubscription = SubscriptionEntity.find {
-                        (SubscriptionsTable.companyId eq newcompany.id) and 
-                        (SubscriptionsTable.moduleId eq documentManagementModule.id)
-                    }.firstOrNull()
-                    
-                    if (existingDocumentSubscription == null) {
-                        SubscriptionEntity.new(UUID.randomUUID()) {
-                            company = newcompany
-                            module = documentManagementModule
-                        }
-                        println("Creada subscripción a document_management para la empresa")
-                    }
-                }
-            } catch (e: Exception) {
-                println("Error asignando permisos de document_management: ${e.message}")
-            }
 
         }
     }

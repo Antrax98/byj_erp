@@ -50,18 +50,11 @@ import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.addSubscription.AddSubs
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companies.CompaniesScreen
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.companyPage.CompanyPageScreen
 import dev.byjtech.erp.core.moduleRoot.nav.superHome.nav.superHomeMain.SuperHomeMainScreen
-import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureScreen
-import dev.byjtech.erp.modules.document_management.features.editHistory.EditHistoryFeatureScreen
-import dev.byjtech.erp.modules.document_management.features.auditLogs.AuditLogsFeatureScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuperHomeScreen(component: SuperHomeComponent) {
-    val dummyNames = listOf(
-        "Users", "Companies", "Modules",
-        "Subscriptions", "Billings", "SuperAdmins"
-    )
 
     val isOnMainPage by component.isOnMainPage.collectAsState()
 
@@ -111,15 +104,6 @@ fun SuperHomeScreen(component: SuperHomeComponent) {
                     }
                     is SuperHomeComponent.Child.AddSubscription -> {
                         AddSubscriptionScreen(child.component)
-                    }
-                    is SuperHomeComponent.Child.DocumentsFeature -> {
-                        DocumentsFeatureScreen(child.component)
-                    }
-                    is SuperHomeComponent.Child.EditHistoryFeature -> {
-                        EditHistoryFeatureScreen(child.component)
-                    }
-                    is SuperHomeComponent.Child.AuditLogsFeature -> {
-                        AuditLogsFeatureScreen(child.component)
                     }
                 }
             }
