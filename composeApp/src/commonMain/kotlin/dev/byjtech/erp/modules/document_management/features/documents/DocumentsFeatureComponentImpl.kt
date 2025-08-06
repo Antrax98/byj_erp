@@ -9,6 +9,8 @@ import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentsMain.DocumentsMainComponent
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentsMain.DocumentsMainComponentImpl
+import dev.byjtech.erp.modules.document_management.features.documents.nav.documentsMain.DocumentsMainHomeComponent
+import dev.byjtech.erp.modules.document_management.features.documents.nav.documentsMain.DocumentsMainHomeComponentImpl
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentPage.DocumentPageComponent
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentPage.DocumentPageComponentImpl
 import dev.byjtech.erp.modules.document_management.features.documents.nav.addDocument.AddDocumentComponent
@@ -60,21 +62,17 @@ class DocumentsFeatureComponentImpl(
     }
 
     override fun onBack(): Boolean {
-        if (childStack.active.configuration == Config.DocumentsMain) {
-            return false
-        } else {
-            navigation.pop {
-                val newConfig = childStack.active.configuration
-                changeTitle(newConfig)
-            }
-            return true
-        }
+        // Implementación simple - siempre permite ir hacia atrás
+        navigation.pop()
+        return true
     }
 
     // Navegación
     @Serializable
     sealed class Config {
         @Serializable
+        data object DocumentsHome : Config()
+        @Serializable  
         data object DocumentsMain : Config()
         @Serializable
         data class DocumentPage(val documentId: String) : Config()
@@ -94,8 +92,7 @@ class DocumentsFeatureComponentImpl(
 
     private val stack = childStack(
         source = navigation,
-        serializer = Config.serializer(),
-        initialStack = { listOf(Config.DocumentsMain) },
+        initialStack = { listOf(Config.DocumentsHome) },
         handleBackButton = true,
         childFactory = ::childFactory
     )
@@ -104,7 +101,12 @@ class DocumentsFeatureComponentImpl(
 
     private fun childFactory(config: Config, componentContext: ComponentContext): DocumentsFeatureComponent.Child =
         when (config) {
-            is Config.DocumentsMain -> DocumentsFeatureComponent.Child.DocumentsMain(
+            is Config.DocumentsHome -> DocumentsFeatureComponent.Child.DocumentsHome(
+                DocumentsMainHomeComponentImpl(
+                    navTo = ::navigateTo
+                )
+            )
+            is Config.DocumentsMain -> DocumentsFeatureComponent.Child.DocumentsList(
                 DocumentsMainComponentImpl(
                     componentContext = componentContext,
                     userPermissions = userPermissions,
@@ -120,27 +122,8 @@ class DocumentsFeatureComponentImpl(
                     apiClient = apiClient,
                     navTo = ::navigateTo,
                     documentId = config.documentId,
-                    onNavigateBackCallback = { 
-                        navigation.pop {
-                            val newConfig = childStack.active.configuration
-                            changeTitle(newConfig)
-                        }
-                    },
-                    onDocumentDeactivatedCallback = {
-                        navigation.pop {
-                            val newConfig = childStack.active.configuration
-                            changeTitle(newConfig)
-                            // Recargar documentos si estamos en DocumentsMain
-                            if (newConfig is Config.DocumentsMain) {
-                                val documentsMain = (childStack.active.instance as? DocumentsFeatureComponent.Child.DocumentsMain)?.component
-                                documentsMain?.let {
-                                    coroutineScope.launch {
-                                        it.loadDocuments()
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    onNavigateBackCallback = { navigation.pop() },
+                    onDocumentDeactivatedCallback = { navigation.pop() }
                 )
             )
             is Config.AddDocument -> DocumentsFeatureComponent.Child.AddDocument(
@@ -149,12 +132,7 @@ class DocumentsFeatureComponentImpl(
                     userPermissions = userPermissions,
                     apiClient = apiClient,
                     navTo = ::navigateTo,
-                    onNavigateBack = { 
-                        navigation.pop {
-                            val newConfig = childStack.active.configuration
-                            changeTitle(newConfig)
-                        }
-                    }
+                    onNavigateBack = { navigation.pop() }
                 )
             )
             is Config.EditDocument -> DocumentsFeatureComponent.Child.EditDocument(
@@ -164,12 +142,7 @@ class DocumentsFeatureComponentImpl(
                     apiClient = apiClient,
                     navTo = ::navigateTo,
                     documentId = config.documentId,
-                    onNavigateBack = { 
-                        navigation.pop {
-                            val newConfig = childStack.active.configuration
-                            changeTitle(newConfig)
-                        }
-                    }
+                    onNavigateBack = { navigation.pop() }
                 )
             )
             is Config.DocumentHistory -> DocumentsFeatureComponent.Child.DocumentHistory(
@@ -178,54 +151,35 @@ class DocumentsFeatureComponentImpl(
                     userPermissions = userPermissions,
                     apiClient = apiClient,
                     documentId = config.documentId,
-                    onNavigateBack = { 
-                        navigation.pop {
-                            val newConfig = childStack.active.configuration
-                            changeTitle(newConfig)
-                        }
-                    }
+                    onNavigateBack = { navigation.pop() }
                 )
             )
             is Config.Notifications -> DocumentsFeatureComponent.Child.Notifications(
                 NotificationsComponentImpl(
                     componentContext = componentContext,
                     viewModel = notificationsViewModel,
-                    onNavigateBackCallback = { 
-                        navigation.pop {
-                            val newConfig = childStack.active.configuration
-                            changeTitle(newConfig)
-                        }
-                    },
-                    onNavigateToSettingsCallback = {
-                        navigateTo(Config.NotificationSettings)
-                    }
+                    onNavigateBackCallback = { navigation.pop() },
+                    onNavigateToSettingsCallback = { navigateTo(Config.NotificationSettings) }
                 )
             )
             is Config.NotificationSettings -> DocumentsFeatureComponent.Child.NotificationSettings(
                 NotificationSettingsComponentImpl(
                     componentContext = componentContext,
                     viewModel = notificationSettingsViewModel,
-                    onNavigateBackCallback = { 
-                        navigation.pop {
-                            val newConfig = childStack.active.configuration
-                            changeTitle(newConfig)
-                        }
-                    }
+                    onNavigateBackCallback = { navigation.pop() }
                 )
             )
         }
 
     private fun navigateTo(target: Config) {
-        val current = childStack.value.active.configuration
-        if (current != target) {
-            navigation.push(target)
-            changeTitle(target)
-        }
+        navigation.push(target)
+        changeTitle(target)
     }
 
     private fun changeTitle(config: Config) {
         val title = when (config) {
-            Config.DocumentsMain -> "Documentos"
+            Config.DocumentsHome -> "Gestión de Documentos"
+            Config.DocumentsMain -> "Lista de Documentos"
             is Config.DocumentPage -> "Detalle de Documento"
             Config.AddDocument -> "Nuevo Documento"
             is Config.EditDocument -> "Editar Documento"
@@ -237,6 +191,6 @@ class DocumentsFeatureComponentImpl(
     }
 
     init {
-        changeTitle(Config.DocumentsMain)
+        changeTitle(Config.DocumentsHome)
     }
 }
