@@ -1,6 +1,7 @@
 package dev.byjtech.erp.machinery.infrastructure
 
 import dev.byjtech.erp.machinery.domain.repository.MachineryRepository
+import dev.byjtech.erp.machinery.domain.repository.MachineryHistoryRepository
 import dev.byjtech.erp.machinery.domain.repository.OperationalDataRepository
 import dev.byjtech.erp.machinery.domain.repository.MaintenanceScheduleRepository
 import dev.byjtech.erp.machinery.domain.repository.WorkOrderRepository
@@ -8,6 +9,7 @@ import dev.byjtech.erp.machinery.domain.repository.MachineryDocumentRepository
 import dev.byjtech.erp.machinery.domain.repository.MachineryNotificationRepository
 import dev.byjtech.erp.machinery.infrastructure.api.MachineryRoutesInstaller
 import dev.byjtech.erp.machinery.infrastructure.api.machinery.MachineryApiRoutesInstaller
+import dev.byjtech.erp.machinery.infrastructure.repository.MachineryHistoryRepositoryImpl
 import dev.byjtech.erp.machinery.infrastructure.exposed.repository.MachineryRepositoryImpl
 import dev.byjtech.erp.machinery.infrastructure.exposed.repository.OperationalDataRepositoryImpl
 import dev.byjtech.erp.machinery.infrastructure.exposed.repository.MaintenanceScheduleRepositoryImpl
@@ -20,6 +22,7 @@ import org.koin.dsl.module
 val machineryinfrastructureModule = module {
     // Repositories
     single<MachineryRepository> { MachineryRepositoryImpl(get(named("machineryDatabase"))) }
+    single<MachineryHistoryRepository> { MachineryHistoryRepositoryImpl() }
     single<OperationalDataRepository> { OperationalDataRepositoryImpl(get(named("machineryDatabase"))) }
     single<MaintenanceScheduleRepository> { MaintenanceScheduleRepositoryImpl(get(named("machineryDatabase"))) }
     single<WorkOrderRepository> { WorkOrderRepositoryImpl(get(named("machineryDatabase"))) }
@@ -27,7 +30,7 @@ val machineryinfrastructureModule = module {
     single<MachineryNotificationRepository> { MachineryNotificationRepositoryImpl(get(named("machineryDatabase"))) }
     
     // Route Installers
-    single<MachineryApiRoutesInstaller> { MachineryApiRoutesInstaller(get()) }
+    single<MachineryApiRoutesInstaller> { MachineryApiRoutesInstaller(get(), get(), get()) }
     
     // API
     single<MachineryRoutesInstaller> {

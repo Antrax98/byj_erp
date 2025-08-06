@@ -10,8 +10,12 @@ import kotlinx.datetime.toLocalDateTime
 import java.util.UUID
 
 class MachineryService(
-    private val machineryRepository: MachineryRepository
+    private val machineryRepository: MachineryRepository,
+    private val machineryHistoryService: MachineryHistoryService? = null
 ) {
+    init {
+        println("MachineryService initialized with historyService: ${machineryHistoryService != null}")
+    }
     fun getAllMachineries(): List<Machinery> {
         return machineryRepository.findAllActive() // Solo activas por defecto
     }
@@ -40,7 +44,7 @@ class MachineryService(
         return machineryRepository.findInactiveByCompanyId(companyId)
     }
 
-    fun createMachinery(request: CreateMachineryRequest): Machinery {
+    fun createMachinery(request: CreateMachineryRequest, userId: UUID? = null): Machinery {
         // Verificar que el código no exista
         if (machineryRepository.existsWithCode(request.code)) {
             throw IllegalArgumentException("Machinery with code '${request.code}' already exists")
@@ -61,10 +65,17 @@ class MachineryService(
             companyId = UUID.fromString(request.companyId)
         )
 
-        return machineryRepository.save(machinery)
+        val savedMachinery = machineryRepository.save(machinery)
+        
+        // Registrar en el historial si se proporciona userId
+        userId?.let { 
+            machineryHistoryService?.logMachineryCreation(savedMachinery, it)
+        }
+
+        return savedMachinery
     }
 
-    fun updateMachinery(id: UUID, request: UpdateMachineryRequest): Machinery {
+    fun updateMachinery(id: UUID, request: UpdateMachineryRequest, userId: UUID? = null): Machinery {
         val existingMachinery = machineryRepository.findById(id)
             ?: throw IllegalArgumentException("Machinery with id $id not found")
 
@@ -81,10 +92,17 @@ class MachineryService(
             updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         )
 
-        return machineryRepository.update(updatedMachinery)
+        val savedMachinery = machineryRepository.update(updatedMachinery)
+        
+        // Registrar cambios en el historial si se proporciona userId
+        userId?.let { 
+            machineryHistoryService?.logMachineryUpdate(id, it, existingMachinery, savedMachinery)
+        }
+
+        return savedMachinery
     }
 
-    fun deactivateMachinery(id: UUID): Machinery {
+    fun deactivateMachinery(id: UUID, userId: UUID? = null): Machinery {
         val machinery = machineryRepository.findById(id)
             ?: throw IllegalArgumentException("Machinery with id $id not found")
 
@@ -97,10 +115,17 @@ class MachineryService(
             updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         )
 
-        return machineryRepository.update(deactivatedMachinery)
+        val savedMachinery = machineryRepository.update(deactivatedMachinery)
+        
+        // Registrar desactivación en el historial si se proporciona userId
+        userId?.let { 
+            machineryHistoryService?.logMachineryDeactivation(id, it)
+        }
+
+        return savedMachinery
     }
 
-    fun activateMachinery(id: UUID): Machinery {
+    fun activateMachinery(id: UUID, userId: UUID? = null): Machinery {
         val machinery = machineryRepository.findById(id)
             ?: throw IllegalArgumentException("Machinery with id $id not found")
 
@@ -113,6 +138,13 @@ class MachineryService(
             updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         )
 
-        return machineryRepository.update(activatedMachinery)
+        val savedMachinery = machineryRepository.update(activatedMachinery)
+        
+        // Registrar activación en el historial si se proporciona userId
+        userId?.let { 
+            machineryHistoryService?.logMachineryActivation(id, it)
+        }
+
+        return savedMachinery
     }
 }

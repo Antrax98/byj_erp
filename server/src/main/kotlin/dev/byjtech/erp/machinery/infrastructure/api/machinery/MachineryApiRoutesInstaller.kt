@@ -1,9 +1,11 @@
 package dev.byjtech.erp.machinery.infrastructure.api.machinery
 
 import dev.byjtech.erp.machinery.application.service.MachineryService
+import dev.byjtech.erp.machinery.application.service.MachineryHistoryService
 import dev.byjtech.erp.machinery.infrastructure.extensions.toDTO
 import dev.byjtech.erp.modules.machinery.request.CreateMachineryRequest
 import dev.byjtech.erp.modules.machinery.request.UpdateMachineryRequest
+import dev.byjtech.erp.core.infrastructure.auth.CoreAuthWrapper
 import dev.byjtech.erp.shared.routing.RoutesInstaller
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
@@ -17,7 +19,9 @@ import io.ktor.server.routing.route
 import java.util.UUID
 
 class MachineryApiRoutesInstaller(
-    private val machineryService: MachineryService
+    private val machineryService: MachineryService,
+    private val machineryHistoryService: MachineryHistoryService,
+    private val authServ: CoreAuthWrapper
 ) : RoutesInstaller {
     
     override fun Route.installRoutes() {
@@ -36,8 +40,15 @@ class MachineryApiRoutesInstaller(
         // Ruta para crear una nueva maquinaria
         post("/create") {
             try {
+                // Autenticación opcional para el historial
+                val session = try {
+                    authServ.authorizeOrThrow(call)
+                } catch (e: Exception) {
+                    null // Si no hay autenticación, continúa sin historial
+                }
+                
                 val request = call.receive<CreateMachineryRequest>()
-                val createdMachinery = machineryService.createMachinery(request)
+                val createdMachinery = machineryService.createMachinery(request, session?.userId)
                 call.respond(HttpStatusCode.Created, createdMachinery.toDTO())
             } catch (e: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
@@ -95,6 +106,13 @@ class MachineryApiRoutesInstaller(
         // Ruta para actualizar una maquinaria
         put("/{id}") {
             try {
+                // Autenticación opcional para el historial
+                val session = try {
+                    authServ.authorizeOrThrow(call)
+                } catch (e: Exception) {
+                    null // Si no hay autenticación, continúa sin historial
+                }
+                
                 val id = call.parameters["id"]?.let { UUID.fromString(it) }
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid machinery ID"))
@@ -102,7 +120,11 @@ class MachineryApiRoutesInstaller(
                 }
                 
                 val request = call.receive<UpdateMachineryRequest>()
-                val updatedMachinery = machineryService.updateMachinery(id, request)
+                
+                // TEMPORAL: Para testing del historial
+                val testUserId = session?.userId ?: UUID.fromString("00000000-0000-0000-0000-000000000001")
+                
+                val updatedMachinery = machineryService.updateMachinery(id, request, testUserId)
                 call.respond(HttpStatusCode.OK, updatedMachinery.toDTO())
             } catch (e: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
@@ -114,13 +136,20 @@ class MachineryApiRoutesInstaller(
         // Ruta para desactivar una maquinaria
         patch("/{id}/deactivate") {
             try {
+                // Autenticación opcional para el historial
+                val session = try {
+                    authServ.authorizeOrThrow(call)
+                } catch (e: Exception) {
+                    null // Si no hay autenticación, continúa sin historial
+                }
+                
                 val id = call.parameters["id"]?.let { UUID.fromString(it) }
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid machinery ID"))
                     return@patch
                 }
                 
-                val deactivatedMachinery = machineryService.deactivateMachinery(id)
+                val deactivatedMachinery = machineryService.deactivateMachinery(id, session?.userId)
                 call.respond(HttpStatusCode.OK, deactivatedMachinery.toDTO())
             } catch (e: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
@@ -132,13 +161,20 @@ class MachineryApiRoutesInstaller(
         // Ruta para reactivar una maquinaria
         patch("/{id}/activate") {
             try {
+                // Autenticación opcional para el historial
+                val session = try {
+                    authServ.authorizeOrThrow(call)
+                } catch (e: Exception) {
+                    null // Si no hay autenticación, continúa sin historial
+                }
+                
                 val id = call.parameters["id"]?.let { UUID.fromString(it) }
                 if (id == null) {
                     call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid machinery ID"))
                     return@patch
                 }
                 
-                val activatedMachinery = machineryService.activateMachinery(id)
+                val activatedMachinery = machineryService.activateMachinery(id, session?.userId)
                 call.respond(HttpStatusCode.OK, activatedMachinery.toDTO())
             } catch (e: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
@@ -176,6 +212,123 @@ class MachineryApiRoutesInstaller(
                 call.respond(HttpStatusCode.OK, machineries.toDTO())
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to fetch active company machineries: ${e.message}"))
+            }
+        }
+        
+        // ===== RUTAS DEL HISTORIAL DE MAQUINARIA =====
+        
+        // Ruta para obtener el historial de una maquinaria específica
+        get("/{id}/history") {
+            try {
+                val machineryId = call.parameters["id"]?.let { UUID.fromString(it) }
+                if (machineryId == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid machinery ID"))
+                    return@get
+                }
+                
+                val history = machineryHistoryService.getHistoryByMachineryId(machineryId)
+                call.respond(HttpStatusCode.OK, history.map { it.toDTO() })
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to fetch machinery history: ${e.message}"))
+            }
+        }
+        
+        // Ruta para obtener el historial de cambios por usuario
+        get("/history/user/{userId}") {
+            try {
+                // Autenticación requerida
+                val session = authServ.authorizeOrThrow(call)
+                
+                val userId = call.parameters["userId"]?.let { UUID.fromString(it) }
+                if (userId == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid user ID"))
+                    return@get
+                }
+                
+                // Verificar que el usuario puede ver este historial (por ejemplo, solo sus propios cambios o admin)
+                val history = machineryHistoryService.getHistoryByUserId(userId)
+                call.respond(HttpStatusCode.OK, history.map { it.toDTO() })
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to fetch user history: ${e.message}"))
+            }
+        }
+        
+        // Ruta para agregar una entrada personalizada al historial (para mantenimiento, etc.)
+        post("/{id}/history") {
+            try {
+                // Autenticación requerida
+                val session = authServ.authorizeOrThrow(call)
+                
+                val id = call.parameters["id"]?.let { UUID.fromString(it) }
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid machinery ID"))
+                    return@post
+                }
+                
+                val request = call.receive<Map<String, String?>>()
+                val field = request["field"] ?: throw IllegalArgumentException("Field is required")
+                val oldValue = request["oldValue"]
+                val newValue = request["newValue"]
+                val comment = request["comment"]
+                
+                val historyEntry = machineryHistoryService.addCustomHistoryEntry(
+                    machineryId = id,
+                    userId = session.userId,
+                    field = field,
+                    oldValue = oldValue,
+                    newValue = newValue,
+                    comment = comment
+                )
+                
+                call.respond(HttpStatusCode.Created, historyEntry.toDTO())
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to add history entry: ${e.message}"))
+            }
+        }
+        
+        // Ruta para marcar inicio de mantenimiento
+        post("/{id}/maintenance/start") {
+            try {
+                // Autenticación requerida
+                val session = authServ.authorizeOrThrow(call)
+                
+                val id = call.parameters["id"]?.let { UUID.fromString(it) }
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid machinery ID"))
+                    return@post
+                }
+                
+                val request = call.receive<Map<String, String?>>()
+                val comment = request["comment"]
+                
+                val historyEntry = machineryHistoryService.logMaintenanceStart(id, session.userId, comment)
+                call.respond(HttpStatusCode.Created, historyEntry.toDTO())
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to log maintenance start: ${e.message}"))
+            }
+        }
+        
+        // Ruta para marcar fin de mantenimiento
+        post("/{id}/maintenance/end") {
+            try {
+                // Autenticación requerida
+                val session = authServ.authorizeOrThrow(call)
+                
+                val id = call.parameters["id"]?.let { UUID.fromString(it) }
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid machinery ID"))
+                    return@post
+                }
+                
+                val request = call.receive<Map<String, String?>>()
+                val comment = request["comment"]
+                
+                val historyEntry = machineryHistoryService.logMaintenanceEnd(id, session.userId, comment)
+                call.respond(HttpStatusCode.Created, historyEntry.toDTO())
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to log maintenance end: ${e.message}"))
             }
         }
     }

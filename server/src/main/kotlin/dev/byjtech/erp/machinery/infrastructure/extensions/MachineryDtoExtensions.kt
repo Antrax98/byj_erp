@@ -1,7 +1,9 @@
 package dev.byjtech.erp.machinery.infrastructure.extensions
 
 import dev.byjtech.erp.machinery.domain.model.Machinery
+import dev.byjtech.erp.machinery.domain.model.MachineryHistory
 import dev.byjtech.erp.modules.machinery.dto.MachineryDTO
+import dev.byjtech.erp.modules.machinery.response.MachineryHistoryResponse
 
 fun Machinery.toDTO(): MachineryDTO {
     return MachineryDTO(
@@ -26,4 +28,17 @@ fun Machinery.toDTO(): MachineryDTO {
 
 fun List<Machinery>.toDTO(): List<MachineryDTO> {
     return this.map { it.toDTO() }
+}
+
+fun MachineryHistory.toDTO(): MachineryHistoryResponse {
+    return MachineryHistoryResponse(
+        id = this.id.toString(),
+        machineryId = this.machineryId.toString(),
+        userId = this.userId.toString(),
+        field = this.field,
+        oldValue = this.oldValue,
+        newValue = this.newValue,
+        createdAt = this.createdAt.toString(),
+        comment = this.comment
+    )
 }
