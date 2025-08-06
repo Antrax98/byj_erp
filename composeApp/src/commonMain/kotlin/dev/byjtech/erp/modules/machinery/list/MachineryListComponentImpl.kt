@@ -18,7 +18,9 @@ class MachineryListComponentImpl(
     override val userPermissions: StateFlow<Set<PermissionKey>>,
     override val apiClient: ApiClient,
     override val toHome: () -> Unit,
-    override val updateTitle: (newTitle: String) -> Unit
+    override val updateTitle: (newTitle: String) -> Unit,
+    private val onNavigateToEdit: ((MachineryDTO) -> Unit)? = null,
+    private val loadInactive: Boolean = false
 ) : MachineryListComponent, FeatureComponent, ComponentContext by componentContext {
 
     // Crear la API directamente usando el ApiClient
@@ -62,13 +64,101 @@ class MachineryListComponentImpl(
         loadMachinery()
     }
 
+    override fun loadInactiveMachinery() {
+        coroutineScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            try {
+                machineryApi.getInactiveMachinery()
+                    .onSuccess { inactiveMachineries ->
+                        _machineryList.value = inactiveMachineries
+                        _state.value = _state.value.copy(
+                            isLoading = false,
+                            showingInactive = true
+                        )
+                    }
+                    .onFailure { exception ->
+                        _state.value = _state.value.copy(
+                            isLoading = false,
+                            error = "Error al cargar maquinarias inactivas: ${exception.message}"
+                        )
+                    }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    error = "Error inesperado: ${e.message}"
+                )
+            }
+        }
+    }
+
+    override fun onEditMachinery(machinery: MachineryDTO) {
+        onNavigateToEdit?.invoke(machinery)
+    }
+
+    override fun onDeactivateMachinery(machinery: MachineryDTO) {
+        coroutineScope.launch {
+            try {
+                machineryApi.deactivateMachinery(machinery.id)
+                    .onSuccess {
+                        // Recargar la lista para remover la maquinaria desactivada
+                        loadMachinery()
+                        _state.value = _state.value.copy(
+                            successMessage = "Maquinaria desactivada exitosamente"
+                        )
+                    }
+                    .onFailure { exception ->
+                        _state.value = _state.value.copy(
+                            error = "Error al desactivar maquinaria: ${exception.message}"
+                        )
+                    }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    error = "Error inesperado: ${e.message}"
+                )
+            }
+        }
+    }
+
+    override fun onActivateMachinery(machinery: MachineryDTO) {
+        coroutineScope.launch {
+            try {
+                machineryApi.activateMachinery(machinery.id)
+                    .onSuccess {
+                        // Recargar la lista para remover la maquinaria reactivada
+                        loadInactiveMachinery()
+                        _state.value = _state.value.copy(
+                            successMessage = "Maquinaria activada exitosamente"
+                        )
+                    }
+                    .onFailure { exception ->
+                        _state.value = _state.value.copy(
+                            error = "Error al activar maquinaria: ${exception.message}"
+                        )
+                    }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    error = "Error inesperado: ${e.message}"
+                )
+            }
+        }
+    }
+
     override fun onMachineryClick(machinery: MachineryDTO) {
         // TODO: Implement machinery detail navigation
         println("Clicked on machinery: ${machinery.name}")
     }
 
+    override fun clearMessages() {
+        _state.value = _state.value.copy(successMessage = null, error = null)
+    }
+
     init {
-        updateTitle("Maquinaria")
-        loadMachinery()
+        if (loadInactive) {
+            updateTitle("Maquinarias Desactivadas")
+            loadInactiveMachinery()
+        } else {
+            updateTitle("Maquinaria")
+            loadMachinery()
+        }
     }
 }

@@ -9,6 +9,7 @@ class MachineryMainMenuComponentImpl(
     componentContext: ComponentContext,
     override val userPermissions: StateFlow<Set<PermissionKey>>,
     private val onNavigateToList: () -> Unit,
+    private val onNavigateToInactiveList: () -> Unit,
     private val onNavigateToCreate: () -> Unit
 ) : MachineryMainMenuComponent, ComponentContext by componentContext {
     
@@ -20,6 +21,10 @@ class MachineryMainMenuComponentImpl(
 
     override fun onViewMachineriesClick() {
         onNavigateToList()
+    }
+
+    override fun onViewInactiveMachineriesClick() {
+        onNavigateToInactiveList()
     }
 
     override fun onCreateMachineryClick() {

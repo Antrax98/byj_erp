@@ -9,11 +9,18 @@ interface MachineryListComponent : FeatureComponent {
     val machineryList: StateFlow<List<MachineryDTO>>
     
     fun loadMachinery()
+    fun loadInactiveMachinery()
     fun refresh()
     fun onMachineryClick(machinery: MachineryDTO)
+    fun onEditMachinery(machinery: MachineryDTO)
+    fun onDeactivateMachinery(machinery: MachineryDTO)
+    fun onActivateMachinery(machinery: MachineryDTO)
+    fun clearMessages()
 }
 
 data class MachineryListState(
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val showingInactive: Boolean = false,
+    val successMessage: String? = null
 )

@@ -3,9 +3,12 @@ package dev.byjtech.erp.modules.machinery.api
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.modules.machinery.dto.MachineryDTO
 import dev.byjtech.erp.modules.machinery.request.CreateMachineryRequest
+import dev.byjtech.erp.modules.machinery.request.UpdateMachineryRequest
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -80,6 +83,90 @@ class MachineryApiImpl(
                 }
                 else -> {
                     Result.failure(Exception("Failed to create machinery: ${response.status}"))
+                }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    override suspend fun getInactiveMachinery(): Result<List<MachineryDTO>> {
+        return try {
+            val response = apiClient.clientKtor.get("/api/machinery/inactive")
+            
+            if (response.status == HttpStatusCode.OK) {
+                val machineries = response.body<List<MachineryDTO>>()
+                Result.success(machineries)
+            } else {
+                Result.failure(Exception("Failed to fetch inactive machineries: ${response.status}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    override suspend fun updateMachinery(id: String, request: UpdateMachineryRequest): Result<MachineryDTO> {
+        return try {
+            val response = apiClient.clientKtor.put("/api/machinery/$id") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+            
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val machinery = response.body<MachineryDTO>()
+                    Result.success(machinery)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorResponse = response.body<Map<String, String>>()
+                    Result.failure(Exception(errorResponse["error"] ?: "Bad request"))
+                }
+                else -> {
+                    Result.failure(Exception("Failed to update machinery: ${response.status}"))
+                }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    override suspend fun deactivateMachinery(id: String): Result<MachineryDTO> {
+        return try {
+            val response = apiClient.clientKtor.patch("/api/machinery/$id/deactivate")
+            
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val machinery = response.body<MachineryDTO>()
+                    Result.success(machinery)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorResponse = response.body<Map<String, String>>()
+                    Result.failure(Exception(errorResponse["error"] ?: "Bad request"))
+                }
+                else -> {
+                    Result.failure(Exception("Failed to deactivate machinery: ${response.status}"))
+                }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    override suspend fun activateMachinery(id: String): Result<MachineryDTO> {
+        return try {
+            val response = apiClient.clientKtor.patch("/api/machinery/$id/activate")
+            
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val machinery = response.body<MachineryDTO>()
+                    Result.success(machinery)
+                }
+                HttpStatusCode.BadRequest -> {
+                    val errorResponse = response.body<Map<String, String>>()
+                    Result.failure(Exception(errorResponse["error"] ?: "Bad request"))
+                }
+                else -> {
+                    Result.failure(Exception("Failed to activate machinery: ${response.status}"))
                 }
             }
         } catch (e: Exception) {

@@ -4,6 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PowerOff
+import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,8 +26,30 @@ fun MachineryListScreen(
 ) {
     val state by component.state.collectAsState()
     val machineryList by component.machineryList.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Manejar mensajes con Snackbar
+    LaunchedEffect(state.successMessage, state.error) {
+        when {
+            state.successMessage != null -> {
+                snackbarHostState.showSnackbar(
+                    message = "✅ ${state.successMessage}",
+                    duration = SnackbarDuration.Long
+                )
+                component.clearMessages()
+            }
+            state.error != null -> {
+                snackbarHostState.showSnackbar(
+                    message = "❌ ${state.error}",
+                    actionLabel = "Cerrar",
+                    duration = SnackbarDuration.Long
+                )
+            }
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
@@ -98,7 +124,9 @@ fun MachineryListScreen(
                             val machinery = machineryList[index]
                             MachineryCard(
                                 machinery = machinery,
-                                onClick = { component.onMachineryClick(machinery) }
+                                onEdit = { component.onEditMachinery(machinery) },
+                                onDeactivate = { component.onDeactivateMachinery(machinery) },
+                                onActivate = { component.onActivateMachinery(machinery) }
                             )
                         }
                     }
@@ -112,11 +140,14 @@ fun MachineryListScreen(
 @Composable
 private fun MachineryCard(
     machinery: MachineryDTO,
-    onClick: () -> Unit,
+    onEdit: () -> Unit,
+    onDeactivate: () -> Unit,
+    onActivate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Card(
-        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -125,11 +156,77 @@ private fun MachineryCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text(
-                text = machinery.name,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
+            // Header con nombre y botón de opciones
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = machinery.name,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+                
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Opciones"
+                        )
+                    }
+                    
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Editar") },
+                            onClick = {
+                                showMenu = false
+                                onEdit()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                        
+                        if (machinery.isActive) {
+                            DropdownMenuItem(
+                                text = { Text("Desactivar") },
+                                onClick = {
+                                    showMenu = false
+                                    onDeactivate()
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.PowerOff,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                        } else {
+                            DropdownMenuItem(
+                                text = { Text("Activar") },
+                                onClick = {
+                                    showMenu = false
+                                    onActivate()
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.PowerSettingsNew,
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+            }
             
             Spacer(modifier = Modifier.height(4.dp))
             
@@ -181,12 +278,17 @@ private fun MachineryCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = machinery.status,
+                        text = when (machinery.status) {
+                            "ACTIVE" -> "Activo"
+                            "MAINTENANCE" -> "En Mantenimiento"
+                            "INACTIVE" -> "Inactivo"
+                            else -> machinery.status
+                        },
                         style = MaterialTheme.typography.bodySmall,
-                        color = when (machinery.status.lowercase()) {
-                            "operativo" -> MaterialTheme.colorScheme.primary
-                            "mantenimiento" -> MaterialTheme.colorScheme.secondary
-                            "fuera de servicio" -> MaterialTheme.colorScheme.error
+                        color = when {
+                            !machinery.isActive || machinery.status == "INACTIVE" -> MaterialTheme.colorScheme.error
+                            machinery.status == "ACTIVE" -> MaterialTheme.colorScheme.primary
+                            machinery.status == "MAINTENANCE" -> MaterialTheme.colorScheme.secondary
                             else -> MaterialTheme.colorScheme.onSurface
                         }
                     )
