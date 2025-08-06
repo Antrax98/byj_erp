@@ -3,13 +3,13 @@ package dev.byjtech.erp.common
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-//NO USAR ESTA CLASE
+//Solo usar en el frontend si se quiere
 @Serializable
 sealed class ApiResponse<out S,out E> {
     @Serializable
-    @SerialName("success")//todo:quitar
+    @SerialName("success")
     data class Success<out S>(val data: S) : ApiResponse<S, Nothing>()
     @Serializable
-    @SerialName("error")//todo:quitar
+    @SerialName("error")
     data class Error<out E>(val data: E, val code: String) : ApiResponse<Nothing, E>()
 }
