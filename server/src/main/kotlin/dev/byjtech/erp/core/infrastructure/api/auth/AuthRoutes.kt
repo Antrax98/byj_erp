@@ -52,9 +52,6 @@ import java.util.UUID
 
 val logger: Logger = LoggerFactory.getLogger("AuthCallbackLogger")
 
-
-
-
 fun Route.googleAuthRoutes(
     httpClient: HttpClient,
     stateCache: Cache<String, String>,

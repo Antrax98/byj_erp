@@ -66,13 +66,6 @@ fun Application.module() {
     coreInitializer.database!!.createTables(coreInitializer.tables.toList())
     println("${coreInitializer.definition.name} database initialized")
 
-//    allModules.forEach {
-//        println("Module ${it.definition.name} detected")
-//        println("Initializing ${it.definition.name} database...")
-//        it.database.createTables(it.tables.toList())
-//        println("${it.definition.name} database initialized")
-//    }
-
     allModules.forEach {
         println("Module ${it.definition.name} detected")
 

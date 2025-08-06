@@ -21,6 +21,4 @@ abstract class ModuleInitializer(
             }
         }
     }
-
-//    abstract fun installRoutes(baseRoute: Route) //funcion especifica para instalar las rutas del modulo de forma ordenada
 }
