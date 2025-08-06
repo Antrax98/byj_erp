@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.document_management.dto.DocumentDTO
 import dev.byjtech.erp.document_management.request.UpdateDocumentRequest
+import dev.byjtech.erp.modules.document_management.api.DocumentManagementClient
 import dev.byjtech.erp.modules.document_management.domain.model.DocumentType
 import dev.byjtech.erp.modules.document_management.domain.model.getDocumentTypeDisplayName
 import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponentImpl
@@ -55,7 +56,8 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
     LaunchedEffect(component.documentId) {
         state = state.copy(isLoading = true)
         try {
-            val document: DocumentDTO? = component.apiClient.documentManagement.getDocumentById(component.documentId)
+            val documentManagementClient = DocumentManagementClient(component.apiClient.clientKtor)
+            val document: DocumentDTO? = documentManagementClient.getDocumentById(component.documentId)
             if (document != null) {
                 state = state.copy(
                     isLoading = false,
@@ -235,7 +237,8 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                                             fileUrl = state.fileUrl
                                         )
 
-                                        val result = component.apiClient.documentManagement.updateDocument(
+                                        val documentManagementClient = DocumentManagementClient(component.apiClient.clientKtor)
+                                        val result = documentManagementClient.updateDocument(
                                             component.documentId,
                                             request
                                         )
@@ -529,7 +532,8 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                                             fileUrl = state.fileUrl
                                         )
 
-                                        val result = component.apiClient.documentManagement.updateDocument(
+                                        val documentManagementClient = DocumentManagementClient(component.apiClient.clientKtor)
+                                        val result = documentManagementClient.updateDocument(
                                             component.documentId,
                                             request
                                         )
@@ -579,7 +583,8 @@ fun EditDocumentScreen(component: EditDocumentComponent) {
                             scope.launch {
                                 state = state.copy(showDeleteDialog = false, isLoading = true)
                                 try {
-                                    val success = component.apiClient.documentManagement.deleteDocument(component.documentId)
+                                    val documentManagementClient = DocumentManagementClient(component.apiClient.clientKtor)
+                                    val success = documentManagementClient.deleteDocument(component.documentId)
                                     if (success) {
                                         // Navegar de vuelta a la lista
                                         component.onNavigateBack()

@@ -18,6 +18,7 @@ import dev.byjtech.erp.modules.document_management.domain.model.DocumentType
 import dev.byjtech.erp.modules.document_management.domain.model.getDocumentTypeDisplayName
 import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponentImpl
 import dev.byjtech.erp.common.ui.DatePickerField
+import dev.byjtech.erp.modules.document_management.api.DocumentManagementClient
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import dev.byjtech.erp.common.utils.DateUtils
@@ -327,7 +328,8 @@ fun AddDocumentScreen(component: AddDocumentComponent) {
                                     fileUrl = state.fileUrl.ifBlank { "" }
                                 )
 
-                                val result = component.apiClient.documentManagement.createDocument(request)
+                                val documentManagementClient = DocumentManagementClient(component.apiClient.clientKtor)
+                                val result = documentManagementClient.createDocument(request)
                                 if (result != null) {
                                     // Navegar de vuelta a la lista
                                     component.onNavigateBack()

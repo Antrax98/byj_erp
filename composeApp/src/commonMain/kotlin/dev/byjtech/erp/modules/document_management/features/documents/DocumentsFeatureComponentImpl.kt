@@ -93,6 +93,8 @@ class DocumentsFeatureComponentImpl(
     private val stack = childStack(
         source = navigation,
         initialStack = { listOf(Config.DocumentsHome) },
+        saveStack = { null },
+        restoreStack = { null },
         handleBackButton = true,
         childFactory = ::childFactory
     )

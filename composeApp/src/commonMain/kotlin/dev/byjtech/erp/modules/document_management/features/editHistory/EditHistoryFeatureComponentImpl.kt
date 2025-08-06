@@ -9,6 +9,7 @@ import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.common.session.SessionManager
+import dev.byjtech.erp.modules.document_management.api.DocumentManagementClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -63,7 +64,8 @@ class EditHistoryFeatureComponentImpl(
         coroutineScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
             try {
-                val editHistory = apiClient.documentManagement.getAllEditHistory()
+                val documentManagementClient = DocumentManagementClient(apiClient.clientKtor)
+                val editHistory = documentManagementClient.getAllEditHistory()
                 _state.value = _state.value.copy(
                     isLoading = false,
                     editHistory = editHistory

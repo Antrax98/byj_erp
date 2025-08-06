@@ -18,6 +18,8 @@ class DocumentHistoryComponentImpl(
 ) : DocumentHistoryComponent, ComponentContext by componentContext {
 
     private val coroutineScope = componentContext.coroutineScope()
+    
+    private val documentManagementClient = DocumentManagementClient(apiClient.clientKtor)
 
     private val _state = MutableStateFlow(DocumentHistoryState())
     override val state: StateFlow<DocumentHistoryState> = _state
@@ -28,8 +30,8 @@ class DocumentHistoryComponentImpl(
             
             try {
                 // Cargar historial y resumen en paralelo
-                val historyEntries = apiClient.documentManagement.getDocumentEditHistory(documentId)
-                val summary = apiClient.documentManagement.getDocumentEditHistorySummary(documentId)
+                val historyEntries = documentManagementClient.getDocumentEditHistory(documentId)
+                val summary = documentManagementClient.getDocumentEditHistorySummary(documentId)
                 
                 _state.value = _state.value.copy(
                     isLoading = false,

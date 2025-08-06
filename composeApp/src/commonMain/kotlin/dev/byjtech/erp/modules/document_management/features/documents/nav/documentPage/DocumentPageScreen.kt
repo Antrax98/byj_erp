@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.document_management.dto.DocumentDTO
+import dev.byjtech.erp.modules.document_management.api.DocumentManagementClient
 import dev.byjtech.erp.modules.document_management.domain.model.getDocumentTypeDisplayName
 import dev.byjtech.erp.modules.document_management.utils.getAvailableActions
 import dev.byjtech.erp.modules.document_management.utils.getStatusDisplayName
@@ -66,7 +67,8 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
     LaunchedEffect(component.documentId) {
         state = state.copy(isLoading = true)
         try {
-            val document: DocumentDTO? = component.apiClient.documentManagement.getDocumentById(component.documentId)
+            val documentManagementClient = DocumentManagementClient(component.apiClient.clientKtor)
+            val document: DocumentDTO? = documentManagementClient.getDocumentById(component.documentId)
             if (document != null) {
                 state = state.copy(
                     isLoading = false,
@@ -124,7 +126,8 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
                                     onClick = { 
                                         scope.launch {
                                             state = state.copy(isLoading = true)
-                                            val result = component.apiClient.documentManagement.changeDocumentStatus(
+                                            val documentManagementClient = DocumentManagementClient(component.apiClient.clientKtor)
+                                            val result = documentManagementClient.changeDocumentStatus(
                                                 document.id, 
                                                 "SENT"
                                             )
@@ -159,7 +162,8 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
                                     onClick = { 
                                         scope.launch {
                                             state = state.copy(isLoading = true)
-                                            val result = component.apiClient.documentManagement.changeDocumentStatus(
+                                            val documentManagementClient = DocumentManagementClient(component.apiClient.clientKtor)
+                                            val result = documentManagementClient.changeDocumentStatus(
                                                 document.id, 
                                                 "APPROVED"
                                             )
@@ -194,7 +198,8 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
                                     onClick = { 
                                         scope.launch {
                                             state = state.copy(isLoading = true)
-                                            val result = component.apiClient.documentManagement.changeDocumentStatus(
+                                            val documentManagementClient = DocumentManagementClient(component.apiClient.clientKtor)
+                                            val result = documentManagementClient.changeDocumentStatus(
                                                 document.id, 
                                                 "REJECTED"
                                             )
@@ -517,7 +522,8 @@ fun DocumentPageScreen(component: DocumentPageComponent) {
                                     confirm = true,
                                     reason = state.deactivateReason.takeIf { it.isNotBlank() }
                                 )
-                                val result = component.apiClient.documentManagement.deactivateDocument(
+                                val documentManagementClient = DocumentManagementClient(component.apiClient.clientKtor)
+                                val result = documentManagementClient.deactivateDocument(
                                     component.documentId, 
                                     deactivateRequest
                                 )

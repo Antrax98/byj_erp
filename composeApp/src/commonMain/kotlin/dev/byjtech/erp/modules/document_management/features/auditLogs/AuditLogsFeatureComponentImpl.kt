@@ -9,6 +9,7 @@ import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.common.session.SessionManager
+import dev.byjtech.erp.modules.document_management.api.DocumentManagementClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +26,8 @@ class AuditLogsFeatureComponentImpl(
 ) : AuditLogsFeatureComponent, ComponentContext by componentContext {
 
     private val coroutineScope = componentContext.coroutineScope()
+    
+    private val documentManagementClient = DocumentManagementClient(apiClient.clientKtor)
     
     private val _state = MutableStateFlow(AuditLogsFeatureState())
     override val state: StateFlow<AuditLogsFeatureState> = _state.asStateFlow()
@@ -63,7 +66,7 @@ class AuditLogsFeatureComponentImpl(
         coroutineScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
             try {
-                val auditLogs = apiClient.documentManagement.getAllAuditLogs()
+                val auditLogs = documentManagementClient.getAllAuditLogs()
                 _state.value = _state.value.copy(
                     isLoading = false,
                     auditLogs = auditLogs

@@ -6,6 +6,7 @@ import dev.byjtech.erp.common.PermissionKey
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.modules.document_management.features.documents.DocumentsFeatureComponentImpl
 import dev.byjtech.erp.modules.document_management.request.DocumentSearchRequest
+import dev.byjtech.erp.modules.document_management.api.DocumentManagementClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -19,6 +20,8 @@ class DocumentsMainComponentImpl(
 ) : DocumentsMainComponent {
 
     private val coroutineScope = componentContext.coroutineScope()
+    
+    private val documentManagementClient = DocumentManagementClient(apiClient.clientKtor)
 
     private val _state = MutableStateFlow(DocumentsMainState())
     override val state: StateFlow<DocumentsMainState> = _state
@@ -26,7 +29,7 @@ class DocumentsMainComponentImpl(
     override suspend fun loadDocuments() {
         _state.value = _state.value.copy(isLoading = true, error = null)
         try {
-            val documents = apiClient.documentManagement.getAllDocuments()
+            val documents = documentManagementClient.getAllDocuments()
             _state.value = _state.value.copy(
                 isLoading = false,
                 documents = documents,
@@ -43,7 +46,7 @@ class DocumentsMainComponentImpl(
     override suspend fun searchDocuments(searchRequest: DocumentSearchRequest) {
         _state.value = _state.value.copy(isLoading = true, error = null)
         try {
-            val searchResponse = apiClient.documentManagement.searchDocuments(searchRequest)
+            val searchResponse = documentManagementClient.searchDocuments(searchRequest)
             if (searchResponse != null) {
                 _state.value = _state.value.copy(
                     isLoading = false,
