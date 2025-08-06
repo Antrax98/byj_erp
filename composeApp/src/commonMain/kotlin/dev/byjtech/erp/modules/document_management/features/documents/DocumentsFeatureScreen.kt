@@ -16,6 +16,8 @@ import dev.byjtech.erp.modules.document_management.features.documents.nav.editDo
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryScreen
 import dev.byjtech.erp.modules.document_management.features.notifications.NotificationsScreenWrapper
 import dev.byjtech.erp.modules.document_management.features.notifications.NotificationSettingsScreenWrapper
+import dev.byjtech.erp.modules.document_management.features.documents.nav.editHistory.EditHistoryScreen
+import dev.byjtech.erp.modules.document_management.features.documents.nav.auditLogs.AuditLogsScreen
 
 @Composable
 fun DocumentsFeatureScreen(component: DocumentsFeatureComponent) {
@@ -36,6 +38,8 @@ fun DocumentsFeatureScreen(component: DocumentsFeatureComponent) {
                 is DocumentsFeatureComponent.Child.DocumentHistory -> DocumentHistoryScreen(child.component)
                 is DocumentsFeatureComponent.Child.Notifications -> NotificationsScreenWrapper(child.component)
                 is DocumentsFeatureComponent.Child.NotificationSettings -> NotificationSettingsScreenWrapper(child.component)
+                is DocumentsFeatureComponent.Child.EditHistory -> EditHistoryScreen(child.component)
+                is DocumentsFeatureComponent.Child.AuditLogs -> AuditLogsScreen(child.component)
             }
         }
     }

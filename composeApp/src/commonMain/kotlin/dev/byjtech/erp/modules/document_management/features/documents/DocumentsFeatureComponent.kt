@@ -11,6 +11,8 @@ import dev.byjtech.erp.modules.document_management.features.documents.nav.editDo
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryComponent
 import dev.byjtech.erp.modules.document_management.features.notifications.NotificationsComponent
 import dev.byjtech.erp.modules.document_management.features.notifications.NotificationSettingsComponent
+import dev.byjtech.erp.modules.document_management.features.documents.nav.editHistory.EditHistoryComponent
+import dev.byjtech.erp.modules.document_management.features.documents.nav.auditLogs.AuditLogsComponent
 import kotlinx.coroutines.flow.StateFlow
 
 interface DocumentsFeatureComponent : FeatureComponent {
@@ -26,5 +28,7 @@ interface DocumentsFeatureComponent : FeatureComponent {
         class DocumentHistory(val component: DocumentHistoryComponent) : Child()
         class Notifications(val component: NotificationsComponent) : Child()
         class NotificationSettings(val component: NotificationSettingsComponent) : Child()
+        class EditHistory(val component: EditHistoryComponent) : Child()
+        class AuditLogs(val component: AuditLogsComponent) : Child()
     }
 }

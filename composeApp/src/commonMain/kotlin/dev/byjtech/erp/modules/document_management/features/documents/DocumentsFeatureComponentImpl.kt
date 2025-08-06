@@ -19,6 +19,10 @@ import dev.byjtech.erp.modules.document_management.features.documents.nav.editDo
 import dev.byjtech.erp.modules.document_management.features.documents.nav.editDocument.EditDocumentComponentImpl
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryComponent
 import dev.byjtech.erp.modules.document_management.features.documents.nav.documentHistory.DocumentHistoryComponentImpl
+import dev.byjtech.erp.modules.document_management.features.documents.nav.editHistory.EditHistoryComponent
+import dev.byjtech.erp.modules.document_management.features.documents.nav.editHistory.EditHistoryComponentImpl
+import dev.byjtech.erp.modules.document_management.features.documents.nav.auditLogs.AuditLogsComponent
+import dev.byjtech.erp.modules.document_management.features.documents.nav.auditLogs.AuditLogsComponentImpl
 import dev.byjtech.erp.modules.document_management.features.notifications.NotificationsViewModel
 import dev.byjtech.erp.modules.document_management.features.notifications.NotificationSettingsViewModel
 import dev.byjtech.erp.modules.document_management.features.notifications.NotificationsComponent
@@ -30,6 +34,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import com.arkivanov.decompose.DelicateDecomposeApi
 
 class DocumentsFeatureComponentImpl(
     val componentContext: ComponentContext,
@@ -44,13 +49,16 @@ class DocumentsFeatureComponentImpl(
     private val _state = MutableStateFlow(DocumentsFeatureState())
     override val state: StateFlow<DocumentsFeatureState> = _state
 
+    // DocumentManagementClient compartido
+    private val documentManagementClient = DocumentManagementClient(apiClient.clientKtor)
+
     // Notification ViewModels compartidos
     private val notificationsViewModel = NotificationsViewModel(
-        DocumentManagementClient(apiClient.clientKtor),
+        documentManagementClient,
         coroutineScope
     )
     private val notificationSettingsViewModel = NotificationSettingsViewModel(
-        DocumentManagementClient(apiClient.clientKtor),
+        documentManagementClient,
         coroutineScope
     )
 
@@ -86,6 +94,10 @@ class DocumentsFeatureComponentImpl(
         data object Notifications : Config()
         @Serializable
         data object NotificationSettings : Config()
+        @Serializable
+        data object EditHistory : Config()
+        @Serializable
+        data object AuditLogs : Config()
     }
 
     private val navigation = StackNavigation<Config>()
@@ -171,6 +183,22 @@ class DocumentsFeatureComponentImpl(
                     onNavigateBackCallback = { navigation.pop() }
                 )
             )
+            is Config.EditHistory -> DocumentsFeatureComponent.Child.EditHistory(
+                EditHistoryComponentImpl(
+                    componentContext = componentContext,
+                    userPermissions = userPermissions,
+                    apiClient = documentManagementClient,
+                    onNavigateBack = { navigation.pop() }
+                )
+            )
+            is Config.AuditLogs -> DocumentsFeatureComponent.Child.AuditLogs(
+                AuditLogsComponentImpl(
+                    componentContext = componentContext,
+                    userPermissions = userPermissions,
+                    apiClient = documentManagementClient,
+                    onNavigateBack = { navigation.pop() }
+                )
+            )
         }
 
     private fun navigateTo(target: Config) {
@@ -188,6 +216,8 @@ class DocumentsFeatureComponentImpl(
             is Config.DocumentHistory -> "Historial de Edición"
             Config.Notifications -> "Notificaciones"
             Config.NotificationSettings -> "Configuración de Notificaciones"
+            Config.EditHistory -> "Historial de Ediciones"
+            Config.AuditLogs -> "Logs de Auditoría"
         }
         updateTitle(title)
     }

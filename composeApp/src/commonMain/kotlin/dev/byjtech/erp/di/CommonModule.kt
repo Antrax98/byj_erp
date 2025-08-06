@@ -19,6 +19,7 @@ val commonModule = module {
     single<List<ModuleEntry>>{
         listOf(
             get(named("CoreEntry")),
+            get(named("DocumentManagementModule")), 
             //aqui van los demas modulesEntry
         )
     }

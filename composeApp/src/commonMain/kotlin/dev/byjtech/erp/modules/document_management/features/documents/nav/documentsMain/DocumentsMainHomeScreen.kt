@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -74,17 +75,6 @@ fun DocumentsMainHomeScreen(component: DocumentsMainHomeComponent) {
 
             item {
                 NavigationCard(
-                    title = "Buscar Documentos",
-                    subtitle = "Búsqueda avanzada de documentos",
-                    icon = Icons.Default.Search
-                ) {
-                    // TODO: Implementar pantalla de búsqueda avanzada
-                    println("Buscar Documentos")
-                }
-            }
-
-            item {
-                NavigationCard(
                     title = "Notificaciones",
                     subtitle = "Ver notificaciones de documentos",
                     icon = Icons.Default.Notifications
@@ -105,34 +95,21 @@ fun DocumentsMainHomeScreen(component: DocumentsMainHomeComponent) {
 
             item {
                 NavigationCard(
-                    title = "Reportes",
-                    subtitle = "Generar reportes de documentos",
-                    icon = Icons.Default.Description
-                ) {
-                    // TODO: Implementar pantalla de reportes
-                    println("Reportes")
-                }
-            }
-
-            item {
-                NavigationCard(
-                    title = "Auditoría",
-                    subtitle = "Ver registros de auditoría",
+                    title = "Historial Ediciones",
+                    subtitle = "Ver historial de cambios en documentos",
                     icon = Icons.Default.History
                 ) {
-                    // TODO: Navegar a auditoría si existe
-                    println("Auditoría")
+                    component.navTo(Config.EditHistory)
                 }
             }
 
             item {
                 NavigationCard(
-                    title = "Estadísticas",
-                    subtitle = "Ver estadísticas del sistema",
-                    icon = Icons.Default.Description
+                    title = "Auditoría Log",
+                    subtitle = "Ver logs de auditoría del sistema",
+                    icon = Icons.Default.Shield
                 ) {
-                    // TODO: Implementar pantalla de estadísticas
-                    println("Estadísticas")
+                    component.navTo(Config.AuditLogs)
                 }
             }
         }

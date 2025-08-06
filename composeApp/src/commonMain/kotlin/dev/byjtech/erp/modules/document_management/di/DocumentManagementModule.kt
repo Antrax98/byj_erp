@@ -7,6 +7,7 @@ import dev.byjtech.erp.modules.document_management.features.documents.DocumentsF
 import dev.byjtech.erp.modules.document_management.features.auditLogs.AuditLogsFeatureEntry
 import dev.byjtech.erp.modules.document_management.features.editHistory.EditHistoryFeatureEntry
 import org.koin.dsl.module
+import org.koin.core.qualifier.named
 
 val DocumentManagementModule = module {
     val featuresEntrySet = setOf<FeatureEntry>(
@@ -15,10 +16,11 @@ val DocumentManagementModule = module {
         EditHistoryFeatureEntry,
     )
 
-    single {
-        ModuleEntry(
-            name = DocumentManagementDefinition.name,
-            features = featuresEntrySet
-        )
-    }
+    val moduleEntry = ModuleEntry(
+        name = DocumentManagementDefinition.name,
+        features = featuresEntrySet
+    )
+
+    single<ModuleEntry>(named("DocumentManagementModule")) { moduleEntry }
+    single<ModuleEntry> { moduleEntry }
 }
