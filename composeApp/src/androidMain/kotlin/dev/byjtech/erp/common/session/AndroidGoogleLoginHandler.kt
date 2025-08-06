@@ -31,12 +31,8 @@ class AndroidGoogleLoginHandler(private val activity: ComponentActivity, private
         } else {
             "${baseUrlFromEnv}:${basePortFromEnv}" // host:puerto si el puerto existe
         }
-        //val loginUrl = "http://proyectron.duckdns.org:8080/auth/login?state=$encodedState"
         val loginUrlString = "https://${hostPortPart}/auth/login?state=$encodedState"
         println("Android loginUrlString: $loginUrlString")
-        //val loginUrl = "http://${baseUrl}:${basePort}/auth/login?state=$encodedState"
-//        val intent = Intent(Intent.ACTION_VIEW, loginUrl.toUri())
-//        activity.startActivity(intent)
         try {
             val intent = Intent(Intent.ACTION_VIEW, loginUrlString.toUri())
             activity.startActivity(intent)

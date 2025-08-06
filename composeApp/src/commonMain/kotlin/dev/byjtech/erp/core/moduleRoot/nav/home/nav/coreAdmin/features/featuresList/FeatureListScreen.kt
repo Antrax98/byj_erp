@@ -84,44 +84,6 @@ fun FeatureListScreen(component: FeatureListComponent) {
             }
         }
     }
-
-//    LazyColumn(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(16.dp),
-//        verticalArrangement = Arrangement.spacedBy(24.dp)
-//    ) {
-//        dummyButtonsMap.forEach { (moduleName, featuresMap) ->
-//            item {
-//                Column {
-//                    Text(
-//                        text = moduleName,
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .padding(bottom = 8.dp),
-//                        style = MaterialTheme.typography.titleLarge
-//                    )
-//
-//                    LazyRow(
-//                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-//                        contentPadding = PaddingValues(horizontal = 4.dp)
-//                    ) {
-//                        featuresMap.forEach { (_, buttonMetadata) ->
-//                            item {
-//                                FeatureButton(
-//                                    metadata = buttonMetadata,
-//                                    onClick = {} // Puedes poner un log o toast
-//                                )
-//                            }
-//                        }
-//                    }
-//
-//                    Spacer(modifier = Modifier.height(12.dp))
-//                    HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-//                }
-//            }
-//        }
-//    }
 }
 
 @Composable
@@ -158,34 +120,3 @@ fun FeatureButton(metadata: ButtonMetadata, onClick: () -> Unit) {
         }
     }
 }
-
-val dummyButtonsMap = mapOf(
-    "Gestión de Accesos" to mapOf(
-        "Usuarios" to ButtonMetadata(
-            displayName = "Usuarios",
-            color = Color(0xFF90CAF9), // Azul claro
-            icon = Icons.Default.Person,
-            config = ComponentConfig("accesos", "usuarios")
-        ),
-        "Roles" to ButtonMetadata(
-            displayName = "Roles",
-            color = Color(0xFFCE93D8), // Violeta claro
-            icon = Icons.Default.Security,
-            config = ComponentConfig("accesos", "roles")
-        )
-    ),
-    "Inventario" to mapOf(
-        "Agregar Item" to ButtonMetadata(
-            displayName = "Agregar",
-            color = Color(0xFFFFCC80), // Naranja suave
-            icon = Icons.Default.AddBox,
-            config = ComponentConfig("inventario", "agregar")
-        ),
-        "Ver Stock" to ButtonMetadata(
-            displayName = "Stock",
-            color = Color(0xFFFFAB91), // Coral claro
-            icon = Icons.Default.Inventory,
-            config = ComponentConfig("inventario", "stock")
-        )
-    )
-)

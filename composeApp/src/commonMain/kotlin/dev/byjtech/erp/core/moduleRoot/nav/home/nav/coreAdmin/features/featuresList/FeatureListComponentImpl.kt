@@ -24,7 +24,5 @@ class FeatureListComponentImpl(
 
     override fun onBack(): Boolean {
         return false
-        //no hace nada por que este no deveria de hacerlo
-        //toHome esta de bonito en este componente
     }
 }

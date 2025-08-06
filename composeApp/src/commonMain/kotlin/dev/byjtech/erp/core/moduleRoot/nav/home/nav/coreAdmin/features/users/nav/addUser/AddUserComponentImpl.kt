@@ -54,9 +54,6 @@ class AddUserComponentImpl(
         } else if (!isValidEmail(email)) {
             _email.value = TextFieldState(error = "Invalid email")
             canSubmit = false
-        } else if (!isValidGmail(email)) {
-            _email.value = TextFieldState(error = "must be a gmail account")
-            canSubmit = false
         }
 
         if (canSubmit) {
@@ -92,12 +89,6 @@ class AddUserComponentImpl(
             "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
         )
         return emailRegex.matches(email)
-    }
-
-    //solo por ahora
-    private fun isValidGmail(email: String): Boolean {
-        val gmailRegex = Regex("^[A-Za-z0-9._%+-]+@gmail\\.com$")
-        return gmailRegex.matches(email)
     }
 
 }

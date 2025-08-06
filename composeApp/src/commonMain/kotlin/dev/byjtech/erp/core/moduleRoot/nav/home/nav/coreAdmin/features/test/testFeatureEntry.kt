@@ -7,8 +7,6 @@ import dev.byjtech.erp.common.ButtonMetadata
 import dev.byjtech.erp.common.ComponentConfig
 import dev.byjtech.erp.common.FeatureEntry
 import dev.byjtech.erp.core.CoreDefinition
-import dev.byjtech.erp.core.api.users.UsersTenantApi
-import dev.byjtech.erp.core.api.users.createUsersTenantApi
 
 //test para ver si funciona el featureEntry con el permiso de admin
 val testFeatureEntry: FeatureEntry = FeatureEntry(

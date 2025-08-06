@@ -83,12 +83,6 @@ val infrastructureModule = module {
         )
     }
 
-//    single<UserRoutesInstaller> {
-//        UserRoutesInstaller(
-//            userServ = get(),
-//            authServ = get()
-//        )
-//    }
 
     //routing
     single<CoreRoutesInstaller> {

@@ -54,7 +54,6 @@ class RootComponentImpl(
     }
 
     private val koin = getKoin()
-    //private val oldModuleManager = koin.get<OldModuleManager>()
     private val moduleEntrySet = koin.get<List<ModuleEntry>>().toSet()
 
     //TODO, en vez de hacer estas funciones, se les puede entrega su contenido directamente al fun child

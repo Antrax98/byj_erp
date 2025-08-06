@@ -8,8 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface AddRoleComponent: PermissionAwareComponent {
     val apiClient: ApiClient
-    val navTo: (Config) -> Unit //porsiacaso
-    //estados para el formulario
+    val navTo: (Config) -> Unit
     val name: StateFlow<TextFieldState>
     val description: StateFlow<TextFieldState>
     val isBusy: StateFlow<Boolean>

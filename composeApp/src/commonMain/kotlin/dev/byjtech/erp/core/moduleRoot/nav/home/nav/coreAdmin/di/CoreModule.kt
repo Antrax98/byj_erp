@@ -11,21 +11,6 @@ import org.koin.core.qualifier.named
 
 
 val CoreModule = module {
-    //deprecado este single
-//    single{
-//        OldModuleEntry(
-//            name = CoreDefinition.name,
-//            factory = { context, userPermissions, apiClient, toHome ->
-//                CoreAdminRootComponentImplOld(context, userPermissions, apiClient, toHome = toHome, coreClient = CoreClient(apiClient.ktorfit))
-//            },
-//            renderScreen = { component -> CoreAdminRootScreen(component as CoreAdminRootComponentOld) },
-//            metadata = OldModuleMetadata(
-//                displayName = CoreDefinition.displayName,
-//                description = CoreDefinition.description,
-//                iconPath = "#32a852"
-//            )
-//        )
-//    }
 
     val featuresEntrySet = setOf<FeatureEntry>(
         // aqui poner todos los featureEntry uno por uno, asi:

@@ -28,17 +28,6 @@ class HomeComponentImpl(
     override val moduleManager: ModuleManager
 ): HomeComponent, ComponentContext by componentContext {
 
-//    //TODO: MOVER A UN ARCHIVO COMPARTIDO este sealed class
-//    sealed class HomeNavEvent {
-//        data class NavigateTo(val target: String) : HomeNavEvent()
-//        data object ToHome : HomeNavEvent()
-//    }
-
-    //override val moduleName = "core" // este no es realmente necesario, es solo por pruebas
-
-//    private val _events = MutableSharedFlow<HomeNavEvent>()
-//    val events: SharedFlow<HomeNavEvent> = _events
-
     private val _state = MutableStateFlow(HomeState())
     override val state: StateFlow<HomeState> = _state.asStateFlow()
 
@@ -74,7 +63,7 @@ class HomeComponentImpl(
         }
     }
 
-    //NAVEGACION NEW
+    //NAVEGACION
 
     private val navigation = StackNavigation<ComponentConfig>()
 

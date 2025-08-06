@@ -15,11 +15,8 @@ data class AppSession(val sessionId: String, val expiresAt: Long = 0) {
     companion object {
         fun fromEncoded(encodedCookie: String): AppSession {
             try {
-                // Decodificamos la cookie codificada en Base64
                 val decodedBytes = Base64.getUrlDecoder().decode(encodedCookie)
                 val decodedJson = String(decodedBytes)
-
-                // Convertimos el JSON de nuevo a un objeto AppSession
                 return Json.decodeFromString(decodedJson)
             } catch (e: Exception) {
                 throw IllegalArgumentException("Error al decodificar la AppSession: ${e.message}", e)
