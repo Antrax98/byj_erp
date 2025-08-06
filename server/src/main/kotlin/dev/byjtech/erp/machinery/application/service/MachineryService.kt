@@ -3,13 +3,25 @@ package dev.byjtech.erp.machinery.application.service
 import dev.byjtech.erp.machinery.domain.model.Machinery
 import dev.byjtech.erp.machinery.domain.repository.MachineryRepository
 import dev.byjtech.erp.modules.machinery.request.CreateMachineryRequest
+import dev.byjtech.erp.modules.machinery.request.UpdateMachineryRequest
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import java.util.UUID
 
 class MachineryService(
     private val machineryRepository: MachineryRepository
 ) {
     fun getAllMachineries(): List<Machinery> {
-        return machineryRepository.findAll()
+        return machineryRepository.findAllActive() // Solo activas por defecto
+    }
+
+    fun getAllActiveMachineries(): List<Machinery> {
+        return machineryRepository.findAllActive()
+    }
+
+    fun getAllInactiveMachineries(): List<Machinery> {
+        return machineryRepository.findAllInactive()
     }
 
     fun getMachineryById(id: java.util.UUID): Machinery? {
@@ -17,11 +29,15 @@ class MachineryService(
     }
 
     fun getMachineriesByCompanyId(companyId: java.util.UUID): List<Machinery> {
-        return machineryRepository.findByCompanyId(companyId)
+        return machineryRepository.findActiveByCompanyId(companyId) // Solo activas por defecto
     }
 
     fun getActiveMachineriesByCompanyId(companyId: java.util.UUID): List<Machinery> {
         return machineryRepository.findActiveByCompanyId(companyId)
+    }
+
+    fun getInactiveMachineriesByCompanyId(companyId: java.util.UUID): List<Machinery> {
+        return machineryRepository.findInactiveByCompanyId(companyId)
     }
 
     fun createMachinery(request: CreateMachineryRequest): Machinery {
@@ -46,5 +62,57 @@ class MachineryService(
         )
 
         return machineryRepository.save(machinery)
+    }
+
+    fun updateMachinery(id: UUID, request: UpdateMachineryRequest): Machinery {
+        val existingMachinery = machineryRepository.findById(id)
+            ?: throw IllegalArgumentException("Machinery with id $id not found")
+
+        val updatedMachinery = existingMachinery.copy(
+            name = request.name,
+            description = request.description,
+            brand = request.brand,
+            model = request.model,
+            year = request.year,
+            serialNumber = request.serialNumber,
+            licensePlate = request.licensePlate,
+            status = request.status,
+            location = request.location,
+            updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        )
+
+        return machineryRepository.update(updatedMachinery)
+    }
+
+    fun deactivateMachinery(id: UUID): Machinery {
+        val machinery = machineryRepository.findById(id)
+            ?: throw IllegalArgumentException("Machinery with id $id not found")
+
+        if (!machinery.isActive) {
+            throw IllegalArgumentException("Machinery is already inactive")
+        }
+
+        val deactivatedMachinery = machinery.deactivate().copy(
+            status = "INACTIVE", // Cambiar también el status
+            updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        )
+
+        return machineryRepository.update(deactivatedMachinery)
+    }
+
+    fun activateMachinery(id: UUID): Machinery {
+        val machinery = machineryRepository.findById(id)
+            ?: throw IllegalArgumentException("Machinery with id $id not found")
+
+        if (machinery.isActive) {
+            throw IllegalArgumentException("Machinery is already active")
+        }
+
+        val activatedMachinery = machinery.activate().copy(
+            status = "ACTIVE", // Cambiar también el status
+            updatedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        )
+
+        return machineryRepository.update(activatedMachinery)
     }
 }

@@ -19,7 +19,8 @@ fun Machinery.toDTO(): MachineryDTO {
         nextMaintenanceDate = null,
         companyId = this.companyId.toString(),
         createdAt = this.createdAt,
-        updatedAt = this.updatedAt
+        updatedAt = this.updatedAt,
+        isActive = this.isActive
     )
 }
 

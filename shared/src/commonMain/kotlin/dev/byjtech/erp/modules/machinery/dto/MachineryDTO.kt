@@ -19,5 +19,6 @@ data class MachineryDTO(
     val nextMaintenanceDate: LocalDateTime? = null,
     val companyId: String,
     val createdAt: LocalDateTime?,
-    val updatedAt: LocalDateTime?
+    val updatedAt: LocalDateTime?,
+    val isActive: Boolean = true
 )

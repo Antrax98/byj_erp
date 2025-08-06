@@ -60,6 +60,26 @@ class MachineryRepositoryImpl(private val db: Database) : MachineryRepository {
         }
     }
 
+    override fun findAllActive(): List<Machinery> {
+        return transaction(db) {
+            MachineryEntity.find { MachineriesTable.isActive eq true }.map { it.toModel() }
+        }
+    }
+
+    override fun findAllInactive(): List<Machinery> {
+        return transaction(db) {
+            MachineryEntity.find { MachineriesTable.isActive eq false }.map { it.toModel() }
+        }
+    }
+
+    override fun findInactiveByCompanyId(companyId: UUID): List<Machinery> {
+        return transaction(db) {
+            MachineryEntity.find { 
+                (MachineriesTable.companyId eq companyId) and (MachineriesTable.isActive eq false) 
+            }.map { it.toModel() }
+        }
+    }
+
     override fun update(machinery: Machinery): Machinery {
         return transaction(db) {
             val entity = MachineryEntity.findById(machinery.id)
