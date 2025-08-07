@@ -106,7 +106,15 @@ class NotificationService(
         if (settings.emailEnabled) {
             val user = userRepository.find(settings.userId)
             if (user != null) {
-                emailService.sendDocumentExpirationNotification(user, document, daysUntilExpiration)
+                try {
+                    emailService.sendDocumentExpirationNotification(user, document, daysUntilExpiration)
+                    // Marcar como enviado solo si el email se envió exitosamente
+                    println("DEBUG: Email enviado exitosamente, cambiando status a SENT")
+                    documentNotificationRepository.markAsSent(notification.id)
+                } catch (e: Exception) {
+                    println("ERROR: No se pudo enviar email de expiración para documento ${document.documentNumber}: ${e.message}")
+                    // La notificación queda como PENDING para reintento posterior
+                }
             }
         }
     }
@@ -150,7 +158,15 @@ class NotificationService(
         if (settings.emailEnabled) {
             val user = userRepository.find(settings.userId)
             if (user != null) {
-                emailService.sendDocumentExpirationNotification(user, document, daysUntilExpiration)
+                try {
+                    emailService.sendDocumentExpirationNotification(user, document, daysUntilExpiration)
+                    // Marcar como enviado solo si el email se envió exitosamente
+                    println("DEBUG: Email enviado exitosamente, cambiando status a SENT")
+                    documentNotificationRepository.markAsSent(notification.id)
+                } catch (e: Exception) {
+                    println("ERROR: No se pudo enviar email de vencimiento para documento ${document.documentNumber}: ${e.message}")
+                    // La notificación queda como PENDING para reintento posterior
+                }
             }
         }
     }
@@ -217,9 +233,9 @@ class NotificationService(
         }
 
         for (notification in pendingNotifications) {
-            println("DEBUG: Procesando notificación ${notification.id}, sent_at: ${notification.sentAt}")
-            // Solo procesar notificaciones que no han sido enviadas por email
-            if (notification.sentAt == null) {
+            println("DEBUG: Procesando notificación ${notification.id}, status: ${notification.status}")
+            // Solo procesar notificaciones que están en status PENDING (no las SENT)
+            if (notification.status == NotificationStatus.PENDING) {
                 val document = documentRepository.findById(notification.documentId)
                 if (document != null) {
                     // Calcular días hasta vencimiento
@@ -231,17 +247,22 @@ class NotificationService(
                     }
                     
                     println("DEBUG: Enviando email para documento ${document.documentNumber}")
-                    // Enviar email
-                    emailService.sendDocumentExpirationNotification(user, document, daysUntilExpiration)
-                    
-                    // Marcar como enviado
-                    println("DEBUG: Marcando notificación como enviada")
-                    documentNotificationRepository.markAsSent(notification.id)
+                    try {
+                        // Enviar email
+                        emailService.sendDocumentExpirationNotification(user, document, daysUntilExpiration)
+                        
+                        // Marcar como enviado solo si el email se envió exitosamente
+                        println("DEBUG: Marcando notificación como enviada (SENT)")
+                        documentNotificationRepository.markAsSent(notification.id)
+                    } catch (e: Exception) {
+                        println("ERROR: No se pudo enviar email para notificación ${notification.id}: ${e.message}")
+                        // No marcar como enviado si hubo error
+                    }
                 } else {
                     println("DEBUG: Documento no encontrado para notificación ${notification.id}")
                 }
             } else {
-                println("DEBUG: Notificación ${notification.id} ya fue enviada")
+                println("DEBUG: Notificación ${notification.id} ya fue procesada (status: ${notification.status})")
             }
         }
     }

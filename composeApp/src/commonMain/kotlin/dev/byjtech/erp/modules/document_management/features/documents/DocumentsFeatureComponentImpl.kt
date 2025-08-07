@@ -70,9 +70,14 @@ class DocumentsFeatureComponentImpl(
     }
 
     override fun onBack(): Boolean {
-        // Implementación simple - siempre permite ir hacia atrás
-        navigation.pop()
-        return true
+        // Verificar si hay pantallas en el stack para hacer pop
+        return if (childStack.value.items.size > 1) {
+            navigation.pop()
+            true
+        } else {
+            // No hay pantallas anteriores, dejar que el nivel superior maneje la navegación
+            false
+        }
     }
 
     // Navegación

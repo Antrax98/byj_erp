@@ -154,14 +154,16 @@ private fun NotificationCard(
     onMarkAsRead: () -> Unit
 ) {
     val isPending = notification.status == NotificationStatus.PENDING
+    val isSent = notification.status == NotificationStatus.SENT
+    val isUnread = isPending || isSent
     
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isPending) {
-                MaterialTheme.colorScheme.secondaryContainer
-            } else {
-                MaterialTheme.colorScheme.surface
+            containerColor = when {
+                isPending -> MaterialTheme.colorScheme.secondaryContainer
+                isSent -> MaterialTheme.colorScheme.tertiaryContainer
+                else -> MaterialTheme.colorScheme.surface
             }
         )
     ) {
@@ -198,7 +200,7 @@ private fun NotificationCard(
                     Text(
                         text = notification.title,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = if (isPending) FontWeight.Bold else FontWeight.Normal
+                        fontWeight = if (isUnread) FontWeight.Bold else FontWeight.Normal
                     )
                     
                     // Message
@@ -208,16 +210,70 @@ private fun NotificationCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     
-                    // Date
-                    Text(
-                        text = formatNotificationDate(notification.createdAt),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Status chip
+                        when (notification.status) {
+                            NotificationStatus.PENDING -> {
+                                Card(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                    )
+                                ) {
+                                    Text(
+                                        text = "Pendiente",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+                            NotificationStatus.SENT -> {
+                                Card(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
+                                    )
+                                ) {
+                                    Text(
+                                        text = "Enviada",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.tertiary,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+                            NotificationStatus.READ -> {
+                                Card(
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                                    )
+                                ) {
+                                    Text(
+                                        text = "Leída",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.outline,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+                            else -> {}
+                        }
+                        
+                        // Date
+                        Text(
+                            text = formatNotificationDate(notification.createdAt),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 // Mark as read button
-                if (isPending) {
+                if (isUnread) {
                     TextButton(
                         onClick = onMarkAsRead
                     ) {

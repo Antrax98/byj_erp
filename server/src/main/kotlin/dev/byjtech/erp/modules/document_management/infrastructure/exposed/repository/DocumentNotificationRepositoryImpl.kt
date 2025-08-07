@@ -33,7 +33,7 @@ class DocumentNotificationRepositoryImpl(
     override fun findPendingByUserId(userId: UUID): List<DocumentNotification> = transaction(database) {
         DocumentNotificationEntity.find { 
             (DocumentNotificationsTable.userId eq userId) and 
-            (DocumentNotificationsTable.status eq NotificationStatus.PENDING)
+            (DocumentNotificationsTable.status inList listOf(NotificationStatus.PENDING, NotificationStatus.SENT))
         }
         .orderBy(DocumentNotificationsTable.createdAt to org.jetbrains.exposed.sql.SortOrder.DESC)
         .map { it.toDomain() }
@@ -62,9 +62,6 @@ class DocumentNotificationRepositoryImpl(
         val entity = DocumentNotificationEntity.findById(notificationId)
         entity?.let {
             it.status = status
-            if (status == NotificationStatus.READ) {
-                it.sentAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime()
-            }
             it.toDomain()
         }
     }
@@ -78,20 +75,21 @@ class DocumentNotificationRepositoryImpl(
             (DocumentNotificationsTable.documentId eq documentId) and
             (DocumentNotificationsTable.userId eq userId) and
             (DocumentNotificationsTable.notificationType eq notificationType) and
-            (DocumentNotificationsTable.status eq NotificationStatus.PENDING)
+            (DocumentNotificationsTable.status neq NotificationStatus.DISMISSED)
         }.singleOrNull()?.toDomain()
     }
 
     override fun countPendingByUserId(userId: UUID): Int = transaction(database) {
         DocumentNotificationEntity.find { 
             (DocumentNotificationsTable.userId eq userId) and 
-            (DocumentNotificationsTable.status eq NotificationStatus.PENDING)
+            (DocumentNotificationsTable.status inList listOf(NotificationStatus.PENDING, NotificationStatus.SENT))
         }.count().toInt()
     }
 
     override fun markAsSent(notificationId: UUID): DocumentNotification? = transaction(database) {
         val entity = DocumentNotificationEntity.findById(notificationId)
         entity?.let {
+            it.status = NotificationStatus.SENT
             it.sentAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime()
             it.toDomain()
         }

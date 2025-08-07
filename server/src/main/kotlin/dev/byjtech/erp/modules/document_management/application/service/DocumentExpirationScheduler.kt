@@ -51,18 +51,24 @@ class DocumentExpirationScheduler(
         scope.launch {
             try {
                 val timestamp = java.time.LocalDateTime.now()
+                println("DEBUG: Iniciando verificación de documentos en timestamp: $timestamp")
                 
                 // Obtener todas las compañías activas
                 val companies = companyValidationRepository.findAllActiveCompanies()
+                println("DEBUG: Encontradas ${companies.size} compañías activas")
                 
                 for (company in companies) {
                     try {
+                        println("DEBUG: Verificando documentos para compañía ${company.id}")
                         notificationService.checkExpiringDocuments(company.id)
                     } catch (e: Exception) {
+                        println("ERROR: Error al verificar documentos para compañía ${company.id}: ${e.message}")
                     }
                 }
                 
+                println("DEBUG: Verificación de documentos completada")
             } catch (e: Exception) {
+                println("ERROR: Error general en verificación de documentos: ${e.message}")
             }
         }
     }
