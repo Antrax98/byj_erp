@@ -1,5 +1,6 @@
 package dev.byjtech.erp.core.moduleRoot.nav.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,11 +29,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import byj_erp.composeapp.generated.resources.Res
+import byj_erp.composeapp.generated.resources.logo
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun LoginScreen(component: LoginComponent) {
     val coroutineScope = rememberCoroutineScope()
@@ -57,12 +64,8 @@ fun LoginScreen(component: LoginComponent) {
                     .padding(horizontal = 32.dp, vertical = 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Business,
-                    contentDescription = "App Logo",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(96.dp)
-                )
+
+                LoginLogo()
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -109,3 +112,20 @@ fun LoginScreen(component: LoginComponent) {
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
+@Composable
+fun LoginLogo() {
+    Box(
+        modifier = Modifier
+            .size(120.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primary),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(Res.drawable.logo),
+            contentDescription = "Logo de la empresa",
+            modifier = Modifier.size(80.dp)
+        )
+    }
+}

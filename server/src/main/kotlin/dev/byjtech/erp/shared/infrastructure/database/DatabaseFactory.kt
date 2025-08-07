@@ -8,29 +8,6 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.transactions.transaction
 
-//class DatabaseFactory {
-//
-//    private val dotenv = dotenv{
-//        ignoreIfMissing = false
-//    }
-//
-//    private val jdbcUrlEnv = "jdbc:mysql://${dotenv["DB_HOST"]}:${dotenv["DB_PORT"]}/${dotenv["DB_NAME"]}"
-//
-//    private val config = HikariConfig().apply {
-//        jdbcUrl = jdbcUrlEnv
-//        driverClassName = "com.mysql.cj.jdbc.Driver"
-//        username = dotenv["DB_USER"]
-//        password = dotenv["DB_PASSWORD"]
-//        isReadOnly = false
-//        maximumPoolSize = 10
-//        transactionIsolation = "TRANSACTION_SERIALIZABLE"
-//    }
-//
-//    private val dataSource = HikariDataSource(config)
-//
-//    val database = Database.connect(datasource = dataSource)
-//}
-
 fun CreateDatabase(
     db_host: String,
     db_port: String,

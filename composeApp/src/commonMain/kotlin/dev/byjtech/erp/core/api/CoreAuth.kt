@@ -1,6 +1,5 @@
 package dev.byjtech.erp.core.api
 
-import de.jensklingenberg.ktorfit.http.*
 import dev.byjtech.erp.core.dto.UserDTO
 import dev.byjtech.erp.core.response.AccessibleModulesResponse
 import dev.byjtech.erp.core.response.PermissionKeysResponse
@@ -8,41 +7,129 @@ import dev.byjtech.erp.core.response.PermittedModulesResponse
 import dev.byjtech.erp.core.response.SubscribedModulesResponse
 import dev.byjtech.erp.core.response.UserPermissionsResponse
 import dev.byjtech.erp.core.response.UserRolesResponse
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.expectSuccess
+import io.ktor.client.request.get
 
-interface CoreAuth {
-    @GET("/auth/test")
-    suspend fun test(): String
+class CoreAuth(private val client: HttpClient) {
+    suspend fun test(): String {
+        return try {
+            val response = client.get("auth/test")
+            response.body()
+        } catch (e: Exception) {
+            ""
+        }
+    }
 
-    @GET("/auth/logout")
-    suspend fun logout(): String
+    suspend fun logout(): String {
+        return try {
+            val response = client.get("auth/logout"){
+                expectSuccess = false
+            }
+            response.body()
+        } catch (e: Exception) {
+            ""
+        }
+    }
 
-    @GET("/auth/login")
-    suspend fun login(): String
+    suspend fun login(): String {
+        return try {
+            val response = client.get("auth/login"){
+                expectSuccess = false
+            }
+            response.body()
+        } catch (e: Exception) {
+            ""
+        }
+    }
 
-    @GET("/auth/me/type")
-    suspend fun getMyType(): String
+    suspend fun getMyType(): String {
+        return try {
+            val response = client.get("auth/me/type"){
+                expectSuccess = false
+            }
+            response.body()
+        } catch (e: Exception) {
+            ""
+        }
+    }
 
-    @GET("/auth/me")
-    suspend fun getMe(): UserDTO
+    suspend fun getMe(): UserDTO {
+        return try {
+            val response = client.get("auth/me") {
+                expectSuccess = false
+            }
+            response.body<UserDTO>()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 
+    suspend fun permittedModules(): PermittedModulesResponse {
+        return try {
+            val response = client.get("auth/permitted-modules") {
+                expectSuccess = false
+            }
+            response.body<PermittedModulesResponse>()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 
-    //podria cambiar estas funciones a que fueran rutas de Subscriptions o Modules??
-    @GET("/auth/permitted-modules")
-    suspend fun permittedModules(): PermittedModulesResponse
+    suspend fun subscribedModules(): SubscribedModulesResponse {
+        return try {
+            val response = client.get("auth/subscribed-modules") {
+                expectSuccess = false
+            }
+            response.body<SubscribedModulesResponse>()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 
-    @GET("/auth/subscribed-modules")
-    suspend fun subscribedModules(): SubscribedModulesResponse
+    suspend fun accessibleModules(): AccessibleModulesResponse {
+        return try {
+            val response = client.get("auth/accessible-modules") {
+                expectSuccess = false
+            }
+            response.body<AccessibleModulesResponse>()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 
-    @GET("/auth/accessible-modules")
-    suspend fun accessibleModules(): AccessibleModulesResponse
+    suspend fun userPermissions(): UserPermissionsResponse {
+        return try {
+            val response = client.get("auth/user-permissions") {
+                expectSuccess = false
+            }
+            response.body<UserPermissionsResponse>()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 
-    @GET("/auth/user-permissions")
-    suspend fun userPermissions(): UserPermissionsResponse
+    suspend fun userRoles(userId: String): UserRolesResponse {
+        return try {
+            val response = client.get("auth/userRoles/$userId") {
+                expectSuccess = false
+            }
+            response.body<UserRolesResponse>()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 
-    //borrar despues
-    @GET("/auth/userRoles/{userId}")
-    suspend fun userRoles(@Path("userId") userId: String): UserRolesResponse
+    suspend fun getSpecialPermissionsByUserId(userId: String): PermissionKeysResponse {
+        return try {
+            val response = client.get("auth/userSpecialPermissions/$userId") {
+                expectSuccess = false
+            }
+            response.body<PermissionKeysResponse>()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 
-    @GET("/auth/userSpecialPermissions/{userId}")
-    suspend fun getSpecialPermissionsByUserId(@Path("userId") userId: String): PermissionKeysResponse
 }

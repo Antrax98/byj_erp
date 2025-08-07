@@ -30,7 +30,12 @@ fun BusyOverlay(
     if (!isVisible) return
 
     Dialog(
-        onDismissRequest = { /* Bloqueado: no se puede cerrar */ }
+        onDismissRequest = { /* Bloqueado: no se puede cerrar */ },
+        properties = androidx.compose.ui.window.DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false
+        )
     ) {
         Box(
             modifier = Modifier

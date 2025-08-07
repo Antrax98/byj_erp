@@ -52,6 +52,7 @@ import dev.byjtech.erp.core.moduleRoot.nav.superHome.SuperHomeComponentImpl
 import kotlinx.datetime.toKotlinLocalDateTime
 import java.time.LocalDateTime
 
+@Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CompaniesScreen(component: CompaniesComponent) {
     val state by component.state.collectAsState()

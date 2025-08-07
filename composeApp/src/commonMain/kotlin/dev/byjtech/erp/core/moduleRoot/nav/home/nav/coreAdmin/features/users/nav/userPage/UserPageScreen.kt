@@ -80,7 +80,6 @@ fun UserPageScreen(component: UserPageComponent) {
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(16.dp)
     ) {
-        // Info del usuario
         item {
             if (userIsLoading || userInfo == null) {
                 CircularProgressIndicator()
@@ -89,7 +88,6 @@ fun UserPageScreen(component: UserPageComponent) {
             }
         }
 
-        // Card de Roles
         item {
             Card(
                 modifier = Modifier
@@ -166,7 +164,6 @@ fun UserPageScreen(component: UserPageComponent) {
             }
         }
 
-        // Card de Permisos especiales
         item {
             Card(
                 modifier = Modifier
@@ -327,7 +324,6 @@ fun PermissionKeyCard(permissionWithKey: PermissionWithKey, canUnassignPermissio
 
 @Composable
 fun UserDetailsScreen(user: UserDTO, component: UserPageComponent) {
-    // Estados para el diálogo de edición
     val showEditNameDialog = remember { mutableStateOf(false) }
     val nameInput = remember { mutableStateOf(user.name ?: "") }
 
@@ -348,7 +344,6 @@ fun UserDetailsScreen(user: UserDTO, component: UserPageComponent) {
                     .padding(24.dp)
                     .fillMaxWidth()
             ) {
-                // Imagen o ícono de perfil
                 if (!user.pictureUrl.isNullOrBlank()) {
                     Icon(
                         imageVector = Icons.Default.Person,
@@ -364,7 +359,6 @@ fun UserDetailsScreen(user: UserDTO, component: UserPageComponent) {
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // Nombre + botón editar
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -407,7 +401,6 @@ fun UserDetailsScreen(user: UserDTO, component: UserPageComponent) {
         }
     }
 
-    // Diálogo para editar nombre
     if (showEditNameDialog.value) {
         AlertDialog(
             onDismissRequest = { showEditNameDialog.value = false },

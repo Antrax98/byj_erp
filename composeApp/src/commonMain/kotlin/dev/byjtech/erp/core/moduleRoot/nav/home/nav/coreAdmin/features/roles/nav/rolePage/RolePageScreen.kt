@@ -79,7 +79,6 @@ fun RolePageScreen(component: RolePageComponent) {
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(16.dp)
     ) {
-        // Card: Información del Rol
         item {
             if (isLoading) {
                 Box(
@@ -104,7 +103,6 @@ fun RolePageScreen(component: RolePageComponent) {
             }
         }
 
-        // Card: Permisos asignados al Rol
         item {
             Card(
                 modifier = Modifier
@@ -230,7 +228,6 @@ fun RoleInfoCard(role: RoleDTO, component: RolePageComponent) {
         }
     }
 
-    // Diálogo para editar el nombre
     if (showEditNameDialog.value) {
         AlertDialog(
             onDismissRequest = { showEditNameDialog.value = false },

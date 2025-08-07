@@ -91,9 +91,6 @@ class AddCompanyComponentImpl(
         } else if (!isValidEmail(companyAdminEmail)) {
             _companyAdminEmailState.value = _companyAdminEmailState.value.copy(error = "Invalid company admin email")
             isValid = false
-        } else if (!isValidGmail(companyAdminEmail)) {
-            _companyAdminEmailState.value = _companyAdminEmailState.value.copy(error = "must be a gmail account")
-            isValid = false
         }
         //validar nombre del admin
         if (adminName.isBlank()) {
@@ -168,12 +165,6 @@ class AddCompanyComponentImpl(
             "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
         )
         return emailRegex.matches(email)
-    }
-
-    //solo por ahora
-    private fun isValidGmail(email: String): Boolean {
-        val gmailRegex = Regex("^[A-Za-z0-9._%+-]+@gmail\\.com$")
-        return gmailRegex.matches(email)
     }
 
 

@@ -1,7 +1,6 @@
 package dev.byjtech.erp.core.moduleRoot.nav.home.nav.coreAdmin.features.test
 
 import dev.byjtech.erp.common.FeatureComponent
-import dev.byjtech.erp.core.api.users.UsersTenantApi
 import kotlinx.coroutines.flow.StateFlow
 
 interface TestFeatureComponent: FeatureComponent {

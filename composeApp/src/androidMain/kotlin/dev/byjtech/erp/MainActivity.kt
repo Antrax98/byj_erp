@@ -39,10 +39,9 @@ class MainActivity : ComponentActivity() { //se cambia ComponentActivity por App
         apiClient = ApiClient(
             engine = Android.create(),
             baseUrl = AndroidEnv.get("BASE_URL"),
-            basePort = null,//basePortaux,
+            basePort = basePortaux,
             settings = settings,
             dispatcher = Dispatchers.IO,
-            //onNavigationRequired = {}
         )
 
         val loginHandler = AndroidGoogleLoginHandler(this, settings)

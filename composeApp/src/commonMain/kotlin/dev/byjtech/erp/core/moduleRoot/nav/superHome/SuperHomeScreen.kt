@@ -55,10 +55,6 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuperHomeScreen(component: SuperHomeComponent) {
-    val dummyNames = listOf(
-        "Users", "Companies", "Modules",
-        "Subscriptions", "Billings", "SuperAdmins"
-    )
 
     val isOnMainPage by component.isOnMainPage.collectAsState()
 

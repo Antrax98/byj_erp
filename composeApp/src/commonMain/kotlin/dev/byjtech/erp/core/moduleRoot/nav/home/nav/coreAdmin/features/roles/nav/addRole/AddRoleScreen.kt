@@ -28,63 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.byjtech.erp.common.BusyOverlay
 
-//@Composable
-//fun AddRoleScreen(component: AddRoleComponent) {
-//    val name by component.name.collectAsState()
-//    val description by component.description.collectAsState()
-//
-//    Box(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(MaterialTheme.colorScheme.background),
-//        contentAlignment = Alignment.Center
-//    ){
-//        Card(
-//            modifier = Modifier
-//                .padding(24.dp)
-//                .fillMaxWidth(),
-//            elevation = CardDefaults.cardElevation(8.dp),
-//            shape = RoundedCornerShape(16.dp)
-//        ) {
-//            Column(
-//                modifier = Modifier
-//                    .padding(24.dp)
-//                    .fillMaxWidth(),
-//                verticalArrangement = Arrangement.spacedBy(16.dp),
-//                horizontalAlignment = Alignment.CenterHorizontally
-//            ){
-//                OutlinedTextField(
-//                    value = name.value,
-//                    onValueChange = { component.onNameChange(it) },
-//                    label = { Text("role name") },
-//                    modifier = Modifier.fillMaxWidth(),
-//                    isError = name.error != null,
-//                    supportingText = { name.error?.let { Text(it, color = MaterialTheme.colorScheme.error) } }
-//                )
-//                Spacer(modifier = Modifier.height(8.dp))
-//                OutlinedTextField(
-//                    value = description.value,
-//                    onValueChange = { component.onDescriptionChange(it) },
-//                    label = { Text("description") },
-//                    modifier = Modifier.fillMaxWidth(),
-//                    isError = description.error != null,
-//                    supportingText = { description.error?.let { Text(it, color = MaterialTheme.colorScheme.error) } }
-//                )
-//                Spacer(modifier = Modifier.height(8.dp))
-//                Button(
-//                    onClick = { component.onSubmitted() },
-//                    modifier = Modifier.fillMaxWidth()
-//                ) {
-//                    Text("Crear")
-//                }
-//            }
-//        }
-//
-//    }
-//
-//
-//}
-
 @Composable
 fun AddRoleScreen(component: AddRoleComponent) {
     val name by component.name.collectAsState()
@@ -115,7 +58,6 @@ fun AddRoleScreen(component: AddRoleComponent) {
                 horizontalAlignment = Alignment.Start
             ) {
 
-                // Campo Nombre
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text("Nombre del rol", style = MaterialTheme.typography.labelMedium)
                     OutlinedTextField(
@@ -137,7 +79,6 @@ fun AddRoleScreen(component: AddRoleComponent) {
                     )
                 }
 
-                // Campo Descripción
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text("Descripción", style = MaterialTheme.typography.labelMedium)
                     OutlinedTextField(

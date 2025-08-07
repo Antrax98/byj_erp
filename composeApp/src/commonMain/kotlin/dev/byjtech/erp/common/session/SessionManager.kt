@@ -19,14 +19,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-// USARLO EN LA APP
-//// En tu clase de Activity, Fragment, o donde manejes la navegación:
-//class MyNavigationDelegate(private val navController: androidx.navigation.NavController) : NavigationDelegate {
-//    override fun navigateToLogin() {
-//        navController.navigate("login_route") // Reemplaza con tu ruta de login
-//    }
-//}
-
 sealed class SessionNavigationTarget {
     object Login : SessionNavigationTarget()
     object Home : SessionNavigationTarget()
@@ -152,10 +144,11 @@ class SessionManager(
             _actualUser.value = user
         } catch (e: InvalidSessionException) {
             // Si la sesión es inválida
+            println("Session not active, by the server, handling invalid session. ${e.message}")
             handleInvalidSession()
         } catch (e: Exception) {
             // Otros errores
-            println("Error al obtener usuario actual: ${e.message}")
+            println("Error al obtener usuario actual: ${e}")
         }
     }
 

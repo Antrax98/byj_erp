@@ -6,5 +6,11 @@ import dev.byjtech.erp.common.session.SessionManager
 import kotlinx.coroutines.flow.StateFlow
 
 fun interface FeatureComponentFactory {
-    fun create(context: ComponentContext, userPermissions: StateFlow<Set<PermissionKey>>, apiClient: ApiClient, toHome: () -> Unit, updateTitle: (newTitle: String) -> Unit): FeatureComponent
+    fun create(
+        context: ComponentContext,
+        userPermissions: StateFlow<Set<PermissionKey>>,
+        apiClient: ApiClient,
+        toHome: () -> Unit,
+        updateTitle: (newTitle: String) -> Unit
+    ): FeatureComponent
 }
