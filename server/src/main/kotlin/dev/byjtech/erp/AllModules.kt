@@ -1,7 +1,7 @@
 package dev.byjtech.erp
 
 import dev.byjtech.erp.core.coreModule
-import dev.byjtech.erp.machinery.machineryModule
+import dev.byjtech.erp.modules.machinery.machineryModule
 import dev.byjtech.erp.modules.moduleTest.testModule
 
 val allModules = setOf(
