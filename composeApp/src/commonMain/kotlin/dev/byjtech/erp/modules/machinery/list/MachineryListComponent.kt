@@ -15,6 +15,7 @@ interface MachineryListComponent : FeatureComponent {
     fun onEditMachinery(machinery: MachineryDTO)
     fun onDeactivateMachinery(machinery: MachineryDTO)
     fun onActivateMachinery(machinery: MachineryDTO)
+    fun onViewHistory(machinery: MachineryDTO)
     fun clearMessages()
 }
 

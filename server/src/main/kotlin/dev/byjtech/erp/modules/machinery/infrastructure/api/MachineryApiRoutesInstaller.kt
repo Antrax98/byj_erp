@@ -3,6 +3,7 @@ package dev.byjtech.erp.modules.machinery.infrastructure.api.machinery
 import dev.byjtech.erp.modules.machinery.application.service.MachineryService
 import dev.byjtech.erp.modules.machinery.application.service.MachineryHistoryService
 import dev.byjtech.erp.modules.machinery.infrastructure.extensions.toDTO
+import dev.byjtech.erp.modules.machinery.infrastructure.extensions.toHistoryDTO
 import dev.byjtech.erp.modules.machinery.request.CreateMachineryRequest
 import dev.byjtech.erp.modules.machinery.request.UpdateMachineryRequest
 import dev.byjtech.erp.core.infrastructure.auth.CoreAuthWrapper
@@ -226,8 +227,12 @@ class MachineryApiRoutesInstaller(
                     return@get
                 }
                 
+                // Obtener la maquinaria para tener información adicional
+                val machinery = machineryService.getMachineryById(machineryId)
+                val machineryName = machinery?.name ?: "Maquinaria desconocida"
+                
                 val history = machineryHistoryService.getHistoryByMachineryId(machineryId)
-                call.respond(HttpStatusCode.OK, history.map { it.toDTO() })
+                call.respond(HttpStatusCode.OK, history.map { it.toHistoryDTO(machineryName = machineryName) })
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to fetch machinery history: ${e.message}"))
             }

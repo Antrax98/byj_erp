@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material.icons.filled.PowerSettingsNew
@@ -126,7 +127,8 @@ fun MachineryListScreen(
                                 machinery = machinery,
                                 onEdit = { component.onEditMachinery(machinery) },
                                 onDeactivate = { component.onDeactivateMachinery(machinery) },
-                                onActivate = { component.onActivateMachinery(machinery) }
+                                onActivate = { component.onActivateMachinery(machinery) },
+                                onViewHistory = { component.onViewHistory(machinery) }
                             )
                         }
                     }
@@ -143,6 +145,7 @@ private fun MachineryCard(
     onEdit: () -> Unit,
     onDeactivate: () -> Unit,
     onActivate: () -> Unit,
+    onViewHistory: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -190,6 +193,20 @@ private fun MachineryCard(
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.Edit,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                        
+                        DropdownMenuItem(
+                            text = { Text("Ver Historial") },
+                            onClick = {
+                                showMenu = false
+                                onViewHistory()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.History,
                                     contentDescription = null
                                 )
                             }

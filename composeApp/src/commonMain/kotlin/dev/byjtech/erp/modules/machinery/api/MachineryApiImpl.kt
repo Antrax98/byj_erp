@@ -2,6 +2,7 @@ package dev.byjtech.erp.modules.machinery.api
 
 import dev.byjtech.erp.common.api.ApiClient
 import dev.byjtech.erp.modules.machinery.dto.MachineryDTO
+import dev.byjtech.erp.modules.machinery.dto.MachineryHistoryDTO
 import dev.byjtech.erp.modules.machinery.request.CreateMachineryRequest
 import dev.byjtech.erp.modules.machinery.request.UpdateMachineryRequest
 import io.ktor.client.call.body
@@ -168,6 +169,21 @@ class MachineryApiImpl(
                 else -> {
                     Result.failure(Exception("Failed to activate machinery: ${response.status}"))
                 }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    override suspend fun getMachineryHistory(machineryId: String): Result<List<MachineryHistoryDTO>> {
+        return try {
+            val response = apiClient.clientKtor.get("/api/machinery/$machineryId/history")
+            
+            if (response.status == HttpStatusCode.OK) {
+                val historyList = response.body<List<MachineryHistoryDTO>>()
+                Result.success(historyList)
+            } else {
+                Result.failure(Exception("Failed to fetch machinery history: ${response.status}"))
             }
         } catch (e: Exception) {
             Result.failure(e)

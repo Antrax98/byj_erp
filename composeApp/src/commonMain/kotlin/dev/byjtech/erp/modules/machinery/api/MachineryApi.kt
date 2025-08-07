@@ -1,6 +1,7 @@
 package dev.byjtech.erp.modules.machinery.api
 
 import dev.byjtech.erp.modules.machinery.dto.MachineryDTO
+import dev.byjtech.erp.modules.machinery.dto.MachineryHistoryDTO
 import dev.byjtech.erp.modules.machinery.request.CreateMachineryRequest
 import dev.byjtech.erp.modules.machinery.request.UpdateMachineryRequest
 
@@ -13,4 +14,5 @@ interface MachineryApi {
     suspend fun updateMachinery(id: String, request: UpdateMachineryRequest): Result<MachineryDTO>
     suspend fun deactivateMachinery(id: String): Result<MachineryDTO>
     suspend fun activateMachinery(id: String): Result<MachineryDTO>
+    suspend fun getMachineryHistory(machineryId: String): Result<List<MachineryHistoryDTO>>
 }

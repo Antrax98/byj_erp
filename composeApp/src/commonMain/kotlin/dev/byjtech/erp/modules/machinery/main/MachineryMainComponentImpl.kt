@@ -13,6 +13,8 @@ import dev.byjtech.erp.modules.machinery.create.MachineryCreateComponentImpl
 import dev.byjtech.erp.modules.machinery.dto.MachineryDTO
 import dev.byjtech.erp.modules.machinery.edit.MachineryEditComponent
 import dev.byjtech.erp.modules.machinery.edit.MachineryEditComponentImpl
+import dev.byjtech.erp.modules.machinery.history.MachineryHistoryComponent
+import dev.byjtech.erp.modules.machinery.history.MachineryHistoryComponentImpl
 import dev.byjtech.erp.modules.machinery.list.MachineryListComponent
 import dev.byjtech.erp.modules.machinery.list.MachineryListComponentImpl
 import kotlinx.coroutines.flow.StateFlow
@@ -40,6 +42,8 @@ class MachineryMainComponentImpl(
         data object InactiveList : Config()
         @Serializable
         data class Edit(val machinery: MachineryDTO) : Config()
+        @Serializable
+        data class History(val machinery: MachineryDTO) : Config()
     }
 
     private val navigation = StackNavigation<Config>()
@@ -71,7 +75,8 @@ class MachineryMainComponentImpl(
                     apiClient = apiClient,
                     toHome = ::navigateToMain,
                     updateTitle = updateTitle,
-                    onNavigateToEdit = ::navigateToEdit
+                    onNavigateToEdit = ::navigateToEdit,
+                    onNavigateToHistory = ::navigateToHistory
                 ).apply {
                     updateTitle("Maquinarias Activas")
                 }
@@ -94,6 +99,7 @@ class MachineryMainComponentImpl(
                     toHome = ::navigateToMain,
                     updateTitle = updateTitle,
                     onNavigateToEdit = ::navigateToEdit,
+                    onNavigateToHistory = ::navigateToHistory,
                     loadInactive = true
                 )
             )
@@ -106,6 +112,17 @@ class MachineryMainComponentImpl(
                     toHome = ::navigateToMain,
                     updateTitle = updateTitle,
                     onNavigateBack = ::navigateToMain
+                )
+            )
+            is Config.History -> MachineryMainComponent.Child.History(
+                MachineryHistoryComponentImpl(
+                    componentContext = componentContext.childContext("history"),
+                    userPermissions = userPermissions,
+                    apiClient = apiClient,
+                    toHome = ::navigateToMain,
+                    updateTitle = updateTitle,
+                    machineryId = config.machinery.id,
+                    machineryName = config.machinery.name
                 )
             )
         }
@@ -125,6 +142,10 @@ class MachineryMainComponentImpl(
 
     override fun navigateToEdit(machinery: MachineryDTO) {
         navigation.push(Config.Edit(machinery))
+    }
+
+    override fun navigateToHistory(machinery: MachineryDTO) {
+        navigation.push(Config.History(machinery))
     }
 
     override fun navigateToMain() {

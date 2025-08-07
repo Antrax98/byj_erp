@@ -6,6 +6,7 @@ import dev.byjtech.erp.common.FeatureComponent
 import dev.byjtech.erp.modules.machinery.create.MachineryCreateComponent
 import dev.byjtech.erp.modules.machinery.dto.MachineryDTO
 import dev.byjtech.erp.modules.machinery.edit.MachineryEditComponent
+import dev.byjtech.erp.modules.machinery.history.MachineryHistoryComponent
 import dev.byjtech.erp.modules.machinery.list.MachineryListComponent
 
 interface MachineryMainComponent : FeatureComponent {
@@ -17,11 +18,13 @@ interface MachineryMainComponent : FeatureComponent {
         class InactiveList(val component: MachineryListComponent) : Child()
         class Create(val component: MachineryCreateComponent) : Child()
         class Edit(val component: MachineryEditComponent) : Child()
+        class History(val component: MachineryHistoryComponent) : Child()
     }
 
     fun navigateToList()
     fun navigateToInactiveList()
     fun navigateToCreate()
     fun navigateToEdit(machinery: MachineryDTO)
+    fun navigateToHistory(machinery: MachineryDTO)
     fun navigateToMain()
 }

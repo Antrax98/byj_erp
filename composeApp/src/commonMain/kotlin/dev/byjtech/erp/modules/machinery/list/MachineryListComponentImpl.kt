@@ -20,6 +20,7 @@ class MachineryListComponentImpl(
     override val toHome: () -> Unit,
     override val updateTitle: (newTitle: String) -> Unit,
     private val onNavigateToEdit: ((MachineryDTO) -> Unit)? = null,
+    private val onNavigateToHistory: ((MachineryDTO) -> Unit)? = null,
     private val loadInactive: Boolean = false
 ) : MachineryListComponent, FeatureComponent, ComponentContext by componentContext {
 
@@ -150,6 +151,10 @@ class MachineryListComponentImpl(
 
     override fun clearMessages() {
         _state.value = _state.value.copy(successMessage = null, error = null)
+    }
+
+    override fun onViewHistory(machinery: MachineryDTO) {
+        onNavigateToHistory?.invoke(machinery)
     }
 
     init {

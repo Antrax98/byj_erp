@@ -79,7 +79,15 @@ class MachineryService(
         val existingMachinery = machineryRepository.findById(id)
             ?: throw IllegalArgumentException("Machinery with id $id not found")
 
+        // Si se proporciona un nuevo código, verificar que no exista
+        request.code?.let { newCode ->
+            if (newCode != existingMachinery.code && machineryRepository.existsWithCode(newCode)) {
+                throw IllegalArgumentException("Machinery with code '$newCode' already exists")
+            }
+        }
+
         val updatedMachinery = existingMachinery.copy(
+            code = request.code ?: existingMachinery.code,
             name = request.name,
             description = request.description,
             brand = request.brand,

@@ -3,8 +3,8 @@ package dev.byjtech.erp.modules.machinery.request
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UpdateMachineryRequest(
-    val code: String? = null,
+data class CreateMachineryRequest(
+    val code: String,
     val name: String,
     val description: String? = null,
     val brand: String,
@@ -13,5 +13,6 @@ data class UpdateMachineryRequest(
     val serialNumber: String? = null,
     val licensePlate: String? = null,
     val status: String,
-    val location: String? = null
+    val location: String? = null,
+    val companyId: String
 )
