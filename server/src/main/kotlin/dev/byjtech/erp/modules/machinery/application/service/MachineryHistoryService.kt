@@ -110,7 +110,7 @@ class MachineryHistoryService(
             field = "isActive",
             oldValue = "true",
             newValue = "false",
-            comment = "Machinery deactivated"
+            comment = "Maquinaria inactiva"
         )
         return machineryHistoryRepository.save(history)
     }
@@ -122,7 +122,7 @@ class MachineryHistoryService(
             field = "isActive",
             oldValue = "false",
             newValue = "true",
-            comment = "Machinery activated"
+            comment = "Maquinaria activa"
         )
         return machineryHistoryRepository.save(history)
     }
@@ -134,7 +134,7 @@ class MachineryHistoryService(
             field = "maintenance",
             oldValue = null,
             newValue = "MAINTENANCE_STARTED",
-            comment = comment ?: "Maintenance started"
+            comment = comment ?: "Mantenimiento iniciado"
         )
         return machineryHistoryRepository.save(history)
     }
@@ -146,7 +146,7 @@ class MachineryHistoryService(
             field = "maintenance",
             oldValue = "MAINTENANCE_STARTED",
             newValue = "MAINTENANCE_COMPLETED",
-            comment = comment ?: "Maintenance completed"
+            comment = comment ?: "Mantenimiento completado"
         )
         return machineryHistoryRepository.save(history)
     }
@@ -183,7 +183,7 @@ class MachineryHistoryService(
             field = field,
             oldValue = oldValue,
             newValue = newValue,
-            comment = "Field '$field' changed from '$oldValue' to '$newValue'"
+            comment = "De '$oldValue' a '$newValue'"
         )
     }
 }

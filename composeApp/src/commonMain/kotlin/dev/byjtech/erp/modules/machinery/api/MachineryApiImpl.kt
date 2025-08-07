@@ -27,7 +27,7 @@ class MachineryApiImpl(
                 val machineries = response.body<List<MachineryDTO>>()
                 Result.success(machineries)
             } else {
-                Result.failure(Exception("Failed to fetch machineries: ${response.status}"))
+                Result.failure(Exception("Error al obtener maquinarias: ${response.status}"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -44,7 +44,7 @@ class MachineryApiImpl(
                     Result.success(machinery)
                 }
                 HttpStatusCode.NotFound -> Result.success(null)
-                else -> Result.failure(Exception("Failed to fetch machinery: ${response.status}"))
+                else -> Result.failure(Exception("Error al obtener maquinaria: ${response.status}"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -59,7 +59,7 @@ class MachineryApiImpl(
                 val machineries = response.body<List<MachineryDTO>>()
                 Result.success(machineries)
             } else {
-                Result.failure(Exception("Failed to fetch company machineries: ${response.status}"))
+                Result.failure(Exception("Error al obtener maquinarias de la empresa: ${response.status}"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -80,10 +80,10 @@ class MachineryApiImpl(
                 }
                 HttpStatusCode.BadRequest -> {
                     val errorResponse = response.body<Map<String, String>>()
-                    Result.failure(Exception(errorResponse["error"] ?: "Bad request"))
+                    Result.failure(Exception(errorResponse["error"] ?: "Solicitud inválida"))
                 }
                 else -> {
-                    Result.failure(Exception("Failed to create machinery: ${response.status}"))
+                    Result.failure(Exception("Error al crear maquinaria: ${response.status}"))
                 }
             }
         } catch (e: Exception) {
@@ -99,7 +99,7 @@ class MachineryApiImpl(
                 val machineries = response.body<List<MachineryDTO>>()
                 Result.success(machineries)
             } else {
-                Result.failure(Exception("Failed to fetch inactive machineries: ${response.status}"))
+                Result.failure(Exception("Error al obtener maquinarias inactivas: ${response.status}"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -120,10 +120,10 @@ class MachineryApiImpl(
                 }
                 HttpStatusCode.BadRequest -> {
                     val errorResponse = response.body<Map<String, String>>()
-                    Result.failure(Exception(errorResponse["error"] ?: "Bad request"))
+                    Result.failure(Exception(errorResponse["error"] ?: "Solicitud inválida"))
                 }
                 else -> {
-                    Result.failure(Exception("Failed to update machinery: ${response.status}"))
+                    Result.failure(Exception("Error al actualizar maquinaria: ${response.status}"))
                 }
             }
         } catch (e: Exception) {
@@ -142,10 +142,10 @@ class MachineryApiImpl(
                 }
                 HttpStatusCode.BadRequest -> {
                     val errorResponse = response.body<Map<String, String>>()
-                    Result.failure(Exception(errorResponse["error"] ?: "Bad request"))
+                    Result.failure(Exception(errorResponse["error"] ?: "Solicitud inválida"))
                 }
                 else -> {
-                    Result.failure(Exception("Failed to deactivate machinery: ${response.status}"))
+                    Result.failure(Exception("Error al desactivar maquinaria: ${response.status}"))
                 }
             }
         } catch (e: Exception) {
@@ -164,10 +164,10 @@ class MachineryApiImpl(
                 }
                 HttpStatusCode.BadRequest -> {
                     val errorResponse = response.body<Map<String, String>>()
-                    Result.failure(Exception(errorResponse["error"] ?: "Bad request"))
+                    Result.failure(Exception(errorResponse["error"] ?: "Solicitud inválida"))
                 }
                 else -> {
-                    Result.failure(Exception("Failed to activate machinery: ${response.status}"))
+                    Result.failure(Exception("Error al activar maquinaria: ${response.status}"))
                 }
             }
         } catch (e: Exception) {
@@ -183,7 +183,7 @@ class MachineryApiImpl(
                 val historyList = response.body<List<MachineryHistoryDTO>>()
                 Result.success(historyList)
             } else {
-                Result.failure(Exception("Failed to fetch machinery history: ${response.status}"))
+                Result.failure(Exception("Error al obtener historial de maquinaria: ${response.status}"))
             }
         } catch (e: Exception) {
             Result.failure(e)

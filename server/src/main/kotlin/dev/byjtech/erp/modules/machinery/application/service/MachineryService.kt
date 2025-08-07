@@ -47,7 +47,7 @@ class MachineryService(
     fun createMachinery(request: CreateMachineryRequest, userId: UUID? = null): Machinery {
         // Verificar que el código no exista
         if (machineryRepository.existsWithCode(request.code)) {
-            throw IllegalArgumentException("Machinery with code '${request.code}' already exists")
+            throw IllegalArgumentException("Ya existe una maquinaria con el código '${request.code}'")
         }
 
         // Crear la maquinaria
@@ -77,12 +77,12 @@ class MachineryService(
 
     fun updateMachinery(id: UUID, request: UpdateMachineryRequest, userId: UUID? = null): Machinery {
         val existingMachinery = machineryRepository.findById(id)
-            ?: throw IllegalArgumentException("Machinery with id $id not found")
+            ?: throw IllegalArgumentException("Maquinaria $id no encontrada")
 
         // Si se proporciona un nuevo código, verificar que no exista
         request.code?.let { newCode ->
             if (newCode != existingMachinery.code && machineryRepository.existsWithCode(newCode)) {
-                throw IllegalArgumentException("Machinery with code '$newCode' already exists")
+                throw IllegalArgumentException("Ya existe una maquinaria con el código '$newCode'")
             }
         }
 
@@ -112,10 +112,10 @@ class MachineryService(
 
     fun deactivateMachinery(id: UUID, userId: UUID? = null): Machinery {
         val machinery = machineryRepository.findById(id)
-            ?: throw IllegalArgumentException("Machinery with id $id not found")
+            ?: throw IllegalArgumentException("Maquinaria $id no encontrada")
 
         if (!machinery.isActive) {
-            throw IllegalArgumentException("Machinery is already inactive")
+            throw IllegalArgumentException("La maquinaria ya está inactiva")
         }
 
         val deactivatedMachinery = machinery.deactivate().copy(
@@ -135,10 +135,10 @@ class MachineryService(
 
     fun activateMachinery(id: UUID, userId: UUID? = null): Machinery {
         val machinery = machineryRepository.findById(id)
-            ?: throw IllegalArgumentException("Machinery with id $id not found")
+            ?: throw IllegalArgumentException("Maquinaria $id no encontrada")
 
         if (machinery.isActive) {
-            throw IllegalArgumentException("Machinery is already active")
+            throw IllegalArgumentException("La maquinaria ya está activa")
         }
 
         val activatedMachinery = machinery.activate().copy(
